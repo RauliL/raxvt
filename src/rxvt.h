@@ -155,7 +155,20 @@ void             rxvt_fatal                       (const char *fmt, ...) THROW (
 ecb_noreturn ecb_cold
 void             rxvt_exit_failure                () THROW ((class rxvt_failure_exception));
 
-void *           rxvt_malloc                      (size_t size);
+template<typename T>
+static inline T*
+rxvt_malloc(std::size_t size)
+{
+  void* p = std::malloc(size);
+
+  if (!p)
+  {
+    rxvt_fatal("memory allocation failure. aborting\n");
+  }
+
+  return static_cast<T*>(p);
+}
+
 void *           rxvt_calloc                      (size_t number, size_t size);
 void *           rxvt_realloc                     (void *ptr, size_t size);
 

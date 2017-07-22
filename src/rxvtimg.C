@@ -345,7 +345,7 @@ rxvt_img::new_from_pixbuf (rxvt_screen *s, GdkPixbuf *pb)
   if (height > INT_MAX / xi.bytes_per_line)
     rxvt_fatal ("rxvt_img::new_from_pixbuf: image too big for Xlib.\n");
 
-  xi.data = (char *)rxvt_malloc (height * xi.bytes_per_line);
+  xi.data = rxvt_malloc<char>(height * xi.bytes_per_line);
 
   int rowstride = gdk_pixbuf_get_rowstride (pb);
   bool pb_has_alpha = gdk_pixbuf_get_has_alpha (pb);

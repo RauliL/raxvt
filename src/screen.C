@@ -427,7 +427,7 @@ rxvt_term::scr_reset ()
   chunk_free (prev_chunk, prev_chunk_size);
 
   free (tabs);
-  tabs = (char *)rxvt_malloc (ncol);
+  tabs = rxvt_malloc<char>(ncol);
 
   for (int col = ncol; col--; )
     tabs [col] = col % TABSIZE == 0;
@@ -2816,7 +2816,7 @@ rxvt_term::selection_make (Time tm)
     return;
 
   size = (selection.end.row - selection.beg.row + 1) * (ncol + 1);
-  new_selection_text = (wchar_t *)rxvt_malloc ((size + 4) * sizeof (wchar_t));
+  new_selection_text = rxvt_malloc<wchar_t>((size + 4) * sizeof(wchar_t));
 
   int ofs = 0;
   int extra = 0;

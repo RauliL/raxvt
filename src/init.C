@@ -32,6 +32,7 @@
 /*
  * Initialisation routines.
  */
+#include <cstring>
 
 #include "../config.h"          /* NECESSARY */
 #include "rxvt.h"               /* NECESSARY */
@@ -136,7 +137,7 @@ rxvt_network_display (const char *display)
               if (colon == NULL)
                 colon = ":0.0";
 
-              rval = rxvt_malloc (strlen (colon) + 16);
+              rval = rxvt_malloc<char>(std::strlen(colon) + 16);
               sprintf (rval, "%d.%d.%d.%d%s",
                       (int) ((addr >> 030) & 0xFF),
                       (int) ((addr >> 020) & 0xFF),
@@ -949,11 +950,11 @@ rxvt_term::init_env ()
   if (rs[Rs_display_name] == NULL)
     rs[Rs_display_name] = val;   /* use broken `:0' value */
 
-  env_display = (char *)rxvt_malloc (strlen (val) + 9);
+  env_display = rxvt_malloc<char>(std::strlen(val) + 9);
 
   sprintf (env_display, "DISPLAY=%s", val);
 
-  env_windowid = (char *)rxvt_malloc (21);
+  env_windowid = rxvt_malloc<char>(21);
   sprintf (env_windowid, "WINDOWID=%lu", (unsigned long)parent);
 
   /* add entries to the environment:
@@ -981,7 +982,7 @@ rxvt_term::init_env ()
 
   if (rs[Rs_term_name] != NULL)
     {
-      env_term = (char *)rxvt_malloc (strlen (rs[Rs_term_name]) + 6);
+      env_term = rxvt_malloc<char>(std::strlen(rs[Rs_term_name]) + 6);
       sprintf (env_term, "TERM=%s", rs[Rs_term_name]);
       putenv (env_term);
     }
@@ -1680,7 +1681,7 @@ rxvt_term::run_child (const char *const *argv)
 
       if (option (Opt_loginShell))
         {
-          login = (char *)rxvt_malloc (strlen (argv0) + 2);
+          login = rxvt_malloc<char>(std::strlen(argv0) + 2);
 
           login[0] = '-';
           strcpy (&login[1], argv0);

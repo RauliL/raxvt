@@ -35,7 +35,7 @@ operator new (size_t s)
   throw (std::bad_alloc)
 #endif
 {
-  return rxvt_malloc (s);
+  return static_cast<void*>(rxvt_malloc<char>(s));
 }
 
 void
@@ -55,7 +55,7 @@ rxvt_wcstombs (const wchar_t *str, int len)
   if (len < 0) len = wcslen (str);
 
   mbstate mbs;
-  char *r = (char *)rxvt_malloc (len * MB_CUR_MAX + 1);
+  char *r = rxvt_malloc<char>(len * MB_CUR_MAX + 1);
 
   char *dst = r;
   while (len--)
@@ -81,7 +81,7 @@ rxvt_mbstowcs (const char *str, int len)
 {
   if (len < 0) len = strlen (str);
 
-  wchar_t *r = (wchar_t *)rxvt_malloc ((len + 1) * sizeof (wchar_t));
+  wchar_t *r = rxvt_malloc<wchar_t>((len + 1) * sizeof (wchar_t));
 
   if ((ssize_t)mbstowcs (r, str, len + 1) < 0)
     *r = 0;
@@ -94,7 +94,7 @@ rxvt_wcstoutf8 (const wchar_t *str, int len)
 {
   if (len < 0) len = wcslen (str);
 
-  char *r = (char *)rxvt_malloc (len * 4 + 1);
+  char *r = rxvt_malloc<char>(len * 4 + 1);
   char *p = r;
 
   while (len--)
@@ -129,7 +129,7 @@ rxvt_utf8towcs (const char *str, int len)
 {
   if (len < 0) len = strlen (str);
 
-  wchar_t *r = (wchar_t *)rxvt_malloc ((len + 1) * sizeof (wchar_t)),
+  wchar_t *r = rxvt_malloc<wchar_t>((len + 1) * sizeof (wchar_t)),
           *p = r;
 
   unsigned char *s = (unsigned char *)str,
@@ -318,17 +318,6 @@ rxvt_strsplit (char delim, const char *str) NOTHROW
     }
 
   return ret;
-}
-
-void *
-rxvt_malloc (size_t size)
-{
-  void *p = malloc (size);
-
-  if (!p)
-    rxvt_fatal ("memory allocation failure. aborting.\n");
-
-  return p;
 }
 
 void *

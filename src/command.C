@@ -398,7 +398,7 @@ map_function_key (KeySym keysym)
 static inline wchar_t *
 rxvt_wcsdup (const wchar_t *str, int len)
 {
-  wchar_t *r = (wchar_t *)rxvt_malloc ((len + 1) * sizeof (wchar_t));
+  wchar_t *r = rxvt_malloc<wchar_t>((len + 1) * sizeof(wchar_t));
   memcpy (r, str, len * sizeof (wchar_t));
   r[len] = 0;
   return r;
