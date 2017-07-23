@@ -4,3 +4,6 @@
 [submodule "libev"]
 	path = libev
 	url = git@github.com:enki/libev.git
+[submodule "tinytoml"]
+	path = tinytoml
+	url = git@github.com:mayah/tinytoml.git
