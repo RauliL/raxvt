@@ -23,41 +23,41 @@
 #include <cstdlib>
 #include <cstring>
 #include <cstdio>
-
 #include <cinttypes>
-#include <unistd.h>
 #include <cerrno>
+
+#include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/utsname.h>
 
+#include <basedir.h>
+
 #include "rxvtdaemon.h"
 
-char *rxvt_connection::unix_sockname ()
+char* rxvt_connection::unix_sockname()
 {
-  char name[PATH_MAX];
-  char *path = getenv ("RXVT_SOCKET");
+  const char* path = std::getenv("RAXVT_SOCKET");
 
   if (!path)
+  {
+    const char* runtime_dir = xdgRuntimeDirectory(nullptr);
+    struct utsname u;
+    char buffer[PATH_MAX];
+
+    uname(&u);
+    if (runtime_dir)
     {
-      struct utsname u;
-      uname (&u);
-
-      path = getenv ("HOME");
-      if (!path)
-        path = "/tmp";
-
-      snprintf (name, PATH_MAX, "%s/.urxvt", path);
-      mkdir (name, 0777);
-
-      snprintf (name, PATH_MAX, "%s/.urxvt/urxvtd-%s",
-                path,
-                u.nodename);
-
-      path = name;
+      std::snprintf(buffer, PATH_MAX, "%s/raxvtd-%s", runtime_dir, u.nodename);
+      std::free(const_cast<char*>(runtime_dir));
+    } else {
+      std::snprintf(buffer, PATH_MAX, "/tmp/raxvtd-%s", u.nodename);
     }
 
-  return strdup (path);
+    return strdup(buffer);
+  }
+
+  return strdup(path);
 }
 
 void rxvt_connection::send (const char *data, int len)
