@@ -570,6 +570,8 @@ if test x$rxvt_have_xrender = xyes; then
     if test $XFT_CONFIG != no; then
       X_LIBS="`$XFT_CONFIG --libs` $X_LIBS"
       CPPFLAGS="$CPPFLAGS `$XFT_CONFIG --cflags`"
+    else
+      AC_MSG_ERROR([Unable to find Xft or FreeType])
     fi
   ])
 
@@ -714,13 +716,20 @@ AC_SUBST(PERL)
 AC_SUBST(IF_PERL)
 AC_SUBST(PERL_O)
 
+RXVT_CHECK_MODULES([XDG_BASEDIR], [libxdg-basedir], [
+  CPPFLAGS="$CPPFLAGS $XDG_BASEDIR_CFLAGS"
+  LIBS="$LIBS $XDG_BASEDIR_LIBS"
+  AC_CHECK_HEADER(basedir.h,,[AC_MSG_ERROR([Unable to find libxdg-basedir])])
+], [
+  AC_MSG_ERROR([Unable to find libxdg-basedir])
+])
 
 AC_CONFIG_FILES([Makefile src/Makefile])
 AC_OUTPUT
 
 echo "Configuration:
 
-  Rxvt version:               $VERSION : $DATE
+  raxvt version:              $VERSION : $DATE
   Source code location:       $srcdir
   Install path:               ${prefix}/bin
   Compiler:                   $CXX

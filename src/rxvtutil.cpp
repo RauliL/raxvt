@@ -65,36 +65,3 @@ rxvt_temp_buf (int len)
 
   return temp_buf;
 }
-
-std::string
-get_config_directory()
-{
-  const char* xdg_config_home_dir = std::getenv("XDG_CONFIG_HOME");
-  std::string result;
-
-  if (!xdg_config_home_dir || !*xdg_config_home_dir)
-  {
-    const char* home_dir = std::getenv("HOME");
-
-    if (home_dir && *home_dir)
-    {
-      result += home_dir;
-      if (!result.empty() && result[result.length() - 1] != '/')
-      {
-        result += '/';
-      }
-    } else {
-      result += "./";
-    }
-    result += ".config/raxvt";
-  } else {
-    result += xdg_config_home_dir;
-    if (!result.empty() && result[result.length() - 1] != '/')
-    {
-      result += '/';
-    }
-    result += "raxvt";
-  }
-
-  return result;
-}
