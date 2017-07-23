@@ -855,17 +855,21 @@ rxvt_term::x_resource (const char *name)
   return p;
 }
 
-void
-rxvt_term::load_settings()
+/**
+ * Attempts to load configuration from given filename and returns true if
+ * configuration could be successfully read from the given path.
+ */
+static bool
+load_settings_from(rxvt_term* term, const std::string& filename)
 {
-  const std::string config_dir = get_config_directory();
-  std::ifstream config_file_stream(config_dir + "/config.toml");
-  toml::ParseResult pr = toml::parse(config_file_stream);
+  std::ifstream stream(filename);
+  toml::ParseResult pr = toml::parse(stream);
 
   if (!pr.valid())
   {
-    std::cerr << pr.errorReason << std::endl;
-    return;
+    std::cerr << filename << ": " << pr.errorReason << std::endl;
+
+    return false;
   }
 
   for (const auto& setting : term_setting_list)
@@ -873,7 +877,7 @@ rxvt_term::load_settings()
     const toml::Value* value;
     char* value_as_string;
 
-    if (!setting.kw || rs[setting.doff] || !(value = pr.value.find(setting.kw)))
+    if (!setting.kw || term->rs[setting.doff] || !(value = pr.value.find(setting.kw)))
     {
       continue; // Previously set.
     }
@@ -889,7 +893,7 @@ rxvt_term::load_settings()
         {
           value_as_bool = !value_as_bool;
         }
-        set_option(setting.index, value_as_bool);
+        term->set_option(setting.index, value_as_bool);
       }
     }
     else if (value->is<int>())
@@ -903,8 +907,33 @@ rxvt_term::load_settings()
       continue;
     }
 
-    rs[setting.doff] = value_as_string;
-    allocated.push_back(value_as_string);
+    if (term->rs[setting.doff])
+    {
+    }
+    term->rs[setting.doff] = value_as_string;
+    term->allocated.push_back(value_as_string);
+  }
+
+  return true;
+}
+
+void
+rxvt_term::load_settings()
+{
+  const char* const* config_dirs = xdgSearchableConfigDirectories(&xdg_handle);
+
+  for (; config_dirs && *config_dirs; ++config_dirs)
+  {
+    const char* dir = *config_dirs;
+
+    if (!dir || !*dir)
+    {
+      continue;
+    }
+    if (load_settings_from(this, std::string(dir) + "/raxvt/config.toml"))
+    {
+      return;
+    }
   }
 }
 

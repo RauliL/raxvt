@@ -3,7 +3,6 @@
 
 #include <cstdlib>
 #include <cstring>
-#include <string>
 #include "ecb.h"
 #include "estl.h"
 
@@ -71,7 +70,5 @@ struct stringvec : simplevec<char *>
 };
 
 typedef estl::scoped_array<char> auto_str;
-
-std::string get_config_directory();
 
 #endif

@@ -7,10 +7,12 @@
 #include <cstdarg>
 #include <cstdlib>
 #include <cstdint>
-#include <sys/types.h>
-#include <unistd.h>
 #include <cstring>
 #include <cassert>
+#include <string>
+
+#include <sys/types.h>
+#include <unistd.h>
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
