@@ -18,7 +18,7 @@ AC_SUBST(VERSION)dnl
 AC_SUBST(DATE)dnl
 
 echo ""
-echo "configuring for rxvt $VERSION"
+echo "configuring for raxvt $VERSION"
 echo ""
 
 orig_CXXFLAGS="$CXXFLAGS"
@@ -291,7 +291,7 @@ AC_ARG_ENABLE(8bitctrls,
 
 RESFALLBACK=Rxvt
 AC_ARG_ENABLE(fallback,
-  [  --enable-fallback@<:@=CLASS@:>@ fall back on CLASS resources in addition to URxvt ones (default: Rxvt)],
+  [  --enable-fallback@<:@=CLASS@:>@ fall back on CLASS resources in addition to raxvt ones (default: Rxvt)],
   [
    test x$enableval = xyes && enableval=Rxvt
    test x$enableval = xno  && enableval=
@@ -302,21 +302,21 @@ if test x$RESFALLBACK != x; then
    AC_DEFINE_UNQUOTED(RESFALLBACK, "$RESFALLBACK", [Fallback resource class])
 fi
 
-RESNAME=urxvt
+RESNAME=raxvt
 AC_ARG_WITH(res-name,
-  [  --with-res-name=NAME    use this as default resource name (default: urxvt)],
+  [  --with-res-name=NAME    use this as default resource name (default: raxvt)],
   [RESNAME="$withval"])
 AC_DEFINE_UNQUOTED(RESNAME,"$RESNAME", [Default resource name])
 
-RESCLASS=URxvt
+RESCLASS=raxvt
 AC_ARG_WITH(res-class,
-  [  --with-res-class=CLASS  use this as the resource class (default: URxvt)],
+  [  --with-res-class=CLASS  use this as the resource class (default: raxvt)],
   [RESCLASS="$withval"])
 AC_DEFINE_UNQUOTED(RESCLASS,"$RESCLASS", [Resource class])
 
-RXVTNAME=urxvt
+RXVTNAME=raxvt
 AC_ARG_WITH(name,
-  [  --with-name=NAME        set the basename for the installed binaries (default: urxvt)],
+  [  --with-name=NAME        set the basename for the installed binaries (default: raxvt)],
   [RXVTNAME="$withval"])
 AC_DEFINE_UNQUOTED(RXVTNAME,"$RXVTNAME", [Binary base name])
 
@@ -740,10 +740,7 @@ AC_SUBST(IF_PERL)
 AC_SUBST(PERL_O)
 
 
-AC_CONFIG_FILES([Makefile \
-doc/Makefile \
-src/Makefile \
-])
+AC_CONFIG_FILES([Makefile src/Makefile])
 AC_OUTPUT
 
 echo "Configuration:

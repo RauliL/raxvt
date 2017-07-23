@@ -57,10 +57,10 @@ typedef char *		utf8_string;
 typedef int		render_repeat_mode;
 
 #if HAVE_PIXBUF
-typedef GdkPixbuf *	urxvt__pixbuf;
+typedef GdkPixbuf *	raxvt__pixbuf;
 #endif
 #if HAVE_IMG
-typedef rxvt_img *	urxvt__img;
+typedef rxvt_img *	raxvt__img;
 typedef rxvt_img::nv	rxvt_img__nv;
 
 /////////////////////////////////////////////////////////////////////////////
@@ -163,11 +163,11 @@ SvPTR (SV *sv, const char *klass)
 }
 
 #define newSVterm(term) SvREFCNT_inc ((SV *)(term)->perl.self)
-#define SvTERM(sv) (rxvt_term *)SvPTR ((sv), "urxvt::term")
+#define SvTERM(sv) (rxvt_term *)SvPTR ((sv), "raxvt::term")
 
 /////////////////////////////////////////////////////////////////////////////
 
-#define SvOVERLAY(sv) (overlay *)SvPTR (sv, "urxvt::overlay")
+#define SvOVERLAY(sv) (overlay *)SvPTR (sv, "raxvt::overlay")
 
 class overlay : overlay_base
 {
@@ -397,11 +397,11 @@ rxvt_perl_interp::init ()
           "",
           "-e"
           "BEGIN {"
-          "   urxvt->bootstrap;"
+          "   raxvt->bootstrap;"
           "   unshift @INC, '" LIBDIR "';"
           "}"
           ""
-          "use urxvt;"
+          "use raxvt;"
         };
         int argc = ecb_array_length (args);
         char **argv = args;
@@ -433,7 +433,7 @@ rxvt_perl_interp::init (rxvt_term *term)
   if (perl && !term->perl.self)
     {
       // runs outside of perls ENV
-      term->perl.self = (void *)newSVptr ((void *)term, "urxvt::term");
+      term->perl.self = (void *)newSVptr ((void *)term, "raxvt::term");
       hv_store ((HV *)SvRV ((SV *)term->perl.self), "_overlay", 8, newRV_noinc ((SV *)newAV ()), 0);
       hv_store ((HV *)SvRV ((SV *)term->perl.self), "_selection", 10, newRV_noinc ((SV *)newAV ()), 0);
     }
@@ -459,7 +459,7 @@ rxvt_perl_interp::usage (rxvt_term *term, int type)
   PUSHs (sv_2mortal (newSVterm (term)));
   PUSHs (sv_2mortal (newSViv (type)));
   PUTBACK;
-  call_pv ("urxvt::usage", G_VOID | G_DISCARD);
+  call_pv ("raxvt::usage", G_VOID | G_DISCARD);
 
   FREETMPS;
   LEAVE;
@@ -483,7 +483,7 @@ rxvt_perl_interp::parse_resource (rxvt_term *term, const char *name, bool arg, b
   PUSHs (flag    ? &PL_sv_yes : &PL_sv_no);
   PUSHs (value ? sv_2mortal (newSVpv (value, 0)) : &PL_sv_undef);
   PUTBACK;
-  call_pv ("urxvt::parse_resource", G_SCALAR);
+  call_pv ("raxvt::parse_resource", G_SCALAR);
   SPAGAIN;
 
   uint8_t ret = POPi;
@@ -719,7 +719,7 @@ rxvt_perl_interp::invoke (rxvt_term *term, hook_type htype, ...)
       va_end (ap);
 
       PUTBACK;
-      int count = call_pv ("urxvt::invoke", G_ARRAY | G_EVAL);
+      int count = call_pv ("raxvt::invoke", G_ARRAY | G_EVAL);
       SPAGAIN;
 
       if (count)
@@ -785,30 +785,30 @@ rxvt_perl_interp::selection_finish (rxvt_selection *sel, char *data, unsigned in
 
 /////////////////////////////////////////////////////////////////////////////
 
-MODULE = urxvt             PACKAGE = urxvt
+MODULE = raxvt             PACKAGE = raxvt
 
 PROTOTYPES: ENABLE
 
 BOOT:
 {
-  sv_setsv (get_sv ("urxvt::LIBDIR",   1), newSVpvn (LIBDIR,   sizeof (LIBDIR)   - 1));
-  sv_setsv (get_sv ("urxvt::RESNAME",  1), newSVpvn (RESNAME,  sizeof (RESNAME)  - 1));
-  sv_setsv (get_sv ("urxvt::RESCLASS", 1), newSVpvn (RESCLASS, sizeof (RESCLASS) - 1));
-  sv_setsv (get_sv ("urxvt::RXVTNAME", 1), newSVpvn (RXVTNAME, sizeof (RXVTNAME) - 1));
+  sv_setsv (get_sv ("raxvt::LIBDIR",   1), newSVpvn (LIBDIR,   sizeof (LIBDIR)   - 1));
+  sv_setsv (get_sv ("raxvt::RESNAME",  1), newSVpvn (RESNAME,  sizeof (RESNAME)  - 1));
+  sv_setsv (get_sv ("raxvt::RESCLASS", 1), newSVpvn (RESCLASS, sizeof (RESCLASS) - 1));
+  sv_setsv (get_sv ("raxvt::RXVTNAME", 1), newSVpvn (RXVTNAME, sizeof (RXVTNAME) - 1));
 
-  AV *hookname = get_av ("urxvt::HOOKNAME", 1);
+  AV *hookname = get_av ("raxvt::HOOKNAME", 1);
 # define def(sym) av_store (hookname, HOOK_ ## sym, newSVpv (# sym, 0));
 # include "hookinc.h"
 # undef def
 
-  HV *option = get_hv ("urxvt::OPTION", 1);
+  HV *option = get_hv ("raxvt::OPTION", 1);
 # define def(name) hv_store (option, # name, sizeof (# name) - 1, newSVuv (Opt_ ## name), 0);
 # define nodef(name)
 # include "optinc.h"
 # undef nodef
 # undef def
 
-  HV *stash = gv_stashpv ("urxvt", 1);
+  HV *stash = gv_stashpv ("raxvt", 1);
   static const struct {
     const char *name;
     IV iv;
@@ -1187,7 +1187,7 @@ _delete_selection_request (IV req_)
 
         delete req;
 
-MODULE = urxvt             PACKAGE = urxvt::term
+MODULE = raxvt             PACKAGE = raxvt::term
 
 SV *
 _new (AV *env, AV *arg)
@@ -2110,7 +2110,7 @@ rxvt_term::overlay (int x, int y, int w, int h, int rstyle = OVERLAY_RSTYLE, int
 	CODE:
 {
         overlay *o = new overlay (THIS, x, y, w, h, rstyle, border);
-        RETVAL = newSVptr ((void *)o, "urxvt::overlay");
+        RETVAL = newSVptr ((void *)o, "raxvt::overlay");
         o->self = (HV *)SvRV (RETVAL);
 }
 	OUTPUT:
@@ -2346,10 +2346,10 @@ rxvt_term::set_background (rxvt_img *img, bool border = false)
 #endif
 
 #############################################################################
-# urxvt::overlay
+# raxvt::overlay
 #############################################################################
 
-MODULE = urxvt             PACKAGE = urxvt::overlay
+MODULE = raxvt             PACKAGE = raxvt::overlay
 
 void
 overlay::set (int x, int y, SV *text, SV *rend = 0)
@@ -2363,23 +2363,23 @@ overlay::hide ()
 void
 overlay::DESTROY ()
 
-INCLUDE: $PERL <iom_perl.xs -pe s/IOM_MODULE/urxvt/g,s/IOM_CLASS/urxvt/g |
+INCLUDE: $PERL <iom_perl.xs -pe s/IOM_MODULE/raxvt/g,s/IOM_CLASS/raxvt/g |
 
-MODULE = urxvt             PACKAGE = urxvt::pixbuf	PREFIX = gdk_pixbuf_
+MODULE = raxvt             PACKAGE = raxvt::pixbuf	PREFIX = gdk_pixbuf_
 
 #if HAVE_PIXBUF
 
-urxvt::pixbuf gdk_pixbuf_new_from_file (SV *klass, octet_string filename)
+raxvt::pixbuf gdk_pixbuf_new_from_file (SV *klass, octet_string filename)
         C_ARGS: filename, 0
 
 void
-DESTROY (urxvt::pixbuf self)
+DESTROY (raxvt::pixbuf self)
 	CODE:
         g_object_unref (self);
 
 #endif
 
-MODULE = urxvt             PACKAGE = urxvt::img
+MODULE = raxvt             PACKAGE = raxvt::img
 
 #if HAVE_IMG
 

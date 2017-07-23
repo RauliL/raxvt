@@ -13,7 +13,7 @@
 /src/Makefile
 /src/perlxsi.c
 /src/rxvtperl.cpp
-/src/rxvt
-/src/rxvtc
-/src/rxvtd
+/src/raxvt
+/src/raxvtc
+/src/raxvtd
 /src/*.o

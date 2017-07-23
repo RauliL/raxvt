@@ -84,11 +84,11 @@ CONFIGURE OPTIONS
         When reading resource settings, also read settings for class CLASS.
         To disable resource fallback use --disable-fallback.
 
-    --with-res-name=NAME (default: urxvt)
+    --with-res-name=NAME (default: raxvt)
         Use the given name as default application name when reading
         resources. Specify --with-res-name=rxvt to replace rxvt.
 
-    --with-res-class=CLASS (default: URxvt)
+    --with-res-class=CLASS (default: raxvt)
         Use the given class as default application class when reading
         resources. Specify --with-res-class=Rxvt to replace rxvt.
 

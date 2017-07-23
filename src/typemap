@@ -6,7 +6,7 @@ Window			T_UV
 Pixmap			T_UV
 rxvt_img::nv		T_NV
 
-urxvt::pixbuf           T_PTROBJ
+raxvt::pixbuf           T_PTROBJ
 
 octet_string            OCTET_STRING
 utf8_string             UTF8_STRING
@@ -32,10 +32,10 @@ UTF8_STRING
         $var = SvPVutf8_nolen ($arg) /* imperfect, destroys references */
 
 IMG
-        if (SvROK ($arg) && sv_derived_from ($arg, \"urxvt::img\"))
+        if (SvROK ($arg) && sv_derived_from ($arg, \"raxvt::img\"))
           $var = INT2PTR ($type, SvIV ((SV *) SvRV ($arg)));
         else
-          croak (\"%s is not of type urxvt::img\", \"$var\")
+          croak (\"%s is not of type raxvt::img\", \"$var\")
 
 RENDER_REPEAT_MODE
 	if (SvOK ($arg))
@@ -53,5 +53,5 @@ TERM
 	$arg = newSVterm ($var);
 
 IMG
-        sv_setref_pv ($arg, "urxvt::img", (void *)$var);
+        sv_setref_pv ($arg, "raxvt::img", (void *)$var);
 
