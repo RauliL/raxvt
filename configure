@@ -7587,6 +7587,8 @@ fi
     if test $XFT_CONFIG != no; then
       X_LIBS="`$XFT_CONFIG --libs` $X_LIBS"
       CPPFLAGS="$CPPFLAGS `$XFT_CONFIG --cflags`"
+    else
+      as_fn_error $? "Unable to find Xft or FreeType" "$LINENO" 5
     fi
 
   fi
@@ -9177,7 +9179,7 @@ fi
 
 echo "Configuration:
 
-  Rxvt version:               $VERSION : $DATE
+  raxvt version:              $VERSION : $DATE
   Source code location:       $srcdir
   Install path:               ${prefix}/bin
   Compiler:                   $CXX

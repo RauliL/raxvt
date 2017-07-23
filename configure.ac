@@ -570,6 +570,8 @@ if test x$rxvt_have_xrender = xyes; then
     if test $XFT_CONFIG != no; then
       X_LIBS="`$XFT_CONFIG --libs` $X_LIBS"
       CPPFLAGS="$CPPFLAGS `$XFT_CONFIG --cflags`"
+    else
+      AC_MSG_ERROR([Unable to find Xft or FreeType])
     fi
   ])
 
@@ -720,7 +722,7 @@ AC_OUTPUT
 
 echo "Configuration:
 
-  Rxvt version:               $VERSION : $DATE
+  raxvt version:              $VERSION : $DATE
   Source code location:       $srcdir
   Install path:               ${prefix}/bin
   Compiler:                   $CXX
