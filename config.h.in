@@ -412,9 +412,6 @@
 /* Define if you want to have wtmp support when utmp/utmpx is enabled */
 #undef WTMP_SUPPORT
 
-/* Define to enable xft support */
-#undef XFT
-
 /* Define if your XIMCallback specifies XIC as first type. */
 #undef XIMCB_PROTO_BROKEN
 

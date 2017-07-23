@@ -3398,11 +3398,9 @@ rxvt_term::process_color_seq (int report, int color, const char *str, char resp)
       rgba c;
       pix_colors_focused[color].get (c);
 
-#if XFT
       if (c.a != rgba::MAX_CC)
         tt_printf ("\033]%d;rgba:%04x/%04x/%04x/%04x%c", report, c.r, c.g, c.b, c.a, resp);
       else
-#endif
         tt_printf ("\033]%d;rgb:%04x/%04x/%04x%c", report, c.r, c.g, c.b, resp);
     }
   else

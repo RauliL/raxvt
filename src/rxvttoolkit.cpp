@@ -34,9 +34,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 
-#if XFT
-# include <X11/extensions/Xrender.h>
-#endif
+#include <X11/extensions/Xrender.h>
 
 static const char *const xa_names[] =
 {
@@ -204,7 +202,6 @@ rxvt_xim::~rxvt_xim ()
 
 /////////////////////////////////////////////////////////////////////////////
 
-#if XFT
 rxvt_drawable::~rxvt_drawable ()
 {
   if (xftdrawable)
@@ -218,11 +215,8 @@ rxvt_drawable::operator XftDraw *()
 
   return xftdrawable;
 }
-#endif
 
 /////////////////////////////////////////////////////////////////////////////
-
-#if XFT
 
 // not strictly necessary as it is only used with superclass of zero_initialised
 rxvt_screen::rxvt_screen ()
@@ -248,8 +242,6 @@ rxvt_drawable &rxvt_screen::scratch_drawable (int w, int h)
 
   return *scratch_area;
 }
-
-#endif
 
 void
 rxvt_screen::set (rxvt_display *disp)
@@ -302,13 +294,11 @@ rxvt_screen::select_depth (int bitdepth)
 void
 rxvt_screen::clear ()
 {
-#if XFT
   if (scratch_area)
     {
       XFreePixmap (dpy, scratch_area->drawable);
       delete scratch_area;
     }
-#endif
 
   if (cmap != DefaultColormapOfScreen (ScreenOfDisplay (dpy, display->screen)))
     XFreeColormap (dpy, cmap);
@@ -756,7 +746,6 @@ rxvt_color::alloc (rxvt_screen *screen, const rgba &color)
   //TODO: only supports 24 bit
   unsigned int alpha = color.a >= 0xff00 ? 0xffff : color.a;
 
-#if XFT
   XRenderPictFormat *format;
 
   // not needed by XftColorAlloc, but by the other paths (ours
@@ -800,22 +789,6 @@ rxvt_color::alloc (rxvt_screen *screen, const rgba &color)
       if (XftColorAllocValue (screen->dpy, screen->visual, screen->cmap, &d, &c))
         return true;
     }
-#else
-  c.red   = color.r;
-  c.green = color.g;
-  c.blue  = color.b;
-
-  if (screen->visual->c_class == TrueColor)
-    {
-      c.pixel = (color.r >> (16 - ecb_popcount32 (screen->visual->red_mask  )) << ecb_ctz32 (screen->visual->red_mask  ))
-              | (color.g >> (16 - ecb_popcount32 (screen->visual->green_mask)) << ecb_ctz32 (screen->visual->green_mask))
-              | (color.b >> (16 - ecb_popcount32 (screen->visual->blue_mask )) << ecb_ctz32 (screen->visual->blue_mask ));
-
-      return true;
-    }
-  else if (XAllocColor (screen->dpy, screen->cmap, &c))
-    return true;
-#endif
 
   c.pixel = (color.r * 2 + color.g * 3 + color.b) >= 0x8000 * 6
           ? WhitePixelOfScreen (DefaultScreenOfDisplay (screen->dpy))
@@ -925,7 +898,6 @@ rxvt_color::set (rxvt_screen *screen, const rgba &color)
 void
 rxvt_color::get (rgba &color) const
 {
-#if XFT
 
   color.r = c.color.red;
   color.g = c.color.green;
@@ -938,15 +910,6 @@ rxvt_color::get (rgba &color) const
       color.g = color.g * 0xffff / color.a;
       color.b = color.b * 0xffff / color.a;
     }
-
-#else
-
-  color.r = c.red;
-  color.g = c.green;
-  color.b = c.blue;
-  color.a = rgba::MAX_CC;
-
-#endif
 }
 
 void
@@ -967,11 +930,7 @@ rxvt_color::free (rxvt_screen *screen)
   if (screen->visual->c_class == TrueColor)
     return; // nothing to do
 
-#if XFT
   XftColorFree (screen->dpy, screen->visual, screen->cmap, &c);
-#else
-  XFreeColors (screen->dpy, screen->cmap, &c.pixel, 1, AllPlanes);
-#endif
 }
 
 void

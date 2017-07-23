@@ -2,9 +2,7 @@
 #define DEFAULTFONT_H_
 
 #include <X11/Xlib.h>
-#if XFT
-# include <X11/Xft/Xft.h>
-#endif
+#include <X11/Xft/Xft.h>
 
 #include <inttypes.h>
 

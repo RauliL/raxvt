@@ -25,10 +25,7 @@
 #define RXVT_TOOLKIT_H
 
 #include <X11/Xlib.h>
-
-#if XFT
-# include <X11/Xft/Xft.h>
-#endif
+#include <X11/Xft/Xft.h>
 
 #include "ev_cpp.h"
 
@@ -160,22 +157,15 @@ struct rxvt_drawable
   Drawable drawable;
   operator Drawable() { return drawable; }
 
-#if XFT
   XftDraw *xftdrawable;
   operator XftDraw *();
-#endif
 
   rxvt_drawable (rxvt_screen *screen, Drawable drawable)
   : screen(screen),
-#if XFT
-    xftdrawable(0),
-#endif
-    drawable(drawable)
-  { }
+    drawable(drawable),
+    xftdrawable(nullptr) {}
 
-#if XFT
   ~rxvt_drawable ();
-#endif
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -203,7 +193,6 @@ struct rxvt_screen
   Visual *visual;
   Colormap cmap;
 
-#if XFT
   // scratch pixmap
   rxvt_drawable *scratch_area;
   int scratch_w, scratch_h;
@@ -211,7 +200,6 @@ struct rxvt_screen
   rxvt_drawable &scratch_drawable (int w, int h);
 
   rxvt_screen ();
-#endif
 
   void set (rxvt_display *disp);
   void select_visual (int id);
@@ -333,11 +321,7 @@ struct rgba
 
 struct rxvt_color
 {
-#if XFT
   XftColor c;
-#else
-  XColor c;
-#endif
 
   operator Pixel () const { return c.pixel; }
 
@@ -346,11 +330,7 @@ struct rxvt_color
 
   bool is_opaque () const
   {
-#if XFT
     return c.color.alpha == rgba::MAX_CC;
-#else
-    return 1;
-#endif
   }
 
   bool alloc (rxvt_screen *screen, const rgba &color);

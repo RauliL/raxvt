@@ -60,10 +60,6 @@
  nodef(iso14755_52)
 #endif
  def(console)
-#if XFT
  def(buffered)
-#else
- nodef(buffered)
-#endif
  def(dockapp)
 

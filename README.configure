@@ -18,11 +18,6 @@ CONFIGURE OPTIONS
         "--disable-everything" and than adding just the "--enable-..."
         arguments you want.
 
-    --enable-xft (default: on)
-        Add support for Xft (anti-aliased, among others) fonts. Xft fonts
-        are slower and require lots of memory, but as long as you don't use
-        them, you don't pay for them.
-
     --enable-font-styles (default: on)
         Add support for bold, *italic* and *bold italic* font styles. The
         fonts can be set manually or automatically.
@@ -37,12 +32,12 @@ CONFIGURE OPTIONS
         about 700kB), but it doesn't increase memory usage unless you use a
         font requiring one of these encodings.
 
-   all             all available codeset groups 
-   zh              common chinese encodings 
-   zh_ext          rarely used but very big chinese encodings 
-   jp              common japanese encodings 
-   jp_ext          rarely used but big japanese encodings 
-   kr              korean encodings 
+   all             all available codeset groups
+   zh              common chinese encodings
+   zh_ext          rarely used but very big chinese encodings
+   jp              common japanese encodings
+   jp_ext          rarely used but big japanese encodings
+   kr              korean encodings
     --enable-xim (default: on)
         Add support for XIM (X Input Method) protocol. This allows using
         alternative input methods (e.g. kinput2) and will also correctly set

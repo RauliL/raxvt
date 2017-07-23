@@ -243,9 +243,7 @@ const std::vector<TermSetting> term_setting_list = {
 #if ENABLE_XEMBED
   STRG(Rs_embed, NULL, "embed", "windowid", "window id to embed terminal in"),
 #endif
-#if XFT
   BOOL(Rs_buffered, "buffered", NULL, Opt_buffered, 0, NULL),
-#endif
 #if ENABLE_FRILLS
   STRG(Rs_depth, "depth", "depth", "number", "depth of visual to request"),
   STRG(Rs_visual, "visual", "visual", "number", "visual id to request"),
@@ -314,9 +312,7 @@ static const char optionsstring[] = "options: "
 #if ENABLE_PERL
                                     "perl,"
 #endif
-#if XFT
                                     "xft,"
-#endif
 #if ENABLE_STYLES
                                     "styles,"
 #endif

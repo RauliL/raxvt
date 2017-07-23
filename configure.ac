@@ -71,7 +71,6 @@ support_scroll_xterm=yes
 support_xim=yes
 support_pixbuf=yes
 support_startup_notification=yes
-support_xft=yes
 support_unicode3=no
 support_combining=yes
 support_8bitctrls=no
@@ -107,7 +106,6 @@ AC_ARG_ENABLE(everything,
        support_xim=no
        support_pixbuf=no
        support_startup_notification=no
-       support_xft=no
        support_unicode3=no
        support_combining=no
        support_8bitctrls=no
@@ -135,7 +133,6 @@ AC_ARG_ENABLE(everything,
        support_xim=yes
        support_pixbuf=yes
        support_startup_notification=yes
-       support_xft=yes
        support_unicode3=yes
        support_combining=yes
        #support_8bitctrls=yes
@@ -182,12 +179,6 @@ AC_ARG_ENABLE(combining,
   [  --enable-combining      enable composition of base and combining characters],
   [if test x$enableval = xyes -o x$enableval = xno; then
     support_combining=$enableval
-  fi])
-
-AC_ARG_ENABLE(xft,
-  [  --enable-xft            enable xft support on systems that have it],
-  [if test x$enableval = xyes -o x$enableval = xno; then
-    support_xft=$enableval
   fi])
 
 AC_ARG_ENABLE(font-styles,
@@ -557,22 +548,20 @@ support_image=no
 if test x$support_inheritpixmap = xyes || test x$support_pixbuf = xyes; then
   support_image=yes
 fi
-if test x$support_xft = xyes || test x$support_image = xyes; then
-  rxvt_have_xrender=no
-  RXVT_CHECK_MODULES([XRENDER], [xrender], [
-    X_LIBS="$XRENDER_LIBS $X_LIBS"
-    CPPFLAGS="$CPPFLAGS $XRENDER_CFLAGS"
-    rxvt_have_xrender=yes
+rxvt_have_xrender=no
+RXVT_CHECK_MODULES([XRENDER], [xrender], [
+  X_LIBS="$XRENDER_LIBS $X_LIBS"
+  CPPFLAGS="$CPPFLAGS $XRENDER_CFLAGS"
+  rxvt_have_xrender=yes
 
-    save_LIBS="$LIBS"
-    LIBS="$LIBS $X_LIBS"
-    AC_CHECK_HEADER(X11/extensions/Xrender.h,,[rxvt_have_xrender=no])
-    AC_CHECK_FUNC(XRenderFindStandardFormat,,[rxvt_have_xrender=no])
-    LIBS="$save_LIBS"
-  ], [:])
-fi
+  save_LIBS="$LIBS"
+  LIBS="$LIBS $X_LIBS"
+  AC_CHECK_HEADER(X11/extensions/Xrender.h,,[rxvt_have_xrender=no])
+  AC_CHECK_FUNC(XRenderFindStandardFormat,,[rxvt_have_xrender=no])
+  LIBS="$save_LIBS"
+], [:])
 
-if test x$support_xft = xyes && test x$rxvt_have_xrender = xyes; then
+if test x$rxvt_have_xrender = xyes; then
   RXVT_CHECK_MODULES([XFT], [fontconfig xft], [
     X_LIBS="$XFT_LIBS $X_LIBS"
     CPPFLAGS="$CPPFLAGS $XFT_CFLAGS"
@@ -589,10 +578,6 @@ if test x$support_xft = xyes && test x$rxvt_have_xrender = xyes; then
   AC_CHECK_HEADERS(X11/Xft/Xft.h fontconfig/fontconfig.h,,[support_xft=no])
   AC_CHECK_FUNCS(XftDrawString32 FcPatternGet,,[support_xft=no])
   LIBS="$save_LIBS"
-
-  if test x$support_xft = xyes; then
-    AC_DEFINE(XFT, 1, Define to enable xft support)
-  fi
 fi
 
 if test x$support_image = xyes && test x$rxvt_have_xrender = xyes; then

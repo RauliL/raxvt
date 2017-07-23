@@ -24,9 +24,7 @@
 #include "rxvtutil.h"
 #include "rxvtfont.h"
 
-#if XFT
-# include <fontconfig/fontconfig.h>
-#endif
+#include <fontconfig/fontconfig.h>
 
 #define MAX_OVERLAP_ROMAN  (8 + 2)	// max. character width in 8ths of the base width
 #define MAX_OVERLAP_ITALIC (8 + 3)	// max. overlap for italic fonts
@@ -64,7 +62,6 @@ static const struct rxvt_fallback_font {
   { CS_ISO8859_14,   "-*-*-*-r-*--*-*-*-*-c-*-iso8859-14"          },
   { CS_ISO8859_16,   "-*-*-*-r-*--*-*-*-*-c-*-iso8859-16"          },
 
-# if XFT
   { CS_KOI8_U,       "xft::lang=ru"                                },
 
   { CS_ISO8859_5,    "xft::lang=ru"                                },
@@ -74,18 +71,15 @@ static const struct rxvt_fallback_font {
   { CS_ISO8859_9,    "xft::lang=tr"                                },
   { CS_ISO8859_10,   "xft::lang=se"                                },
   { CS_ISO8859_11,   "xft::lang=th"                                },
-# endif
 #endif
 
   // japanese
 #if ENCODING_JP || ENCODING_JP_EXT
-# if XFT
   // prefer xft for complex scripts
   { CS_JIS0208_1990_0, "xft:Sazanami Mincho:antialias=false"       },
   { CS_JIS0208_1990_0, "xft:Kochi Gothic:antialias=false"          },
   { CS_JIS0208_1990_0, "xft:Mincho:antialias=false"                },
   { CS_JIS0208_1990_0, "xft::lang=ja:antialias=false"              },
-# endif
   { CS_JIS0201_1976_0, "-*-mincho-*-r-*--*-*-*-*-c-*-jisx0201*-0"  },
   { CS_JIS0208_1990_0, "-*-mincho-*-r-*--*-*-*-*-c-*-jisx0208*-0"  },
   { CS_JIS0212_1990_0, "-*-mincho-*-r-*--*-*-*-*-c-*-jisx0212*-0"  },
@@ -95,7 +89,6 @@ static const struct rxvt_fallback_font {
 #endif
 
 #if ENCODING_ZH || ENCODING_ZH_EXT
-# if XFT
   { CS_GBK_0,          "xft:AR PL KaitiM GB"                       },
   { CS_GBK_0,          "xft:AR PL SungtiL GB"                      },
   { CS_GBK_0,          "xft::lang=zh"                              },
@@ -104,7 +97,6 @@ static const struct rxvt_fallback_font {
   { CS_GB2312_1980_0,  "xft:AR PL KaitiM GB"                       },
   { CS_GB2312_1980_0,  "xft:AR PL SungtiL GB"                      },
   { CS_GB2312_1980_0,  "xft::lang=zh"                              },
-# endif
   { CS_GBK_0,           "-*-*-*-*-*-*-*-*-*-*-c-*-gbk*-0"          },
   { CS_BIG5,            "-*-*-*-*-*-*-*-*-*-*-c-*-big5-0"          },
   { CS_BIG5_PLUS,       "-*-*-*-*-*-*-*-*-*-*-c-*-big5p-0"         },
@@ -124,14 +116,11 @@ static const struct rxvt_fallback_font {
 #if ENCODING_KR
   { CS_KSC5601_1987_0,  "-baekmuk-gulim-*-*-*-*-*-*-*-*-c-*-ksc5601*" },
   { CS_KSC5601_1987_0,  "-*-*-*-*-*-*-*-*-*-*-c-*-ksc5601*"        },
-# if XFT
   { CS_KSC5601_1987_0,  "xft:Baekmuk Gulim:antialias=false"        },
   { CS_KSC5601_1987_0,  "xft::lang=ko:antialias=false"             },
-# endif
 #endif
 
   //{ CS_UNICODE,      "-*-unifont-*-*-*-*-*-*-*-*-c-*-iso10646-1"   }, // this gem of a font has actual dotted circles within the combining character glyphs.
-#if XFT
   { CS_UNICODE,      "xft:Bitstream Vera Sans Mono:antialias=false:autohint=true" },
   { CS_UNICODE,      "xft:Courier New:antialias=false:autohint=true"              },
   { CS_UNICODE,      "xft:Andale Mono:antialias=false:autohint=false"             },
@@ -139,7 +128,6 @@ static const struct rxvt_fallback_font {
 
   // FreeMono is usually uglier than x fonts, so try after the others
   { CS_UNICODE,      "xft:FreeMono:autohint=true"                  },
-#endif
 
   // generic font fallback, put this last, as many iso10646 fonts have extents
   // specified for all glyphs in the range they cover, but most are simply empty
@@ -234,7 +222,6 @@ rxvt_font::clear_rect (rxvt_drawable &d, int x, int y, int w, int h, int color) 
     XClearArea (disp, d, x, y, w, h, false);
   else if (color >= 0)
     {
-#if XFT
       Picture dst;
 
 # ifdef HAVE_IMG
@@ -250,11 +237,6 @@ rxvt_font::clear_rect (rxvt_drawable &d, int x, int y, int w, int h, int color) 
       else
 # endif
         XftDrawRect (d, &term->pix_colors[color].c, x, y, w, h);
-
-#else
-      XSetForeground (disp, gc, term->pix_colors[color]);
-      XFillRectangle (disp, d, gc, x, y, w, h);
-#endif
     }
 }
 
@@ -1108,8 +1090,6 @@ rxvt_font_x11::draw (rxvt_drawable &d, int x, int y,
 
 /////////////////////////////////////////////////////////////////////////////
 
-#if XFT
-
 struct rxvt_font_xft : rxvt_font {
   rxvt_font_xft () { f = 0; }
 
@@ -1447,8 +1427,6 @@ rxvt_font_xft::draw (rxvt_drawable &d, int x, int y,
     }
 }
 
-#endif
-
 /////////////////////////////////////////////////////////////////////////////
 
 rxvt_fontset::rxvt_fontset (rxvt_term *term)
@@ -1501,13 +1479,11 @@ rxvt_fontset::new_font (const char *name, codeset cs)
       name = "";
       f = new rxvt_font_default (this);
     }
-#if XFT
   else if (!strncmp (name, "xft:", 4))
     {
       name += 4;
       f = new rxvt_font_xft ();
     }
-#endif
   else if (!strncmp (name, "x:", 2))
     {
       name += 2;
@@ -1706,7 +1682,7 @@ rxvt_fontset::find_font_idx (unicode_t unicode)
               // way to configure this and xft is easier to hack in,
               // while x11 has more framework in place already.
               // TODO: this is a real resource hog, xft takes ages(?)
-#if XFT && USE_SLOW_LOOKUP
+#if USE_SLOW_LOOKUP
               // grab the first xft font that seems suitable
               FcPattern *p = FcPatternCreate ();
 

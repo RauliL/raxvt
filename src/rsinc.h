@@ -55,9 +55,7 @@
   def (preeditType)
   def (inputMethod)
 #endif
-#if XFT
   def (buffered)
-#endif
 #if ENABLE_FRILLS
   def (depth)
   def (visual)
