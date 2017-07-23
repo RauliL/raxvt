@@ -23,7 +23,7 @@ DEFS = @DEFS@
 LIBS = @LIBS@
 XINC = @X_CFLAGS@ @PIXBUF_CFLAGS@ @STARTUP_NOTIFICATION_CFLAGS@
 XLIB = @X_LIBS@ -lX11 @X_EXTRA_LIBS@ @PIXBUF_LIBS@ @STARTUP_NOTIFICATION_LIBS@
-COMPILE = $(CXX) -I.. -I$(srcdir) -I. -I$(srcdir)/../libev -I$(srcdir)/../libptytty/src $(DEFS) $(CPPFLAGS) $(CXXFLAGS) $(XINC)
+COMPILE = $(CXX) -I.. -I$(srcdir) -I. -I$(srcdir)/../libev -I$(srcdir)/../libptytty/src -I$(srcdir)/../tinytoml/include $(DEFS) $(CPPFLAGS) $(CXXFLAGS) $(XINC)
 LINK = @LINKER@ $(LDFLAGS)
 EXEEXT = @EXEEXT@
 PERLFLAGS = @PERLFLAGS@
@@ -38,9 +38,9 @@ dummy:
 COMMON = \
 	command.o rxvtfont.o init.o main.o misc.o \
 	screen.o scrollbar.o scrollbar-next.o scrollbar-rxvt.o \
-	scrollbar-xterm.o scrollbar-plain.o xdefaults.o encoding.o \
+	scrollbar-xterm.o scrollbar-plain.o encoding.o \
 	rxvttoolkit.o rxvtutil.o keyboard.o rxvtimg.o \
-	ev_cpp.o fdpass_wrapper.o ptytty_wrapper.o @PERL_O@
+	settings.o ev_cpp.o fdpass_wrapper.o ptytty_wrapper.o @PERL_O@
 
 COMMON_DAEMON = rxvtdaemon.o
 
@@ -278,11 +278,11 @@ scrollbar.o: rxvtutil.h ../libptytty/src/estl.h emman.h rxvtfont.h
 scrollbar.o: rxvttoolkit.h ev_cpp.h ../config.h ../libev/ev++.h ../libev/ev.h
 scrollbar.o: callback.h rxvtimg.h scrollbar.h ../libptytty/src/libptytty.h
 scrollbar.o: rxvtperl.h hookinc.h rsinc.h optinc.h
-xdefaults.o: ../config.h rxvt.h feature.h ../libptytty/src/ecb.h encoding.h
-xdefaults.o: rxvtutil.h ../libptytty/src/estl.h emman.h rxvtfont.h
-xdefaults.o: rxvttoolkit.h ev_cpp.h ../config.h ../libev/ev++.h ../libev/ev.h
-xdefaults.o: callback.h rxvtimg.h scrollbar.h ../libptytty/src/libptytty.h
-xdefaults.o: rxvtperl.h hookinc.h rsinc.h optinc.h version.h keyboard.h
+settings.o: ../config.h rxvt.h feature.h ../libptytty/src/ecb.h encoding.h
+settings.o: rxvtutil.h ../libptytty/src/estl.h emman.h rxvtfont.h
+settings.o: rxvttoolkit.h ev_cpp.h ../config.h ../libev/ev++.h ../libev/ev.h
+settings.o: callback.h rxvtimg.h scrollbar.h ../libptytty/src/libptytty.h
+settings.o: rxvtperl.h hookinc.h rsinc.h optinc.h version.h keyboard.h
 rxvtperl.o: ../config.h ev_cpp.h ../config.h ../libev/ev++.h ../libev/ev.h
 rxvtperl.o: rxvt.h feature.h ../libptytty/src/ecb.h encoding.h rxvtutil.h
 rxvtperl.o: ../libptytty/src/estl.h emman.h rxvtfont.h rxvttoolkit.h

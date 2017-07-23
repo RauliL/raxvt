@@ -34,25 +34,6 @@ AC_ISC_POSIX
 AC_LANG(C++)
 
 LINKER="$CXX"
-dnl check whether we can link with gcc -lsupc++
-if test x$GCC = xyes && test x$GXX = xyes; then
-   dnl FreeBSD (at least up to 5.3) has a broken GCC, workaround it
-   AC_MSG_CHECKING([for working libsupc++])
-   save_CXX="$CXX"
-   save_LIBS="$LIBS"
-   CXX="$CC"
-   LIBS="$LIBS -lsupc++"
-   AC_LINK_IFELSE(
-      [AC_LANG_PROGRAM([struct test { }; void f() try { throw new test; } catch (...) { throw; }],[])],
-      [AC_MSG_RESULT(ok)
-       LINKER="$CC"],
-      [
-         AC_MSG_RESULT([no, making everything bigger and slower])
-         LIBS="$save_LIBS"
-      ]
-   )
-   CXX="$save_CXX"
-fi
 AC_SUBST(LINKER,[$LINKER])
 
 dnl# --------------------------------------------------------------------------

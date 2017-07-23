@@ -630,7 +630,7 @@ rxvt_term::init_resources (int argc, const char *const *argv)
   xa = display->xa;
 
   set (display);
-  extract_resources ();
+  load_settings();
 
 #if ENABLE_FRILLS
   if (rs[Rs_visual])
