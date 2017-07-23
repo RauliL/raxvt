@@ -7895,6 +7895,35 @@ fi
 
 
 
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for libxdg-basedir" >&5
+$as_echo_n "checking for libxdg-basedir... " >&6; }
+  if test $PKG_CONFIG != no && $PKG_CONFIG --exists libxdg-basedir; then
+    XDG_BASEDIR_CFLAGS="`$PKG_CONFIG --cflags libxdg-basedir`"
+    XDG_BASEDIR_LIBS="`$PKG_CONFIG --libs libxdg-basedir`"
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: ok" >&5
+$as_echo "ok" >&6; }
+
+  CPPFLAGS="$CPPFLAGS $XDG_BASEDIR_CFLAGS"
+  LIBS="$LIBS $XDG_BASEDIR_LIBS"
+  ac_fn_cxx_check_header_mongrel "$LINENO" "basedir.h" "ac_cv_header_basedir_h" "$ac_includes_default"
+if test "x$ac_cv_header_basedir_h" = xyes; then :
+
+else
+  as_fn_error $? "Unable to find libxdg-basedir" "$LINENO" 5
+fi
+
+
+
+  else
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+  as_fn_error $? "Unable to find libxdg-basedir" "$LINENO" 5
+
+  fi
+
+
 ac_config_files="$ac_config_files Makefile src/Makefile"
 
 cat >confcache <<\_ACEOF

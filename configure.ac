@@ -716,6 +716,13 @@ AC_SUBST(PERL)
 AC_SUBST(IF_PERL)
 AC_SUBST(PERL_O)
 
+RXVT_CHECK_MODULES([XDG_BASEDIR], [libxdg-basedir], [
+  CPPFLAGS="$CPPFLAGS $XDG_BASEDIR_CFLAGS"
+  LIBS="$LIBS $XDG_BASEDIR_LIBS"
+  AC_CHECK_HEADER(basedir.h,,[AC_MSG_ERROR([Unable to find libxdg-basedir])])
+], [
+  AC_MSG_ERROR([Unable to find libxdg-basedir])
+])
 
 AC_CONFIG_FILES([Makefile src/Makefile])
 AC_OUTPUT
