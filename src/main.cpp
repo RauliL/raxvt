@@ -629,8 +629,8 @@ rxvt_init ()
 
   XrmInitialize ();
 
-#if HAVE_PIXBUF
-  g_type_init ();
+#if HAVE_PIXBUF && !GLIB_CHECK_VERSION(2, 35, 0)
+  g_type_init();
 #endif
 }
 
