@@ -48,40 +48,34 @@ vector<rxvt_term *> rxvt_term::termlist;
 // used to tell global functions which terminal instance is "active"
 rxvt_t rxvt_current_term;
 
-static char curlocale[128], savelocale[128];
+static std::string locale_current;
+static std::string locale_saved;
 
 bool
-rxvt_set_locale(const char* locale) NOTHROW
+rxvt_set_locale(const std::string& locale) noexcept
 {
-  const std::size_t size = std::strlen(locale) + 1;
-
-  if (size > sizeof(curlocale))
-  {
-    rxvt_fatal ("locale string too long, aborting.\n");
-  }
-
-  if (!locale || !std::memcmp(locale, curlocale, size))
+  if (locale.empty() || !locale.compare(locale_current))
   {
     return false;
   }
 
-  std::memcpy(curlocale, locale, size);
-  std::setlocale(LC_CTYPE, curlocale);
+  locale_current = locale;
+  std::setlocale(LC_CTYPE, locale_current.c_str());
 
   return true;
 }
 
 void
-rxvt_push_locale (const char *locale) NOTHROW
+rxvt_push_locale(const std::string& locale) noexcept
 {
-  std::strcpy(savelocale, curlocale);
-  rxvt_set_locale (locale);
+  locale_saved = locale_current;
+  rxvt_set_locale(locale);
 }
 
 void
-rxvt_pop_locale () NOTHROW
+rxvt_pop_locale() noexcept
 {
-  rxvt_set_locale (savelocale);
+  rxvt_set_locale(locale_saved);
 }
 
 #if ENABLE_COMBINING
@@ -1296,13 +1290,17 @@ xim_preedit_draw (XIC ic, XPointer client_data, XIMPreeditDrawCallbackStruct *ca
         {
           // of course, X makes it ugly again
           if (term->rs[Rs_imLocale])
-            SET_LOCALE (term->rs[Rs_imLocale]);
+          {
+            rxvt_set_locale(term->rs[Rs_imLocale]);
+          }
 
           str = rxvt_temp_buf<wchar_t> (text->length + 1);
           mbstowcs (str, text->string.multi_byte, text->length + 1);
 
           if (term->rs[Rs_imLocale])
-            SET_LOCALE (term->locale);
+          {
+            rxvt_set_locale(term->locale);
+          }
         }
       else
         str = text->string.wide_char;
@@ -1546,7 +1544,9 @@ rxvt_term::im_cb ()
     return;
 
   if (rs[Rs_imLocale])
-    SET_LOCALE (rs[Rs_imLocale]);
+  {
+    rxvt_set_locale(rs[Rs_imLocale]);
+  }
 
   p = rs[Rs_inputMethod];
   if (p && *p)
@@ -1585,7 +1585,9 @@ rxvt_term::im_cb ()
 
 done:
   if (rs[Rs_imLocale])
-    SET_LOCALE (locale);
+  {
+    rxvt_set_locale(locale);
+  }
 }
 
 void

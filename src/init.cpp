@@ -931,7 +931,7 @@ rxvt_term::set_locale (const char *locale)
 
 
   this->locale = strdup (this->locale);
-  SET_LOCALE (this->locale);
+  rxvt_set_locale(this->locale);
   mbstate.reset ();
 
 #if HAVE_NL_LANGINFO

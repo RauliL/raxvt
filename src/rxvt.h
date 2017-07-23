@@ -123,10 +123,9 @@ class out_of_input { };
  *****************************************************************************
  */
 // main.C
-#define SET_LOCALE(locale) rxvt_set_locale (locale)
-extern bool rxvt_set_locale (const char *locale) NOTHROW;
-extern void rxvt_push_locale (const char *locale) NOTHROW;
-extern void rxvt_pop_locale () NOTHROW;
+extern bool rxvt_set_locale(const std::string&) noexcept;
+extern void rxvt_push_locale(const std::string&) noexcept;
+extern void rxvt_pop_locale() noexcept;
 void rxvt_init ();
 
 // misc.C

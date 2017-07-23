@@ -442,14 +442,18 @@ rxvt_term::key_press (XKeyEvent &ev)
           // the XOpenIM manpage lies about hardcoding the locale
           // at the point of XOpenIM, so temporarily switch locales
           if (rs[Rs_imLocale])
-            SET_LOCALE (rs[Rs_imLocale]);
+          {
+            rxvt_set_locale(rs[Rs_imLocale]);
+          }
 
           // assume wchar_t == unicode or better
           len = XwcLookupString (Input_Context, &ev, wkbuf,
                                  KBUFSZ, &keysym, &status_return);
 
           if (rs[Rs_imLocale])
-            SET_LOCALE (locale);
+          {
+            rxvt_set_locale(locale);
+          }
 
           if (status_return == XLookupChars
               || status_return == XLookupBoth)
