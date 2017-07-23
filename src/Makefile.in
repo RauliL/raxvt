@@ -52,11 +52,11 @@ RXVTD_BINNAME=$(DESTDIR)$(bindir)/$(RXVTNAME)d$(EXEEXT)
 # Distribution variables
 #
 
-.SUFFIXES:	.C .c .o
+.SUFFIXES:	.cpp .c .o
 
 #-------------------------------------------------------------------------
 # inference rules
-.C.o:
+.cpp.o:
 	$(COMPILE) -c $<
 
 #-------------------------------------------------------------------------
@@ -87,7 +87,7 @@ allbin: rxvt rxvtd rxvtc
 alldoc:
 
 clean:
-	rm -f rxvt rxvtc rxvtd perlxsi.c rxvtperl.C manlst mantmp
+	rm -f rxvt rxvtc rxvtd perlxsi.c rxvtperl.cpp manlst mantmp
 	rm -f *.o
 
 distclean: clean
@@ -135,14 +135,14 @@ install: install-bin install-perl
 perlxsi.c: Makefile
 	$(PERL) -MExtUtils::Embed -e xsinit -- -std urxvt
 
-rxvtperl.C: rxvtperl.xs iom_perl.h iom_perl.xs typemap typemap.iom
+rxvtperl.cpp: rxvtperl.xs iom_perl.h iom_perl.xs typemap typemap.iom
 	PERL="$(PERL)" $(PERL) @PERLPRIVLIBEXP@/ExtUtils/xsubpp -C++ -typemap @PERLPRIVLIBEXP@/ExtUtils/typemap -typemap 'typemap.iom' -typemap 'typemap' -prototypes $(srcdir)/rxvtperl.xs >$@
 
-rxvtperl.o: rxvtperl.C perlxsi.c
+rxvtperl.o: rxvtperl.cpp perlxsi.c
 	$(COMPILE) $(PERLFLAGS) -DLIBDIR="\"$(libdir)/urxvt\"" -c $<
 
 depend:
-	makedepend -f Makefile.in -I. -I.. -I../libptytty/src -I../libev -Y *.C *.xs >/dev/null 2>&1
+	makedepend -f Makefile.in -I. -I.. -I../libptytty/src -I../libev -Y *.cpp *.xs >/dev/null 2>&1
 
 # DO NOT DELETE: nice dependency list follows
 

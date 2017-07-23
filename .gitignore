@@ -12,7 +12,7 @@
 /doc/rxvtd.1.man
 /src/Makefile
 /src/perlxsi.c
-/src/rxvtperl.C
+/src/rxvtperl.cpp
 /src/rxvt
 /src/rxvtc
 /src/rxvtd
