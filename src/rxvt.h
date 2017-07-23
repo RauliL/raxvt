@@ -265,27 +265,16 @@ struct mouse_event
 # define COLORTERMENVFULL COLORTERMENV
 #endif
 #ifndef TERMENV
-# if USE_256_COLORS
-#  define TERMENV        "rxvt-unicode-256color"
-# else
-#  define TERMENV        "rxvt-unicode"
-# endif
+# define TERMENV        "rxvt-unicode-256color"
 #endif
 
 // Hidden color cube for indexed 24-bit colors. There are fewer blue levels
 // because normal human eye is less sensitive to the blue component than to
 // the red or green. (https://en.m.wikipedia.org/wiki/Color_depth#8-bit_color)
-#if USE_256_COLORS
 // 7x7x5=245 < 254 unused color indices
 # define Red_levels      7
 # define Green_levels    7
 # define Blue_levels     5
-#else
-// 6x6x4=144 < 166 unused color indices
-# define Red_levels      6
-# define Green_levels    6
-# define Blue_levels     4
-#endif
 
 #define RGB24_CUBE_SIZE (Red_levels * Green_levels * Blue_levels)
 
@@ -485,11 +474,7 @@ enum colour_list {
   Color_White = maxCOLOR,
 #endif
   minTermCOLOR = Color_White + 1,
-#if USE_256_COLORS
   maxTermCOLOR = Color_White + 240,
-#else
-  maxTermCOLOR = Color_White + 72,
-#endif
   minTermCOLOR24,
   maxTermCOLOR24 = minTermCOLOR24 +
                    RGB24_CUBE_SIZE - 1,
@@ -530,11 +515,7 @@ enum colour_list {
 #endif
 };
 
-#if USE_256_COLORS
-# define Color_Bits      9 // 0 .. maxTermCOLOR24
-#else
-# define Color_Bits      8 // 0 .. maxTermCOLOR24
-#endif
+#define Color_Bits      9 // 0 .. maxTermCOLOR24
 
 #if maxTermCOLOR24 >= (1 << Color_Bits)
 # error color index overflow

@@ -713,7 +713,6 @@ enable_option_checking
 enable_everything
 enable_assert
 enable_warnings
-enable_256_color
 enable_unicode3
 enable_combining
 enable_xft
@@ -1397,7 +1396,6 @@ Optional Features:
                           NOTE: this option is order dependent
   --enable-assert         enable assertions
   --enable-warnings       turn on g++ warnings
-  --enable-256-color      enable 256-color support
   --enable-unicode3       use 21 instead of 16 bits to represent unicode characters
   --enable-combining      enable composition of base and combining characters
   --enable-xft            enable xft support on systems that have it
@@ -4839,20 +4837,6 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
   else
     CXXFLAGS="$CXXFLAGS -w"
   fi
-fi
-
-support_256_color=no
-# Check whether --enable-256-color was given.
-if test "${enable_256_color+set}" = set; then :
-  enableval=$enable_256_color; if test x$enableval = xyes; then
-    support_256_color=yes
-  fi
-fi
-
-if test x$support_256_color = xyes; then
-
-$as_echo "#define USE_256_COLORS 1" >>confdefs.h
-
 fi
 
 # Check whether --enable-unicode3 was given.
