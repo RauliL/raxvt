@@ -26,7 +26,7 @@
 
 #ifdef KEYSYM_RESOURCE
 
-#include <inttypes.h>
+#include <cstdint>
 
 #include "rxvtutil.h"
 
