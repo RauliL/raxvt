@@ -61,11 +61,6 @@
 /* #define NO_CURSORCOLOR */
 
 /*
- * Make colours match xterm colours instead of `traditional' rxvt colours
- */
-#define XTERM_COLORS
-
-/*
  * Disable separate colours for bold, underline and reverse video
  */
 /* #define NO_BOLD_UNDERLINE_REVERSE */
