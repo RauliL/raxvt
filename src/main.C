@@ -38,19 +38,9 @@
 #include "rxvtperl.h"
 
 #include <limits>
-
-#include <assert.h>
-#include <signal.h>
-#include <string.h>
-
+#include <csignal>
 #include <termios.h>
-
-#ifdef HAVE_XSETLOCALE
-# define X_LOCALE
-# include <X11/Xlocale.h>
-#else
-# include <locale.h>
-#endif
+#include <clocale>
 
 struct termios rxvt_term::def_tio;
 vector<rxvt_term *> rxvt_term::termlist;
@@ -61,25 +51,30 @@ rxvt_t rxvt_current_term;
 static char curlocale[128], savelocale[128];
 
 bool
-rxvt_set_locale (const char *locale) NOTHROW
+rxvt_set_locale(const char* locale) NOTHROW
 {
-  int size = strlen (locale) + 1;
+  const std::size_t size = std::strlen(locale) + 1;
 
-  if (size > sizeof (curlocale))
+  if (size > sizeof(curlocale))
+  {
     rxvt_fatal ("locale string too long, aborting.\n");
+  }
 
-  if (!locale || !memcmp (locale, curlocale, size))
+  if (!locale || !std::memcmp(locale, curlocale, size))
+  {
     return false;
+  }
 
-  memcpy (curlocale, locale, size);
-  setlocale (LC_CTYPE, curlocale);
+  std::memcpy(curlocale, locale, size);
+  std::setlocale(LC_CTYPE, curlocale);
+
   return true;
 }
 
 void
 rxvt_push_locale (const char *locale) NOTHROW
 {
-  strcpy (savelocale, curlocale);
+  std::strcpy(savelocale, curlocale);
   rxvt_set_locale (locale);
 }
 
@@ -537,8 +532,10 @@ sig_handlers::sig_term (ev::sig &w, int revents)
 static void
 rxvt_get_ttymode (struct termios *tio)
 {
-  if (tcgetattr (STDIN_FILENO, tio) < 0)
-    memset (tio, 0, sizeof (struct termios));
+  if (tcgetattr(STDIN_FILENO, tio) < 0)
+  {
+    std::memset(tio, 0, sizeof(struct termios));
+  }
 
   for (int i = 0; i < NCCS; i++)
     tio->c_cc[i] = VDISABLE;
@@ -880,11 +877,18 @@ rxvt_term::set_fonts ()
 }
 
 void
-rxvt_term::set_string_property (Atom prop, const char *str, int len)
+rxvt_term::set_string_property(Atom prop, const char* str, int len)
 {
-  XChangeProperty (dpy, parent,
-                   prop, XA_STRING, 8, PropModeReplace,
-                   (const unsigned char *)str, len >= 0 ? len : strlen (str));
+  XChangeProperty(
+    dpy,
+    parent,
+    prop,
+    XA_STRING,
+    8,
+    PropModeReplace,
+    reinterpret_cast<const unsigned char*>(str),
+    len >= 0 ? len : std::strlen(str)
+  );
 }
 
 void
@@ -900,17 +904,24 @@ rxvt_term::set_mbstring_property (Atom prop, const char *str, int len)
 }
 
 void
-rxvt_term::set_utf8_property (Atom prop, const char *str, int len)
+rxvt_term::set_utf8_property(Atom prop, const char* str, int len)
 {
-  wchar_t *ws = rxvt_mbstowcs (str, len);
-  char *s = rxvt_wcstoutf8 (ws);
+  wchar_t* ws = rxvt_mbstowcs(str, len);
+  char* s = rxvt_wcstoutf8(ws);
 
-  XChangeProperty (dpy, parent,
-                   prop, xa[XA_UTF8_STRING], 8, PropModeReplace,
-                   (const unsigned char *)s, strlen (s));
+  XChangeProperty(
+    dpy,
+    parent,
+    prop,
+    xa[XA_UTF8_STRING],
+    8,
+    PropModeReplace,
+    reinterpret_cast<const unsigned char*>(s),
+    std::strlen(s)
+  );
 
-  free (s);
-  free (ws);
+  std::free(s);
+  std::free(ws);
 }
 
 /*----------------------------------------------------------------------*/
@@ -1023,7 +1034,7 @@ rxvt_term::get_colorfgbg ()
         break;
       }
 
-  env_colorfgbg = (char *)rxvt_malloc (sizeof ("COLORFGBG=default;default;bg"));
+  env_colorfgbg = rxvt_malloc<char>(sizeof("COLORFGBG=default;default;bg"));
   sprintf (env_colorfgbg, "COLORFGBG=%s;%s%s", fstr, xpmb, bstr);
   return env_colorfgbg;
 }
@@ -1239,10 +1250,10 @@ rxvt_term::im_is_running ()
   /* get current locale modifier */
   if (char *p = XSetLocaleModifiers (0))
     {
-      strcpy (server, "@server=");
-      strncat (server, p + 4, IMBUFSIZ - 9); /* skip "@im=" */
+      std::strcpy(server, "@server=");
+      std::strncat(server, p + 4, IMBUFSIZ - 9); /* skip "@im=" */
 
-      if (p = strchr (server + 1, '@'))      /* first one only */
+      if (p = std::strchr(server + 1, '@'))      /* first one only */
         *p = '\0';
 
       atom = XInternAtom (dpy, server, False);
@@ -1614,8 +1625,8 @@ rxvt_term::im_cb ()
         {
           if (*s[i])
             {
-              strcpy (buf, "@im=");
-              strncat (buf, s[i], IMBUFSIZ - 5);
+              std::strcpy(buf, "@im=");
+              std::strncat(buf, s[i], IMBUFSIZ - 5);
               if (im_get_ic (buf))
                 {
                   found = true;

@@ -21,8 +21,7 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *---------------------------------------------------------------------*/
 
-#include <string.h>
-#include <math.h>
+#include <cmath>
 #include "../config.h"
 #include "rxvt.h"
 
@@ -42,7 +41,7 @@ namespace
 
     mat3x3 (const nv *matrix)
     {
-      memcpy (v, matrix, sizeof (v));
+        std::memcpy(v, matrix, sizeof (v));
     }
 
     mat3x3 (nv v11, nv v12, nv v13, nv v21, nv v22, nv v23, nv v31, nv v32, nv v33)
@@ -392,7 +391,7 @@ rxvt_img::new_from_pixbuf (rxvt_screen *s, GdkPixbuf *pb)
   XPutImage (dpy, img->pm, gc, &xi, 0, 0, 0, 0, width, height);
   XFreeGC (dpy, gc);
 
-  free (xi.data);
+  std::free(xi.data);
 
   return img;
 }
@@ -541,7 +540,7 @@ rxvt_img::blur (int rh, int rv)
 
   Display *dpy = d->dpy;
   int size = max (rh, rv) * 2 + 1;
-  nv *kernel = (nv *)malloc (size * sizeof (nv));
+  nv *kernel = static_cast<nv*>(std::malloc(size * sizeof(nv)));
   XFixed *params = rxvt_temp_buf<XFixed> (size + 2);
   rxvt_img *img = new_empty ();
 
@@ -586,7 +585,7 @@ rxvt_img::blur (int rh, int rv)
                         w, h);
     }
 
-  free (kernel);
+  std::free(kernel);
 
   XRenderFreePicture (dpy, src);
   XRenderFreePicture (dpy, dst);

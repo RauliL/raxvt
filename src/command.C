@@ -208,7 +208,7 @@ rxvt_term::iso14755_51 (unicode_t ch, rend_t r, int x, int y, int y2)
       max_it (width, wcswidth (fname[i], wcslen (fname[i])));
     }
 
-  max_it (width, strlen (attr));
+  max_it(width, std::strlen(attr));
 
   if (y >= 0)
     {
@@ -395,12 +395,14 @@ map_function_key (KeySym keysym)
   return param;
 }
 
-static inline wchar_t *
-rxvt_wcsdup (const wchar_t *str, int len)
+static inline wchar_t*
+rxvt_wcsdup(const wchar_t* str, std::size_t len)
 {
   wchar_t *r = rxvt_malloc<wchar_t>((len + 1) * sizeof(wchar_t));
-  memcpy (r, str, len * sizeof (wchar_t));
+
+  std::memcpy(r, str, len * sizeof(wchar_t));
   r[len] = 0;
+
   return r;
 }
 
@@ -516,17 +518,17 @@ rxvt_term::key_press (XKeyEvent &ev)
                     kbuf[1] = '\0';
                   }
                 else
-                  strcpy (kbuf, rs[Rs_backspace_key]);
+                  std::strcpy(kbuf, rs[Rs_backspace_key]);
                 break;
 #endif
 #ifndef NO_DELETE_KEY
               case XK_Delete:
-                strcpy (kbuf, rs[Rs_delete_key]);
+                std::strcpy(kbuf, rs[Rs_delete_key]);
                 break;
 #endif
               case XK_Tab:
                 if (shft)
-                  strcpy (kbuf, "\033[Z");
+                  std::strcpy(kbuf, "\033[Z");
                 else
                   {
 #ifdef CTRL_TAB_MAKES_META
@@ -545,7 +547,7 @@ rxvt_term::key_press (XKeyEvent &ev)
               case XK_Down:	/* "\033[B" */
               case XK_Right:	/* "\033[C" */
               case XK_Left:	/* "\033[D" */
-                strcpy (kbuf, "\033[Z");
+                std::strcpy(kbuf, "\033[Z");
                 kbuf[2] = "DACB"[keysym - XK_Left];
                 /* do Shift first */
                 if (shft)
@@ -563,7 +565,7 @@ rxvt_term::key_press (XKeyEvent &ev)
                 /* allow shift to override */
                 if (kp)
                   {
-                    strcpy (kbuf, "\033OM");
+                      std::strcpy(kbuf, "\033OM");
                     break;
                   }
 
@@ -587,7 +589,7 @@ rxvt_term::key_press (XKeyEvent &ev)
               case XK_KP_F2:	/* "\033OQ" */
               case XK_KP_F3:	/* "\033OR" */
               case XK_KP_F4:	/* "\033OS" */
-                strcpy (kbuf, "\033OP");
+                std::strcpy(kbuf, "\033OP");
                 kbuf[2] += (keysym - XK_KP_F1);
                 break;
 
@@ -610,7 +612,7 @@ rxvt_term::key_press (XKeyEvent &ev)
                 /* allow shift to override */
                 if (kp)
                   {
-                    strcpy (kbuf, "\033Oj");
+                      std::strcpy(kbuf, "\033Oj");
                     kbuf[2] += (keysym - XK_KP_Multiply);
                   }
                 else
@@ -632,7 +634,9 @@ rxvt_term::key_press (XKeyEvent &ev)
             }
 
           if (newlen)
-            len = strlen (kbuf);
+          {
+            len = std::strlen(kbuf);
+          }
 
           if (len > 0)
             {
@@ -665,7 +669,7 @@ rxvt_term::key_press (XKeyEvent &ev)
         }
       else if (keysym == XK_ISO_Left_Tab)
         {
-          strcpy (kbuf, "\033[Z");
+            std::strcpy(kbuf, "\033[Z");
           len = 3;
         }
       else
@@ -1160,7 +1164,7 @@ rxvt_term::cmdbuf_reify ()
 
   ssize_t used = cmdbuf_endp - cmdbuf_ptr;
 
-  memmove (cmdbuf_base, cmdbuf_ptr, used);
+  std::memmove(cmdbuf_base, cmdbuf_ptr, used);
   cmdbuf_ptr  = cmdbuf_base;
   cmdbuf_endp = cmdbuf_ptr + used;
 
@@ -1177,7 +1181,7 @@ rxvt_term::cmdbuf_append (const char *str, size_t count)
   if (count > avail)
     return;
 
-  memcpy (cmdbuf_endp, str, count);
+  std::memcpy(cmdbuf_endp, str, count);
   cmdbuf_endp += count;
 
   cmd_parse ();
@@ -2518,9 +2522,11 @@ rxvt_term::process_nonprinting (unicode_t ch)
         break;
       case C0_ENQ:	/* terminal Status */
         if (rs[Rs_answerbackstring])
-          tt_write (rs [Rs_answerbackstring], strlen (rs [Rs_answerbackstring]));
-        else
-          tt_write (VT100_ANS, strlen (VT100_ANS));
+        {
+          tt_write(rs[Rs_answerbackstring], std::strlen(rs[Rs_answerbackstring]));
+        } else {
+          tt_write(VT100_ANS, std::strlen(VT100_ANS));
+        }
         break;
       case C0_BEL:	/* bell */
         scr_bell ();
@@ -3462,7 +3468,7 @@ rxvt_term::process_xterm_seq (int op, char *str, char resp)
           }
         else
           {
-            char *eq = strchr (str, '=');
+            char* eq = std::strchr(str, '=');
 
             if (eq)
               {
@@ -3478,7 +3484,7 @@ rxvt_term::process_xterm_seq (int op, char *str, char resp)
       case XTerm_Color:
         for (buf = (char *)str; buf && *buf;)
           {
-            if ((name = strchr (buf, ';')) == NULL)
+            if (!(name = std::strchr(buf, ';')))
               break;
 
             *name++ = '\0';
@@ -3487,7 +3493,7 @@ rxvt_term::process_xterm_seq (int op, char *str, char resp)
             if (!IN_RANGE_INC (color, minCOLOR, maxTermCOLOR))
               break;
 
-            if ((buf = strchr (name, ';')) != NULL)
+            if ((buf = std::strchr(name, ';')))
               *buf++ = '\0';
 
             process_color_seq (op, color, name, resp);
@@ -4062,15 +4068,15 @@ rxvt_term::set_cursor_style (int style)
  * Only use for small amounts of data.
  */
 void
-rxvt_term::tt_printf (const char *fmt,...)
+rxvt_term::tt_printf(const char *fmt,...)
 {
   va_list arg_ptr;
   char buf[256];
 
   va_start (arg_ptr, fmt);
-  vsnprintf ((char *)buf, 256, fmt, arg_ptr);
+  std::vsnprintf(buf, 256, fmt, arg_ptr);
   va_end (arg_ptr);
-  tt_write (buf, strlen (buf));
+  tt_write(buf, std::strlen(buf));
 }
 
 /* Write data to the pty as typed by the user. */
@@ -4122,7 +4128,7 @@ rxvt_term::tt_write_ (const char *data, unsigned int len)
 
   v_buffer = (char *)rxvt_realloc (v_buffer, v_buflen + len);
 
-  memcpy (v_buffer + v_buflen, data, len);
+  std::memcpy(v_buffer + v_buflen, data, len);
   v_buflen += len;
 
   pty_ev.set (ev::READ | ev::WRITE);
@@ -4145,7 +4151,7 @@ void rxvt_term::pty_write ()
           return;
         }
 
-      memmove (v_buffer, v_buffer + written, v_buflen);
+      std::memmove(v_buffer, v_buffer + written, v_buflen);
     }
   else if (written != -1 || (errno != EAGAIN && errno != EINTR))
     pty_ev.set (ev::READ);

@@ -24,10 +24,6 @@
 #include "rxvtutil.h"
 #include "rxvtfont.h"
 
-#include <stdlib.h>
-
-#include <inttypes.h>
-
 #if XFT
 # include <fontconfig/fontconfig.h>
 #endif
@@ -686,11 +682,12 @@ replace_field (char **ptr, const char *name, int index, const char old, const ch
 
   if (slashes >= 13 && (!old || *field == old))
     {
-      size_t len = field - name;
-      *ptr = (char *)malloc (len + strlen (replace) + strlen (end) + 1);
-      memcpy (*ptr, name, len);
-      strcpy (*ptr + len, replace);
-      strcat (*ptr, end);
+      const size_t len = field - name;
+
+      *ptr = static_cast<char*>(std::malloc(len + std::strlen(replace) + std::strlen(end) + 1));
+      std::memcpy(*ptr, name, len);
+      std::strcpy(*ptr + len, replace);
+      std::strcat(*ptr, end);
 
       return true;
     }
@@ -1591,7 +1588,7 @@ rxvt_fontset::add_fonts (const char *desc)
               char spec[256];
               const char *extra = ++desc; // not yet used
 
-              desc = strchr (desc, ']');
+              desc = std::strchr(desc, ']');
 
               if (!desc)
                 {
@@ -1599,10 +1596,10 @@ rxvt_fontset::add_fonts (const char *desc)
                   break;
                 }
 
-              memcpy (spec, extra, min (desc - extra, 255));
+              std::memcpy(spec, extra, min (desc - extra, 255));
               spec[min (desc - extra, 255)] = 0;
 
-              if (!strncmp (extra, "codeset=", sizeof ("codeset=") - 1))
+              if (!std::strncmp(extra, "codeset=", sizeof ("codeset=") - 1))
                 cs = codeset_from_name (spec + sizeof ("codeset=") - 1);
               else
                 rxvt_warn ("unknown parameter '%s' in font specification, skipping.\n", spec);
@@ -1611,13 +1608,15 @@ rxvt_fontset::add_fonts (const char *desc)
               while (*desc <= ' ' && *desc) desc++;
             }
 
-          end = strchr (desc, ',');
+          end = std::strchr(desc, ',');
           if (!end)
-            end = desc + strlen (desc);
+          {
+            end = desc + std::strlen(desc);
+          }
 
           if (end - desc < 511)
             {
-              memcpy (buf, desc, end - desc);
+              std::memcpy(buf, desc, end - desc);
               buf[end - desc] = 0;
 
               push_font (new_font (buf, cs));
@@ -1790,7 +1789,7 @@ found:
       if (!fmap[hi])
         {
           fmap[hi] = new pagemap;
-          memset (fmap[hi], 0xff, sizeof (pagemap));
+          std::memset(fmap[hi], 0xff, sizeof(pagemap));
         }
 
       (*fmap[hi])[unicode & 0xff] = i;

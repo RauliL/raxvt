@@ -1,18 +1,18 @@
 #ifndef RXVT_H_                /* include once only */
 #define RXVT_H_
 
-#include <stdio.h>
-#include <ctype.h>
-#include <errno.h>
-#include <stdarg.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cctype>
+#include <cerrno>
+#include <cstdarg>
+#include <cstdlib>
 #ifdef HAVE_STDINT_H
 #include <stdint.h>
 #endif
 #include <sys/types.h>
 #include <unistd.h>
-#include <string.h>
-#include <assert.h>
+#include <cstring>
+#include <cassert>
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
@@ -91,15 +91,6 @@ typedef  int32_t tlen_t_; // specifically for use in the line_t structure
 #include "libptytty.h"
 
 #include "rxvtperl.h"
-
-// try to avoid some macros to decrease code size, on some systems
-#if ENABLE_MINIMAL
-# define strcmp(a,b)   (strcmp)(a,b)
-# define strlen(a)     (strlen)(a)
-# define strcpy(a,b)   (strcpy)(a,b)
-# define memset(a,c,l) (memset)(a,c,l)
-# define memcpy(a,b,l) (memcpy)(a,b,l)
-#endif
 
 /*
  *****************************************************************************
@@ -771,8 +762,8 @@ struct mbstate
 {
   mbstate_t mbs;
 
-  operator mbstate_t *() { return &mbs; }
-  void reset () { memset (&mbs, 0, sizeof (mbs)); }
+  operator mbstate_t*() { return &mbs; }
+  void reset () { std::memset(&mbs, 0, sizeof(mbs)); }
   mbstate () { reset (); }
 };
 

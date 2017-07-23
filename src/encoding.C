@@ -25,8 +25,8 @@
 #include "encoding.h"
 #include "rxvtutil.h"
 
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
 
 static const struct n2cs {
   const char *name;
@@ -120,24 +120,29 @@ normalize_name (const char *name)
 }
 
 codeset
-codeset_from_name (const char *name)
+codeset_from_name(const char *name)
 {
+  const struct n2cs* i = n2cs;
+
   if (!name)
+  {
     return CS_UNKNOWN;
+  }
 
-  name = normalize_name (name);
+  name = normalize_name(name);
 
-  const struct n2cs *i = n2cs;
-
-  do {
-    int len = strlen (i->name);
+  do
+  {
+    const std::size_t len = std::strlen(i->name);
 
     if ((i->name[len - 1] == '*'
-         && !strncmp (name, i->name, len - 1))
-        || !strcmp (name, i->name))
-        return i->cs;
-
-  } while ((++i)->name);
+         && !std::strncmp(name, i->name, len - 1))
+        || !std::strcmp(name, i->name))
+    {
+      return i->cs;
+    }
+  }
+  while ((++i)->name);
 
   return CS_UNKNOWN;
 }

@@ -102,7 +102,7 @@ chunk_alloc (size_t size, int populate)
 
     return ptr;
   #else
-    return malloc (size);
+    return std::malloc(size);
   #endif
 }
 
@@ -125,7 +125,7 @@ chunk_realloc (void *ptr, size_t old_size, size_t new_size)
 
       /* TODO: prepopulate old_size pages instead of faulting them in */
 
-      memcpy (ptr2, ptr, old_size);
+      std::memcpy(ptr2, ptr, old_size);
       munmap (ptr, old_size);
       return ptr2;
     #endif

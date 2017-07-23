@@ -173,19 +173,19 @@ keyboard_manager::dispatch (rxvt_term *term, KeySym keysym, unsigned int state, 
           // TODO: do (some) translations, unescaping etc, here (allow \u escape etc.)
           free (ws);
 
-          if (char *colon = strchr (str, ':'))
+          if (char* colon = std::strchr(str, ':'))
             {
-              if (strncmp (str, "command:", 8) == 0)
-                term->cmdbuf_append (str + 8, strlen (str) - 8);
-              else if (strncmp (str, "string:", 7) == 0)
-                term->tt_write_user_input (colon + 1, strlen (colon + 1));
-              else if (strncmp (str, "perl:", 5) == 0)
+              if (std::strncmp(str, "command:", 8) == 0)
+                term->cmdbuf_append (str + 8, std::strlen(str) - 8);
+              else if (std::strncmp(str, "string:", 7) == 0)
+                term->tt_write_user_input (colon + 1, std::strlen(colon + 1));
+              else if (std::strncmp(str, "perl:", 5) == 0)
                 HOOK_INVOKE ((term, HOOK_USER_COMMAND, DT_STR, colon + 1, DT_END));
               else
                 HOOK_INVOKE ((term, HOOK_ACTION, DT_STR_LEN, str, colon - str, DT_STR, colon + 1, DT_INT, 0, DT_STR_LEN, kbuf, len, DT_END));
             }
           else
-            term->tt_write_user_input (str, strlen (str));
+            term->tt_write_user_input (str, std::strlen(str));
 
           free (str);
 
@@ -202,7 +202,7 @@ keyboard_manager::register_done ()
   unsigned int i, index, hashkey;
   uint16_t hash_bucket_size[KEYSYM_HASH_BUCKETS];	// size of each bucket
 
-  memset (hash_bucket_size, 0, sizeof (hash_bucket_size));
+  std::memset(hash_bucket_size, 0, sizeof(hash_bucket_size));
 
   // determine hash bucket size
   for (i = 0; i < keymap.size (); ++i)
@@ -222,7 +222,7 @@ keyboard_manager::register_done ()
   // and allocate just enough space
   simplevec <keysym_t *> sorted_keymap (index, 0);
 
-  memset (hash_bucket_size, 0, sizeof (hash_bucket_size));
+  std::memset(hash_bucket_size, 0, sizeof(hash_bucket_size));
 
   // fill in sorted_keymap
   // it is sorted in each bucket

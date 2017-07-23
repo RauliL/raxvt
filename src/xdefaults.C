@@ -402,31 +402,37 @@ rxvt_term::rxvt_usage (int type)
         rxvt_log (" [-help] [--help]\n");
 
         for (col = 1, i = 0; i < ecb_array_length (optList); i++)
-          if (optList[i].desc != NULL)
+        {
+          if (optList[i].desc)
+          {
+            std::size_t len = 0;
+
+            if (optList[i].arg)
             {
-              int len = 0;
-
-              if (optList[i].arg)
-                len = strlen (optList[i].arg) + 1;
-
-              assert (optList[i].opt != NULL);
-              len += 4 + strlen (optList[i].opt) + (optList_isBool (i) ? 2 : 0);
-              col += len;
-
-              if (col > 79)
-                {
-                  /* assume regular width */
-                  rxvt_log ("\n");
-                  col = 1 + len;
-                }
-
-              rxvt_log (" [-%s%s", (optList_isBool (i) ? "/+" : ""), optList[i].opt);
-
-              if (optList[i].arg)
-                rxvt_log (" %s]", optList[i].arg);
-              else
-                rxvt_log ("]");
+              len = std::strlen(optList[i].arg) + 1;
             }
+
+            assert(optList[i].opt);
+            len += 4 + std::strlen(optList[i].opt) + (optList_isBool(i) ? 2 : 0);
+            col += len;
+
+            if (col > 79)
+            {
+              /* assume regular width */
+              rxvt_log("\n");
+              col = 1 + len;
+            }
+
+            rxvt_log(" [-%s%s", (optList_isBool(i) ? "/+" : ""), optList[i].opt);
+
+            if (optList[i].arg)
+            {
+              rxvt_log(" %s]", optList[i].arg);
+            } else {
+              rxvt_log("]");
+            }
+          }
+        }
         break;
 
       case 1:			/* full command-line listing */
@@ -438,7 +444,7 @@ rxvt_term::rxvt_usage (int type)
               assert (optList[i].opt != NULL);
               rxvt_log ("  %s%s %-*s%s%s\n",
                          (optList_isBool (i) ? "-/+" : "-"), optList[i].opt,
-                         (INDENT - strlen (optList[i].opt)
+                         (INDENT - std::strlen(optList[i].opt)
                           + (optList_isBool (i) ? 0 : 2)),
                          (optList[i].arg ? optList[i].arg : ""),
                          (optList_isBool (i) ? "turn on/off " : ""),
@@ -461,7 +467,7 @@ rxvt_term::rxvt_usage (int type)
           if (optList[i].kw != NULL)
             rxvt_log ("  %s: %*s%s\n",
                     optList[i].kw,
-                    (INDENT + 2 - strlen (optList[i].kw)), "", /* XXX */
+                    (INDENT + 2 - std::strlen(optList[i].kw)), "", /* XXX */
                     (optList_isBool (i) ? "boolean" : optList[i].arg));
 
 #if ENABLE_PERL
@@ -570,7 +576,8 @@ rxvt_term::get_options (int argc, const char *const *argv)
         {
           if (i + 1 < argc)
             {
-              char *res = rxvt_temp_buf<char> (strlen (opt) + strlen (argv[++i]) + 6);
+              char* res = rxvt_temp_buf<char>(std::strlen (opt) + std::strlen(argv[++i]) + 6);
+
               sprintf (res, "*.%s: %s\n", opt, argv[i]);
               XrmPutLineResource (&option_db, res);
             }

@@ -29,8 +29,8 @@
 
 #include "../config.h"
 
-#include <stddef.h>
-#include <stdarg.h>
+#include <cstddef>
+#include <cstdarg>
 
 #include "unistd.h"
 
@@ -1587,7 +1587,7 @@ rxvt_term::key_press (unsigned int state, unsigned int keycode, Time time = Curr
 {
         XKeyEvent xkey;
 
-        memset (&xkey, 0, sizeof (xkey));
+        std::memset(&xkey, 0, sizeof(xkey));
 
         xkey.time      = time;
         xkey.state     = state;
@@ -2514,7 +2514,7 @@ rxvt_img::filter (octet_string name, SV *params = &PL_sv_undef)
               croak ("rxvt_img::filter: params must be an array reference with parameter values");
 
             nparams = av_len ((AV *)SvRV (params)) + 1;
-            vparams = (rxvt_img::nv *)malloc (nparams * sizeof (rxvt_img::nv));
+            vparams = static_cast<rxvt_img::nv*>(std::malloc(nparams * sizeof(rxvt_img::nv)));
 
             for (int i = 0; i < nparams; ++i)
               vparams [i] = SvNV (*av_fetch ((AV *)SvRV (params), i, 1));

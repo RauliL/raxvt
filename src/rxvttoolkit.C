@@ -454,10 +454,10 @@ bool rxvt_display::ref_init ()
 #ifdef LOCAL_X_IS_UNIX
   if (id[0] == ':')
     {
-      char *val = rxvt_temp_buf<char> (5 + strlen (id) + 1);
+      char* val = rxvt_temp_buf<char>(5 + std::strlen(id) + 1);
 
-      strcpy (val, "unix/");
-      strcat (val, id);
+      std::strcpy(val, "unix/");
+      std::strcat(val, id);
 
       dpy = XOpenDisplay (val);
     }
@@ -679,23 +679,25 @@ void rxvt_display::unreg (im_watcher *w)
   imw.erase (find (imw.begin (), imw.end (), w));
 }
 
-rxvt_xim *rxvt_display::get_xim (const char *locale, const char *modifiers)
+rxvt_xim*
+rxvt_display::get_xim(const char* locale, const char* modifiers)
 {
-  char *id;
-  int l, m;
-
-  l = strlen (locale);
-  m = strlen (modifiers);
+  char* id;
+  const std::size_t l = std::strlen(locale);
+  const std::size_t m = std::strlen(modifiers);
 
   if (!(id = rxvt_temp_buf<char> (l + m + 2)))
-    return 0;
+  {
+    return nullptr;
+  }
 
-  memcpy (id, locale, l); id[l] = '\n';
-  memcpy (id + l + 1, modifiers, m); id[l + m + 1] = 0;
+  std::memcpy(id, locale, l);
+  id[l] = '\n';
 
-  rxvt_xim *xim = xims.get (id);
+  std::memcpy(id + l + 1, modifiers, m);
+  id[l + m + 1] = 0;
 
-  return xim;
+  return xims.get(id);
 }
 
 void rxvt_display::put_xim (rxvt_xim *xim)
@@ -839,7 +841,7 @@ rxvt_color::set (rxvt_screen *screen, const char *name)
     }
 
   // parse the non-standard "rgba:rrrr/gggg/bbbb/aaaa" format
-  if (strlen (name) != 4+5*4 || 4 != sscanf (name, "rgba:%4hx/%4hx/%4hx/%4hx%c", &c.r, &c.g, &c.b, &c.a, &eos))
+  if (std::strlen(name) != 4+5*4 || 4 != std::sscanf(name, "rgba:%4hx/%4hx/%4hx/%4hx%c", &c.r, &c.g, &c.b, &c.a, &eos))
     {
       XColor xc;
 
@@ -1029,8 +1031,8 @@ rxvt_selection::run ()
     {
       /* internal selection */
       char *str = rxvt_wcstombs (display->selection_owner->selection.text, display->selection_owner->selection.len);
-      finish (str, strlen (str));
-      free (str);
+      finish(str, std::strlen(str));
+      std::free(str);
       return;
     }
 #endif
@@ -1200,7 +1202,7 @@ rxvt_selection::handle_selection (Window win, Atom prop, bool delete_prop)
           incr_buf = (char *)rxvt_realloc (incr_buf, incr_buf_size);
         }
 
-      memcpy (incr_buf + incr_buf_fill, ct.value, ct.nitems);
+      std::memcpy(incr_buf + incr_buf_fill, ct.value, ct.nitems);
       incr_buf_fill += ct.nitems;
 
       goto bailout;
@@ -1218,14 +1220,14 @@ rxvt_selection::handle_selection (Window win, Atom prop, bool delete_prop)
     {
       wchar_t *w = rxvt_utf8towcs ((const char *)ct.value, ct.nitems);
       data = rxvt_wcstombs (w);
-      free (w);
+      std::free(w);
     }
   else
 #endif
   if (XmbTextPropertyToTextList (dpy, &ct, &cl, &cr) >= 0
       && cl)
     {
-      data = strdup (cl[0]);
+      data = strdup(cl[0]);
       XFreeStringList (cl);
     }
   else
@@ -1234,7 +1236,7 @@ rxvt_selection::handle_selection (Window win, Atom prop, bool delete_prop)
       data = strdup ((const char *)ct.value);
     }
 
-  data_len = strlen (data);
+  data_len = std::strlen(data);
 
 bailout:
   XFree (ct.value);
@@ -1242,7 +1244,7 @@ bailout:
   if (selection_wait == Sel_normal)
     {
       finish (data, data_len);
-      free (data);
+      std::free(data);
     }
 }
 

@@ -20,13 +20,13 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *----------------------------------------------------------------------*/
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
+#include <cstdlib>
+#include <cstring>
+#include <cstdio>
 
-#include <inttypes.h>
+#include <cinttypes>
 #include <unistd.h>
-#include <errno.h>
+#include <cerrno>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/utsname.h>
@@ -75,7 +75,7 @@ void rxvt_connection::send (const char *data, int len)
 
 void rxvt_connection::send (const char *data)
 {
-  send (data, strlen (data));
+  send(data, std::strlen(data));
 }
 
 bool rxvt_connection::recv (auto_str &data, int *len)

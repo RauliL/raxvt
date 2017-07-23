@@ -202,12 +202,12 @@ rxvt_term::scr_alloc () NOTHROW
 }
 
 void
-rxvt_term::copy_line (line_t &dst, line_t &src)
+rxvt_term::copy_line(line_t& dst, line_t& src)
 {
-  scr_blank_screen_mem (dst, DEFAULT_RSTYLE);
-  dst.l = min (src.l, ncol);
-  memcpy (dst.t, src.t, sizeof (text_t) * dst.l);
-  memcpy (dst.r, src.r, sizeof (rend_t) * dst.l);
+  scr_blank_screen_mem(dst, DEFAULT_RSTYLE);
+  dst.l = min(src.l, ncol);
+  std::memcpy(dst.t, src.t, sizeof(text_t) * dst.l);
+  std::memcpy(dst.r, src.r, sizeof(rend_t) * dst.l);
   dst.f = src.f;
 }
 
@@ -260,7 +260,7 @@ rxvt_term::scr_reset ()
       top_row    = 0;
       term_start = 0;
 
-      memset (charsets, 'B', sizeof (charsets));
+      std::memset(charsets, 'B', sizeof(charsets));
       rstyle = DEFAULT_RSTYLE;
       screen.flags = Screen_DefaultFlags;
       screen.cur.row = screen.cur.col = 0;
@@ -296,8 +296,8 @@ rxvt_term::scr_reset ()
       for (int row = min (nrow, prev_nrow); row--; )
         {
           scr_blank_screen_mem (drawn_buf [row], DEFAULT_RSTYLE);
-          memcpy (drawn_buf [row].t, prev_drawn_buf [row].t, sizeof (text_t) * common_col);
-          memcpy (drawn_buf [row].r, prev_drawn_buf [row].r, sizeof (rend_t) * common_col);
+          std::memcpy(drawn_buf [row].t, prev_drawn_buf [row].t, sizeof(text_t) * common_col);
+          std::memcpy(drawn_buf [row].r, prev_drawn_buf [row].r, sizeof(rend_t) * common_col);
 
           copy_line (swap_buf [row], prev_swap_buf [row]);
         }
@@ -374,8 +374,8 @@ rxvt_term::scr_reset ()
 
                       int len = min (min (prev_ncol - pcol, ncol - qcol), llen - lofs);
 
-                      memcpy (qline->t + qcol, pline.t + pcol, len * sizeof (text_t));
-                      memcpy (qline->r + qcol, pline.r + pcol, len * sizeof (rend_t));
+                      std::memcpy(qline->t + qcol, pline.t + pcol, len * sizeof(text_t));
+                      std::memcpy(qline->r + qcol, pline.r + pcol, len * sizeof(rend_t));
 
                       lofs += len;
                       qcol += len;
@@ -1689,12 +1689,16 @@ rxvt_term::scr_insert_mode (int mode) NOTHROW
  * XTERM_SEQ: Clear all tabs             : ESC [ 3 g
  */
 void ecb_cold
-rxvt_term::scr_set_tab (int mode) NOTHROW
+rxvt_term::scr_set_tab(int mode) NOTHROW
 {
   if (mode < 0)
-    memset (tabs, 0, ncol);
+  {
+    std::memset(tabs, 0, ncol);
+  }
   else if (screen.cur.col < ncol)
+  {
     tabs [screen.cur.col] = !!mode;
+  }
 }
 
 /* ------------------------------------------------------------------------- */
@@ -3015,7 +3019,7 @@ rxvt_term::selection_start_colrow (int col, int row) NOTHROW
 
 /* what do we want: spaces/tabs are delimiters or cutchars or non-cutchars */
 #define DELIMIT_TEXT(x)		\
-    (unicode::is_space (x) ? 2 : (x) <= 0xff && !!strchr (rs[Rs_cutchars], (x)))
+    (unicode::is_space (x) ? 2 : (x) <= 0xff && !!std::strchr(rs[Rs_cutchars], (x)))
 #define DELIMIT_REND(x)        1
 
 void ecb_cold
@@ -3515,7 +3519,7 @@ rxvt_term::selection_send (const XSelectionRequestEvent &rq) NOTHROW
           ct.encoding = target;
           ct.format = 8;
           ct.value = (unsigned char *)rxvt_wcstoutf8 (cl, selectlen);
-          ct.nitems = strlen ((char *)ct.value);
+          ct.nitems = std::strlen(reinterpret_cast<char*>(ct.value));
         }
       else
 #endif

@@ -46,7 +46,7 @@ operator delete (void *p)
   throw ()
 #endif
 {
-  free (p);
+  std::free(p);
 }
 
 char *
@@ -76,15 +76,20 @@ rxvt_wcstombs (const wchar_t *str, int len)
   return (char *)rxvt_realloc (r, dst - r);
 }
 
-wchar_t *
-rxvt_mbstowcs (const char *str, int len)
+wchar_t*
+rxvt_mbstowcs(const char* str, int len)
 {
-  if (len < 0) len = strlen (str);
+  if (len < 0)
+  {
+    len = std::strlen(str);
+  }
 
-  wchar_t *r = rxvt_malloc<wchar_t>((len + 1) * sizeof (wchar_t));
+  wchar_t* r = rxvt_malloc<wchar_t>((len + 1) * sizeof(wchar_t));
 
-  if ((ssize_t)mbstowcs (r, str, len + 1) < 0)
+  if (((ssize_t) std::mbstowcs(r, str, len + 1)) < 0)
+  {
     *r = 0;
+  }
 
   return r;
 }
@@ -124,10 +129,13 @@ rxvt_wcstoutf8 (const wchar_t *str, int len)
   return (char *)rxvt_realloc (r, p - r);
 }
 
-wchar_t *
-rxvt_utf8towcs (const char *str, int len)
+wchar_t*
+rxvt_utf8towcs(const char* str, int len)
 {
-  if (len < 0) len = strlen (str);
+  if (len < 0)
+  {
+    len = std::strlen(str);
+  }
 
   wchar_t *r = rxvt_malloc<wchar_t>((len + 1) * sizeof (wchar_t)),
           *p = r;
@@ -211,7 +219,7 @@ rxvt_vlog (const char *fmt, va_list arg_ptr) NOTHROW
   if (GET_R && GET_R->log_hook)
     (*GET_R->log_hook) (msg);
   else
-    write (STDOUT_FILENO, msg, strlen (msg));
+    write (STDOUT_FILENO, msg, std::strlen(msg));
 }
 
 void
@@ -275,13 +283,13 @@ rxvt_strtrim (char *str) NOTHROW
   for (s = str; *s && isspace (*s); s++) ;
 
   /* goto end of string */
-  r = s + strlen (s) - 1;
+  r = s + std::strlen(s) - 1;
 
   /* dump return and other trailing whitespace */
   while (r > s && isspace (*r))
     r--;
 
-  memmove (str, s, r + 1 - s);
+  std::memmove(str, s, r + 1 - s);
   str[r + 1 - s] = 0;
 
   return str;
@@ -304,7 +312,7 @@ rxvt_strsplit (char delim, const char *str) NOTHROW
     if (*t == delim)
       n++;
 
-  ret = (char **)malloc ((n + 1) * sizeof (char *));
+  ret = static_cast<char**>(std::malloc((n + 1) * sizeof(char*)));
   ret[n] = NULL;
 
   for (l = 0, t = s; l < n; l++)

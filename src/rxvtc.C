@@ -21,10 +21,10 @@
  *----------------------------------------------------------------------*/
 
 #include "../config.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <signal.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <csignal>
 
 #include <unistd.h>
 #include <sys/socket.h>
@@ -42,32 +42,32 @@ struct client : rxvt_connection
   client ();
 };
 
-client::client ()
+client::client()
 {
   sockaddr_un sa;
-  char *sockname = rxvt_connection::unix_sockname ();
+  char* sockname = rxvt_connection::unix_sockname();
 
-  if (strlen (sockname) >= sizeof (sa.sun_path))
-    {
-      fputs ("socket name too long, aborting.\n", stderr);
-      exit (STATUS_FAILURE);
-    }
+  if (std::strlen(sockname) >= sizeof(sa.sun_path))
+  {
+    std::fputs("socket name too long, aborting.\n", stderr);
+    std::exit(STATUS_FAILURE);
+  }
 
-  if ((fd = socket (AF_UNIX, SOCK_STREAM, 0)) < 0)
-    {
-      perror ("unable to create communications socket");
-      exit (STATUS_FAILURE);
-    }
+  if ((fd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
+  {
+    std::perror("unable to create communications socket");
+    std::exit(STATUS_FAILURE);
+  }
 
   sa.sun_family = AF_UNIX;
-  strcpy (sa.sun_path, sockname);
-  free (sockname);
+  std::strcpy(sa.sun_path, sockname);
+  std::free(sockname);
 
-  if (connect (fd, (sockaddr *)&sa, sizeof (sa)))
-    {
-      perror ("unable to connect to the rxvt-unicode daemon");
-      exit (STATUS_CONNECTION_FAILED);
-    }
+  if (connect(fd, (sockaddr*) &sa, sizeof(sa)))
+  {
+    std::perror("unable to connect to the rxvt-unicode daemon");
+    std::exit(STATUS_CONNECTION_FAILED);
+  }
 }
 
 extern char **environ;

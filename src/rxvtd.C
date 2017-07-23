@@ -21,10 +21,6 @@
  *----------------------------------------------------------------------*/
 
 #include "../config.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <string.h>
 
 #include <unistd.h>
 #include <fcntl.h>
@@ -40,8 +36,6 @@
 #if ENABLE_MLOCK
 # include <sys/mman.h>
 #endif
-
-#include <errno.h>
 
 #include "rxvt.h"
 #include "rxvtdaemon.h"
@@ -84,11 +78,11 @@ unix_listener::unix_listener (const char *sockname)
 
   sockaddr_un sa;
 
-  if (strlen (sockname) >= sizeof(sa.sun_path))
-    {
-      fputs ("socket name too long, aborting.\n", stderr);
-      exit (EXIT_FAILURE);
-    }
+  if (std::strlen(sockname) >= sizeof(sa.sun_path))
+  {
+    std::fputs("socket name too long, aborting.\n", stderr);
+    std::exit(EXIT_FAILURE);
+  }
 
   if ((fd = socket (AF_UNIX, SOCK_STREAM, 0)) < 0)
     {
@@ -100,7 +94,7 @@ unix_listener::unix_listener (const char *sockname)
   fcntl (fd, F_SETFL, O_NONBLOCK);
 
   sa.sun_family = AF_UNIX;
-  strcpy (sa.sun_path, sockname);
+  std::strcpy(sa.sun_path, sockname);
 
   unlink (sockname);
 

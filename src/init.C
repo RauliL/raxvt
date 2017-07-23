@@ -32,8 +32,6 @@
 /*
  * Initialisation routines.
  */
-#include <cstring>
-
 #include "../config.h"          /* NECESSARY */
 #include "rxvt.h"               /* NECESSARY */
 #include "rxvtutil.h"
@@ -117,7 +115,7 @@ rxvt_network_display (const char *display)
     {
       struct ifreq ifr2;
 
-      strcpy (ifr2.ifr_name, ifr->ifr_name);
+      std::strcpy(ifr2.ifr_name, ifr->ifr_name);
 
       if (ioctl (skfd, SIOCGIFADDR, &ifr2) >= 0)
         {
@@ -132,17 +130,23 @@ rxvt_network_display (const char *display)
            */
           if (addr && addr != 0x7F000001)
             {
-              char *colon = strchr (display, ':');
+              char* colon = std::strchr(display, ':');
 
-              if (colon == NULL)
+              if (!colon)
+              {
                 colon = ":0.0";
+              }
 
               rval = rxvt_malloc<char>(std::strlen(colon) + 16);
-              sprintf (rval, "%d.%d.%d.%d%s",
-                      (int) ((addr >> 030) & 0xFF),
-                      (int) ((addr >> 020) & 0xFF),
-                      (int) ((addr >> 010) & 0xFF),
-                      (int) (addr & 0xFF), colon);
+              std::sprintf(
+                rval,
+                "%d.%d.%d.%d%s",
+                static_cast<int>((addr >> 030) & 0xFF),
+                static_cast<int>((addr >> 020) & 0xFF),
+                static_cast<int>((addr >> 010) & 0xFF),
+                static_cast<int>(addr & 0xFF),
+                colon
+              );
               break;
             }
         }
@@ -1233,7 +1237,7 @@ rxvt_term::get_ourmods ()
                 continue;
             }
 
-          if (rsmod && strncasecmp (rsmod, cm, strlen (cm)) == 0)
+          if (rsmod && !strncasecmp(rsmod, cm, std::strlen(cm)))
             requestedmeta = i;
         }
     }
@@ -1270,7 +1274,7 @@ rxvt_term::set_icon (const char *file)
       return;
     }
 
-  if (long *buffer = (long *)malloc ((2 + w * h) * sizeof (long)))
+  if (long *buffer = static_cast<long*>(std::malloc((2 + w * h) * sizeof(long))))
     {
       int rowstride = gdk_pixbuf_get_rowstride (pixbuf);
       unsigned char *row = gdk_pixbuf_get_pixels (pixbuf);
@@ -1684,7 +1688,7 @@ rxvt_term::run_child (const char *const *argv)
           login = rxvt_malloc<char>(std::strlen(argv0) + 2);
 
           login[0] = '-';
-          strcpy (&login[1], argv0);
+          std::strcpy(&login[1], argv0);
           argv0 = login;
         }
 
