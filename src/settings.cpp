@@ -28,17 +28,15 @@
 #include "rxvt.h"
 #include "version.h"
 
+#include <iostream>
+#include <fstream>
 #include <vector>
+
+#include <toml/toml.h>
 
 #ifdef KEYSYM_RESOURCE
 # include "keyboard.h"
 #endif
-
-/* place holders used for parsing command-line options */
-#define Optflag_Reverse              1
-#define Optflag_Boolean              2
-#define Optflag_Switch               4
-#define Optflag_Info                 8
 
 /* monolithic option/resource structure: */
 /*
@@ -49,10 +47,10 @@
 
 /* INFO () - descriptive information only */
 #define INFO(opt, arg, desc)					\
-    {0, TERM_OPTION_FLAG_INFO, -1, NULL, (opt), (arg), (desc)}
+    {0, TERM_SETTING_FLAG_INFO, -1, NULL, (opt), (arg), (desc)}
 
 #define RINFO(kw, arg)						\
-    {0, TERM_OPTION_FLAG_INFO, -1, (kw), NULL, (arg), NULL}
+    {0, TERM_SETTING_FLAG_INFO, -1, (kw), NULL, (arg), NULL}
 
 /* STRG () - command-line option, with/without resource */
 #define STRG(rsp, kw, opt, arg, desc)				\
@@ -64,21 +62,21 @@
 
 /* BOOL () - regular boolean `-/+' flag */
 #define BOOL(rsp, kw, opt, option, flag, desc)			\
-    { (option), (TERM_OPTION_FLAG_BOOLEAN | (flag)), (rsp), (kw), (opt), NULL, (desc)}
+    { (option), (TERM_SETTING_FLAG_BOOLEAN | (flag)), (rsp), (kw), (opt), NULL, (desc)}
 
 /* SWCH () - `-' flag */
 #define SWCH(opt, option, flag, desc)				\
-    { (option), (TERM_OPTION_FLAG_SWITCH | (flag)), -1, NULL, (opt), NULL, (desc)}
+    { (option), (TERM_SETTING_FLAG_SWITCH | (flag)), -1, NULL, (opt), NULL, (desc)}
 
-enum TermOptionFlag
+enum TermSettingFlag
 {
-  TERM_OPTION_FLAG_REVERSE = 1,
-  TERM_OPTION_FLAG_BOOLEAN = 2,
-  TERM_OPTION_FLAG_SWITCH  = 4,
-  TERM_OPTION_FLAG_INFO    = 8
+  TERM_SETTING_FLAG_REVERSE = 1,
+  TERM_SETTING_FLAG_BOOLEAN = 2,
+  TERM_SETTING_FLAG_SWITCH  = 4,
+  TERM_SETTING_FLAG_INFO    = 8
 };
 
-struct TermOption
+struct TermSetting
 {
   /** Option index. */
   const uint8_t index;
@@ -96,27 +94,27 @@ struct TermOption
   const char* desc;
 };
 
-static inline bool term_option_is_string(const TermOption& option)
+static inline bool term_setting_is_string(const TermSetting& setting)
 {
-  return option.flag == 0;
+  return setting.flag == 0;
 }
 
-static inline bool term_option_is_bool(const TermOption& option)
+static inline bool term_setting_is_bool(const TermSetting& setting)
 {
-  return (option.flag & TERM_OPTION_FLAG_BOOLEAN);
+  return (setting.flag & TERM_SETTING_FLAG_BOOLEAN);
 }
 
-static inline bool term_option_is_reverse(const TermOption& option)
+static inline bool term_setting_is_reverse(const TermSetting& setting)
 {
-  return (option.flag & TERM_OPTION_FLAG_REVERSE);
+  return (setting.flag & TERM_SETTING_FLAG_REVERSE);
 }
 
-static inline bool term_option_is_info(const TermOption& option)
+static inline bool term_setting_is_info(const TermSetting& setting)
 {
-  return (option.flag & TERM_OPTION_FLAG_INFO);
+  return (setting.flag & TERM_SETTING_FLAG_INFO);
 }
 
-const std::vector<TermOption> option_list = {
+const std::vector<TermSetting> term_setting_list = {
   STRG(Rs_display_name, NULL, "d", NULL, NULL),	/* short form */
   STRG(Rs_display_name, NULL, "display", "string", "X server to contact"),
   STRG(Rs_term_name, "termName", "tn", "string", "value of the TERM environment variable"),
@@ -140,7 +138,7 @@ const std::vector<TermOption> option_list = {
   RSTRG(Rs_scrollBar_align, "scrollBar_align", "mode"),
   STRG(Rs_scrollBar_thickness, "thickness", "sbt", "number", "scrollbar thickness/width in pixels"),
   BOOL(Rs_scrollTtyOutput, "scrollTtyOutput", NULL, Opt_scrollTtyOutput, 0, NULL),
-  BOOL(Rs_scrollTtyOutput, NULL, "si",  Opt_scrollTtyOutput, Optflag_Reverse, "scroll-on-tty-output inhibit"),
+  BOOL(Rs_scrollTtyOutput, NULL, "si",  Opt_scrollTtyOutput, TERM_SETTING_FLAG_REVERSE, "scroll-on-tty-output inhibit"),
   BOOL(Rs_scrollTtyKeypress, "scrollTtyKeypress", "sk", Opt_scrollTtyKeypress, 0, "scroll-on-keypress"),
   BOOL(Rs_scrollWithBuffer, "scrollWithBuffer", "sw", Opt_scrollWithBuffer, 0, "scroll-with-buffer"),
 #if OFF_FOCUS_FADING
@@ -430,56 +428,55 @@ rxvt_term::rxvt_usage (int type)
         rxvt_log (" [-help] [--help]\n");
 
         col = 1;
-        for (const auto& option : option_list)
+        for (const auto& setting : term_setting_list)
         {
-          if (option.desc)
+          std::size_t length = 0;
+
+          if (!setting.desc)
           {
-            std::size_t len = 0;
-
-            if (option.arg)
-            {
-              len = std::strlen(option.arg) + 1;
-            }
-
-            assert(optList[i].opt);
-            len += 4 + std::strlen(option.opt) + (term_option_is_bool(option) ? 2 : 0);
-            col += len;
-
-            if (col > 79)
-            {
-              /* assume regular width */
-              rxvt_log("\n");
-              col = 1 + len;
-            }
-
-            rxvt_log(" [-%s%s", (term_option_is_bool(option) ? "/+" : ""), option.opt);
-
-            if (option.arg)
-            {
-              rxvt_log(" %s]", option.arg);
-            } else {
-              rxvt_log("]");
-            }
+            continue;
           }
+
+          if (setting.arg)
+          {
+            length = std::strlen(setting.arg) + 1;
+          }
+
+          assert(setting.opt);
+          length += 4 + std::strlen(setting.opt) + (term_setting_is_bool(setting) ? 2 : 0);
+          col += length;
+
+          if (col > 79)
+          {
+            /* assume regular width */
+            rxvt_log("\n");
+            col = 1 + length;
+          }
+
+          rxvt_log(" [-%s%s", term_setting_is_bool(setting) ? "/+" : "", setting.opt);
+          rxvt_log("%s%s]", setting.arg ? " " : "", setting.arg ? setting.arg : "");
         }
         break;
 
       case 1:			/* full command-line listing */
         rxvt_log (" [options] [-e command args]\n\nwhere options include:\n");
 
-        for (const auto& option : option_list)
+        for (const auto& setting : term_setting_list)
         {
-          if (option.desc)
+          if (!setting.desc)
           {
-            assert (optList[i].opt != NULL);
-            rxvt_log ("  %s%s %-*s%s%s\n",
-                       (term_option_is_bool(option) ? "-/+" : "-"), option.opt,
-                       (INDENT - std::strlen(option.opt)
-                        + (term_option_is_bool(option) ? 0 : 2)),
-                       (option.arg ? option.arg : ""),
-                       (term_option_is_bool(option) ? "turn on/off " : ""),
-                       option.desc);
+            continue;
           }
+          assert(setting.opt);
+          rxvt_log(
+            "  %s%s %-*s%s%s\n",
+            term_setting_is_bool(setting) ? "-/+" : "-",
+            setting.opt,
+            INDENT - std::strlen(setting.opt) + (term_setting_is_bool(setting) ? 0 : 2),
+            setting.arg ? setting.arg : "",
+            term_setting_is_bool(setting) ? "turn on/off " : "",
+            setting.desc
+          );
         }
 
 #if ENABLE_PERL
@@ -494,14 +491,17 @@ rxvt_term::rxvt_usage (int type)
         rxvt_log (" [options] [-e command args]\n\n"
                    "where resources (long-options) include:\n");
 
-        for (const auto& option : option_list)
+        for (const auto& setting : term_setting_list)
         {
-          if (option.kw)
+          if (setting.kw)
           {
-            rxvt_log ("  %s: %*s%s\n",
-                    option.kw,
-                    (INDENT + 2 - std::strlen(option.kw)), "", /* XXX */
-                    (term_option_is_bool(option) ? "boolean" : option.arg));
+            rxvt_log(
+              "  %s: %*s%s\n",
+              setting.kw,
+              INDENT + 2 - std::strlen(setting.kw),
+              "", /* XXX */
+              term_setting_is_bool(setting) ? "boolean" : setting.arg
+            );
           }
         }
 
@@ -562,28 +562,28 @@ rxvt_term::get_options (int argc, const char *const *argv)
         rxvt_usage (0);
 
       /* feature: always try to match long-options */
-      for (entry = 0; i < option_list.size(); ++i)
+      for (entry = 0; i < term_setting_list.size(); ++i)
       {
-        const TermOption& option = option_list[i];
+        const TermSetting& setting = term_setting_list[i];
 
-        if ((option.kw && !std::strcmp(opt, option.kw))
+        if ((setting.kw && !std::strcmp(opt, setting.kw))
             || (!longopt
-                && option.opt && !std::strcmp(opt, option.opt)))
+                && setting.opt && !std::strcmp(opt, setting.opt)))
         {
           break;
         }
       }
 
-      if (entry < option_list.size() && !term_option_is_info(option_list[i]))
+      if (entry < term_setting_list.size() && !term_setting_is_info(term_setting_list[i]))
       {
-        const TermOption& option = option_list[i];
+        const TermSetting& setting = term_setting_list[i];
 
-        if (term_option_is_reverse(option))
+        if (term_setting_is_reverse(setting))
         {
           flag = !flag;
         }
 
-        if (term_option_is_string(option))
+        if (term_setting_is_string(setting))
         {
           /*
            * special cases are handled in init_resources () to allow
@@ -591,22 +591,22 @@ rxvt_term::get_options (int argc, const char *const *argv)
            * default values
            */
 
-          if (option.doff != -1)
+          if (setting.doff != -1)
           {
             if (flag && i + 1 == argc)
             {
               rxvt_fatal("option '%s' requires an argument, aborting.\n", argv[i]);
             }
 
-            rs[option.doff] = flag ? argv[++i] : resval_undef;
+            rs[setting.doff] = flag ? argv[++i] : resval_undef;
           }
         } else {
           /* boolean value */
-          set_option(option.index, flag);
+          set_option(setting.index, flag);
 
-          if (option.doff != -1)
+          if (setting.doff != -1)
           {
-            rs[option.doff] = flag ? resval_on : resval_off;
+            rs[setting.doff] = flag ? resval_on : resval_off;
           }
         }
       }
@@ -860,52 +860,56 @@ rxvt_term::x_resource (const char *name)
 }
 
 void
-rxvt_term::extract_resources ()
+rxvt_term::load_settings()
 {
-#ifndef NO_RESOURCES
-  XrmDatabase database = XrmGetDatabase (dpy);
-  XrmMergeDatabases (option_db, &database);
-  option_db = NULL;
-  /*
-   * Query resources for options that affect us
-   */
-  for (const auto& option : option_list)
-  {
-    int s;
-    const char* kw = option.kw;
+  const std::string config_dir = get_config_directory();
+  std::ifstream config_file_stream(config_dir + "/config.toml");
+  toml::ParseResult pr = toml::parse(config_file_stream);
 
-    if (!kw || rs[option.doff])
+  if (!pr.valid())
+  {
+    std::cerr << pr.errorReason << std::endl;
+    return;
+  }
+
+  for (const auto& setting : term_setting_list)
+  {
+    const toml::Value* value;
+    char* value_as_string;
+
+    if (!setting.kw || rs[setting.doff] || !(value = pr.value.find(setting.kw)))
     {
       continue; // Previously set.
     }
 
-    const char *p = x_resource(kw);
-
-    if (!p)
+    if (value->is<bool>())
     {
+      bool value_as_bool = value->as<bool>();
+
+      value_as_string = strdup(value_as_bool ? "true" : "false");
+      if (term_setting_is_bool(setting))
+      {
+        if (term_setting_is_reverse(setting))
+        {
+          value_as_bool = !value_as_bool;
+        }
+        set_option(setting.index, value_as_bool);
+      }
+    }
+    else if (value->is<int>())
+    {
+      value_as_string = strdup(std::to_string(value->as<int>()).c_str());
+    }
+    else if (value->is<std::string>())
+    {
+      value_as_string = strdup(value->as<std::string>().c_str());
+    } else {
       continue;
     }
 
-    p = strdup(p);
-    allocated.push_back(const_cast<void*>(static_cast<const void*>(p)));
-    rs[option.doff] = p;
-
-    if (term_option_is_bool(option))
-    {
-      s = !strcasecmp(p, "TRUE")
-        || !strcasecmp(p, "YES")
-        || !strcasecmp(p, "ON")
-        || !strcasecmp(p, "1");
-
-      if (term_option_is_reverse(option))
-      {
-        s = !s;
-      }
-
-      set_option(option.index, s);
-    }
+    rs[setting.doff] = value_as_string;
+    allocated.push_back(value_as_string);
   }
-#endif /* NO_RESOURCES */
 }
 
 void
