@@ -29,8 +29,6 @@
 #include "rxvt.h"               /* NECESSARY */
 #include "rxvtperl.h"           /* NECESSARY */
 
-#include <inttypes.h>
-
 static inline void
 fill_text (text_t *start, text_t value, int len)
 {

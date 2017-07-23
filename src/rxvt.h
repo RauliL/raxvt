@@ -6,9 +6,7 @@
 #include <cerrno>
 #include <cstdarg>
 #include <cstdlib>
-#ifdef HAVE_STDINT_H
-#include <stdint.h>
-#endif
+#include <cstdint>
 #include <sys/types.h>
 #include <unistd.h>
 #include <cstring>
