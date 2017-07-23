@@ -8,9 +8,9 @@
 #define EV_SIGNAL_ENABLE 1
 #define EV_CHILD_ENABLE 1
 #define EV_USE_STDEXCEPT 0
-#define EV_CONFIG_H <config.h>
+#define EV_CONFIG_H "./config.h"
 
-#include <config.h>
+#include "./config.h"
 
 #if ENABLE_FRILLS
 # define EV_FEATURES 1+2
