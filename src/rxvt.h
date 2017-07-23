@@ -1411,7 +1411,6 @@ struct rxvt_term : zero_initialized, rxvt_vars, rxvt_screen
   void scr_set_tab (int mode) NOTHROW;
   void scr_rvideo_mode (bool on) NOTHROW;
   void scr_report_position () NOTHROW;
-  void set_font_style () NOTHROW;
   void scr_charset_choose (int set) NOTHROW;
   void scr_charset_set (int set, unsigned int ch) NOTHROW;
   void scr_move_to (int y, int len) NOTHROW;

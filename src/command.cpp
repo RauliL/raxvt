@@ -436,14 +436,6 @@ rxvt_term::key_press (XKeyEvent &ev)
     {
       Status status_return;
 
-#if 0
-#ifdef X_HAVE_UTF8_STRING
-      if (enc_utf8 && 0) // currently disabled, doesn't seem to work, nor is useful
-        len = Xutf8LookupString (Input_Context, &ev, kbuf,
-                                 KBUFSZ, &keysym, &status_return);
-      else
-#endif
-#endif
         {
           wchar_t wkbuf[KBUFSZ + 1];
 
@@ -3545,18 +3537,6 @@ rxvt_term::process_xterm_seq (int op, char *str, char resp)
         // TODO, when secure mode?
         break;
 
-#if 0
-      case Rxvt_dumpscreen:	/* no error notices */
-        {
-          int fd;
-          if ((fd = open (str, O_RDWR | O_CREAT | O_EXCL, 0600)) >= 0)
-            {
-              scr_dump (fd);
-              close (fd);
-            }
-        }
-        break;
-#endif
       case XTerm_font:
         op = URxvt_font;
       case URxvt_font:
@@ -3985,7 +3965,7 @@ rxvt_term::process_sgr_mode (unsigned int nargs, const int *arg)
             {
               unsigned int fgbg = arg[i] == 38 ? Color_fg : Color_bg;
               unsigned int idx;
-            
+
               if (nargs > i + 2 && arg[i + 1] == 5)
                 {
                   idx = minCOLOR + arg[i + 2];

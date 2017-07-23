@@ -163,21 +163,11 @@ scrollBar_t::init_next ()
                        GCForeground | GCGraphicsExposures, &gcvalue);
 
   light = term->pix_colors_focused[Color_scroll];
-#if 0
-  //color used by rxvt
-  if (color.set (term, rgba (0xaeba, 0xaaaa, 0xaeba)))
-    light = color;
-#endif
   gcvalue.foreground = light;
   grayGC = XCreateGC (term->dpy, win,
                       GCForeground | GCGraphicsExposures, &gcvalue);
 
   dark = term->pix_colors_focused[Color_Grey25];
-#if 0
-  //color used by rxvt
-  if (color.set (term, rgba (0x51aa, 0x5555, 0x5144)))
-    dark = color;
-#endif
   gcvalue.foreground = dark;
   darkGC = XCreateGC (term->dpy, win,
                      GCForeground | GCGraphicsExposures, &gcvalue);

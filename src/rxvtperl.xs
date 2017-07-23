@@ -1007,20 +1007,6 @@ BOOT:
     const_iv (PictOpHSLColor),
     const_iv (PictOpHSLLuminosity),
 #endif
-#   if 0
-    const_iv (XIMForwardChar),
-    const_iv (XIMBackwardChar),
-    const_iv (XIMForwardWord),
-    const_iv (XIMBackwardWord),
-    const_iv (XIMCaretUp),
-    const_iv (XIMCaretDown),
-    const_iv (XIMNextLine),
-    const_iv (XIMPreviousLine),
-    const_iv (XIMLineStart),
-    const_iv (XIMLineEnd),
-    const_iv (XIMAbsolutePosition),
-    const_iv (XIMDontChange),
-#   endif
 #   endif
 
     /* DEC private modes */
@@ -2198,17 +2184,6 @@ rxvt_term::DefaultRootWindow ()
         RETVAL = THIS->display->root;
         OUTPUT:
         RETVAL
-
-#if 0
-
-Window
-XCreateSimpleWindow (rxvt_term *term, Window parent, int x, int y, unsigned int width, unsigned int height)
-	C_ARGS: term->dpy, (Window)parent,
-                x, y, width, height, 0,
-                term->pix_colors_focused[Color_border],
-                term->pix_colors_focused[Color_border]
-
-#endif
 
 void
 XReparentWindow (rxvt_term *term, Window window, Window parent, int x = 0, int y = 0)

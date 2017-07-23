@@ -773,10 +773,6 @@ rxvt_term::init2 (int argc, const char *const *argv)
 
   scr_poweron (); // initialize screen
 
-#if 0
-  XSynchronize (dpy, True);
-#endif
-
   if (option (Opt_scrollBar))
     scrollBar.resize ();      /* create and map scrollbar */
 

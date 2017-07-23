@@ -400,36 +400,8 @@ print_x_error (Display *dpy, XErrorEvent *event)
 
   if (event->request_code >= 128)
     {
-#if 0
-      /* XListExtensions and probably query extensions hangs when there are multiple queues errors */
-      int nexts;
-      char **exts = XListExtensions (dpy, &nexts);
-
-      while (nexts)
-        {
-          char *extname = exts [nexts - 1];
-          int major, first_event, first_error;
-
-          if (XQueryExtension (dpy, extname, &major, &first_event, &first_error) && major == event->request_code)
-            {
-              XGetErrorDatabaseText (dpy, "XlibMessage", "MinorCode", "Request Minor code %d", mesg, BUFSIZ);
-              rxvt_warn ("+ (which is extension %s minor code %d)\n", extname, event->minor_code);
-
-              snprintf (buffer, BUFSIZ, "%s.%d", extname, event->minor_code);
-              XGetErrorDatabaseText (dpy, "XRequest", buffer, "an unregistered minor code", buffer, BUFSIZ);
-              rxvt_warn ("+ (which is %s)\n", buffer);
-
-              break;
-            }
-
-          printf ("nextss %d %s\n", nexts, extname);//D
-          --nexts;
-          ++exts;
-        }
-#else
       int nexts = 0;
       char **exts = 0;
-#endif
 
       if (!nexts)
         {
@@ -437,12 +409,6 @@ print_x_error (Display *dpy, XErrorEvent *event)
 
           XGetErrorDatabaseText (dpy, "XlibMessage", "MinorCode", "Request Minor code %d", mesg, BUFSIZ);
           snprintf (buffer, BUFSIZ, "+ %s\n", mesg); rxvt_warn (buffer, event->minor_code);
-
-#if 0
-          sprintf (number, "RENDER.%d", event->minor_code);
-          XGetErrorDatabaseText (dpy, "XRequest", number, "", buffer, BUFSIZ);
-          rxvt_warn ("+ (which is %s)\n", buffer);
-#endif
         }
 
       XFreeExtensionList (exts);
@@ -791,12 +757,6 @@ rxvt_term::tt_winch ()
   ws.ws_xpixel = vt_width;
   ws.ws_ypixel = vt_height;
   ioctl (pty->pty, TIOCSWINSZ, &ws);
-
-#if 0
-  // TIOCSWINSZ is supposed to do this automatically and correctly
-  if (cmd_pid)               /* force through to the command */
-    kill (-cmd_pid, SIGWINCH);
-#endif
 }
 
 /*----------------------------------------------------------------------*/
@@ -1362,20 +1322,6 @@ xim_preedit_draw (XIC ic, XPointer client_data, XIMPreeditDrawCallbackStruct *ca
                   DT_INT, call_data->chg_length,
                   DT_END));
 }
-
-#if 0
-static void
-xim_preedit_caret (XIC ic, XPointer client_data, XIMPreeditCaretCallbackStruct *call_data)
-{
-  ((rxvt_term *)client_data)->make_current ();
-  HOOK_INVOKE (((rxvt_term *)client_data, HOOK_XIM_PREEDIT_CARET,
-                DT_INT, call_data->position,
-                DT_INT, call_data->direction,
-                DT_INT, call_data->style,
-                DT_END));
-}
-#endif
-
 #endif
 
 /*
@@ -1549,18 +1495,12 @@ foundpet:
       xcb[0].client_data = (XPointer)this; xcb[0].callback = (XIMProc)xim_preedit_start;
       xcb[1].client_data = (XPointer)this; xcb[1].callback = (XIMProc)xim_preedit_done;
       xcb[2].client_data = (XPointer)this; xcb[2].callback = (XIMProc)xim_preedit_draw;
-# if 0
-      xcb[3].client_data = (XPointer)this; xcb[3].callback = (XIMProc)xim_preedit_caret;
-# endif
 
       preedit_attr = XVaCreateNestedList (0,
                                           XNSpotLocation, &spot,
                                           XNPreeditStartCallback, &xcb[0],
                                           XNPreeditDoneCallback , &xcb[1],
                                           XNPreeditDrawCallback , &xcb[2],
-# if 0
-                                          XNPreeditCaretCallback, &xcb[3],
-# endif
                                           NULL);
     }
 #endif
@@ -1584,12 +1524,6 @@ foundpet:
       im_destroy ();
       return false;
     }
-
-#if 0
-  // unfortunately, only the focus window is used by XIM, hard to fix
-  if (!XGetICValues (Input_Context, XNFilterEvents, &vt_emask_xim, NULL))
-    vt_select_input ();
-#endif
 
   im_set_position ();
 

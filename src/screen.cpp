@@ -523,7 +523,6 @@ rxvt_term::scr_cursor (cursor_mode mode) NOTHROW
         rstyle = s->s_rstyle;
         screen.charset = s->s_charset;
         charsets[screen.charset] = s->s_charset_char;
-        set_font_style ();
         break;
     }
 
@@ -1758,34 +1757,6 @@ rxvt_term::scr_report_position () NOTHROW
  * ------------------------------------------------------------------------- */
 
 /*
- * Set font style
- */
-void ecb_cold
-rxvt_term::set_font_style () NOTHROW
-{
-#if 0
-  switch (charsets [screen.charset])
-    {
-      case '0':                   /* DEC Special Character & Line Drawing Set */
-        break;
-      case 'A':                   /* United Kingdom (UK) */
-        break;
-      case 'B':                   /* United States (USASCII) */
-        break;
-      case '<':                   /* Multinational character set */
-        break;
-      case '5':                   /* Finnish character set */
-        break;
-      case 'C':                   /* Finnish character set */
-        break;
-      case 'K':                   /* German character set */
-        break;
-    }
-#endif
-}
-
-/* ------------------------------------------------------------------------- */
-/*
  * Choose a font
  * XTERM_SEQ: Invoke G0 character set: CTRL-O
  * XTERM_SEQ: Invoke G1 character set: CTRL-N
@@ -1796,7 +1767,6 @@ void ecb_cold
 rxvt_term::scr_charset_choose (int set) NOTHROW
 {
   screen.charset = set;
-  set_font_style ();
 }
 
 /* ------------------------------------------------------------------------- */
@@ -1806,13 +1776,11 @@ rxvt_term::scr_charset_choose (int set) NOTHROW
  * XTERM_SEQ: Set G1 character set: ESC ) <C>
  * XTERM_SEQ: Set G2 character set: ESC * <C>
  * XTERM_SEQ: Set G3 character set: ESC + <C>
- * See set_font_style for possible values for <C>
  */
 void
 rxvt_term::scr_charset_set (int set, unsigned int ch) NOTHROW
 {
   charsets[set] = (unsigned char)ch;
-  set_font_style ();
 }
 
 
@@ -2659,20 +2627,6 @@ rxvt_term::scr_reverse_selection () NOTHROW
     }
 }
 
-/* ------------------------------------------------------------------------- */
-/*
- * Dump the whole scrollback and screen to the passed filedescriptor.  The
- * invoking routine must close the fd.
- */
-#if 0
-void
-rxvt_term::scr_dump (int fd) NOTHROW
-{
-  // if this method is needed, it can be implemented by factoring the
-  // relevant code in scr_printscreen
-}
-#endif
-
 /* ------------------------------------------------------------------------- *
  *                           CHARACTER SELECTION                             *
  * ------------------------------------------------------------------------- */
@@ -2937,16 +2891,6 @@ rxvt_term::selection_grab (Time tm, bool clipboard) NOTHROW
       selection_clear (clipboard);
       return false;
     }
-
-#if 0
-  XTextProperty ct;
-
-  if (XwcTextListToTextProperty (dpy, &selection.text, 1, XStringStyle, &ct) >= 0)
-    {
-      set_string_property (XA_CUT_BUFFER0, ct.value, ct.nitems);
-      XFree (ct.value);
-    }
-#endif
 }
 
 /* ------------------------------------------------------------------------- */

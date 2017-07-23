@@ -600,12 +600,7 @@ rxvt_font_x11::set_properties (rxvt_fontprop &p, XFontStruct *f)
 {
   unsigned long height;
 
-#if 0
-  if (!XGetFontProperty (f, XInternAtom (term->dpy, "PIXEL_SIZE", 0), &height))
-    return false;
-#else
   height = f->ascent + f->descent;
-#endif
 
   unsigned long avgwidth;
   if (!XGetFontProperty (f, term->xa [XA_AVERAGE_WIDTH], &avgwidth))
@@ -946,14 +941,6 @@ rxvt_font_x11::load (const rxvt_fontprop &prop, bool force_prop)
       if (width < g.width) width = g.width;
     }
 
-#if 0 // do it per-character
-  if (prop && width > prop->width)
-    {
-      clear ();
-      return false;
-    }
-#endif
-
   return true;
 }
 
@@ -1199,12 +1186,6 @@ rxvt_font_xft::load (const rxvt_fontprop &prop, bool force_prop)
       && (force_prop || FcPatternGet (p, FC_SLANT, 0, &v) != FcResultMatch))
     FcPatternAddInteger (p, FC_SLANT, prop.slant);
 
-#if 0 // clipping unfortunately destroys our precious double-width-characters
-  // clip width, we can't do better, or can we?
-  if (FcPatternGet (p, FC_CHAR_WIDTH, 0, &v) != FcResultMatch)
-    FcPatternAddInteger (p, FC_CHAR_WIDTH, prop.width);
-#endif
-
   if (FcPatternGet (p, FC_MINSPACE, 0, &v) != FcResultMatch)
     FcPatternAddBool (p, FC_MINSPACE, 1);
 
@@ -1309,14 +1290,6 @@ rxvt_font_xft::load (const rxvt_fontprop &prop, bool force_prop)
     }
 
   FcPatternDestroy (match);
-
-#if 0 // do it per-character
-  if (prop.width != rxvt_fontprop::unset && width > prop.width)
-    {
-      clear ();
-      success = false;
-    }
-#endif
 
   return success;
 }
