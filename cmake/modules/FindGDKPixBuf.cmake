@@ -1,0 +1,3 @@
+INCLUDE(FindPkgConfig)
+
+PKG_CHECK_MODULES(GDKPIXBUF gdk-pixbuf-2.0)

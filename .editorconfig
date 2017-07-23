@@ -6,6 +6,10 @@ end_of_line = lf
 insert_final_newline = true
 trim_trailing_whitespace = true
 
+[CMakeLists.txt]
+indent_style = space
+indent_size = 2
+
 [*.{cpp,hpp,c,h,xs}]
 indent_style = space
 indent_size = 2

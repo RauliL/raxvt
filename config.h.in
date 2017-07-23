@@ -39,225 +39,12 @@
 /* Define if you want extended chinese codesets */
 #undef ENCODING_ZH_EXT
 
-/* Define to 1 if you have the `clock_gettime' function. */
-#undef HAVE_CLOCK_GETTIME
-
-/* Define to 1 to use the syscall interface for clock_gettime */
-#undef HAVE_CLOCK_SYSCALL
-
-/* Define to 1 if you have the `epoll_ctl' function. */
-#undef HAVE_EPOLL_CTL
-
-/* Define to 1 if you have the `eventfd' function. */
-#undef HAVE_EVENTFD
-
-/* Define to 1 if you have the `FcPatternGet' function. */
-#undef HAVE_FCPATTERNGET
-
-/* Define to 1 if the floor function is available */
-#undef HAVE_FLOOR
-
-/* Define to 1 if you have the <fontconfig/fontconfig.h> header file. */
-#undef HAVE_FONTCONFIG_FONTCONFIG_H
-
-/* Define to 1 if you have the `getpt' function. */
-#undef HAVE_GETPT
-
-/* Define to 1 if you have the `inotify_init' function. */
-#undef HAVE_INOTIFY_INIT
-
-/* Define to 1 if you have the <inttypes.h> header file. */
-#undef HAVE_INTTYPES_H
-
-/* Define to 1 if you have the `isastream' function. */
-#undef HAVE_ISASTREAM
-
-/* Define to 1 if you have the `kqueue' function. */
-#undef HAVE_KQUEUE
-
-/* Define to 1 if you have the <lastlog.h> header file. */
-#undef HAVE_LASTLOG_H
-
-/* Define to 1 if you have the `rt' library (-lrt). */
-#undef HAVE_LIBRT
-
-/* Define to 1 if you have the <libutil.h> header file. */
-#undef HAVE_LIBUTIL_H
-
-/* Define to 1 if you have the <memory.h> header file. */
-#undef HAVE_MEMORY_H
-
-/* Define to 1 if you have the `nanosleep' function. */
-#undef HAVE_NANOSLEEP
-
-/* Define if nl_langinfo(CODESET) works */
-#undef HAVE_NL_LANGINFO
-
-/* "" */
-#undef HAVE_OPENPTY
-
-/* Define if you want to use gdk-pixbuf for image processing */
-#undef HAVE_PIXBUF
-
-/* Define to 1 if you have the `poll' function. */
-#undef HAVE_POLL
-
-/* Define to 1 if you have the <poll.h> header file. */
-#undef HAVE_POLL_H
-
-/* Define to 1 if you have the `port_create' function. */
-#undef HAVE_PORT_CREATE
-
-/* Define to 1 if you have the <port.h> header file. */
-#undef HAVE_PORT_H
-
-/* Define to 1 if you have the `posix_openpt' function. */
-#undef HAVE_POSIX_OPENPT
-
-/* Define to 1 if you have the <pty.h> header file. */
-#undef HAVE_PTY_H
-
-/* Define to 1 if you have the `revoke' function. */
-#undef HAVE_REVOKE
-
-/* Define to 1 if you have the `select' function. */
-#undef HAVE_SELECT
-
-/* Define to 1 if you have the `seteuid' function. */
-#undef HAVE_SETEUID
-
-/* Define to 1 if you have the `setresuid' function. */
-#undef HAVE_SETRESUID
-
-/* Define to 1 if you have the `setreuid' function. */
-#undef HAVE_SETREUID
-
-/* Define to 1 if you have the `setuid' function. */
-#undef HAVE_SETUID
-
-/* Define to 1 if you have the `signalfd' function. */
-#undef HAVE_SIGNALFD
-
-/* Define if freedesktop startup notifications should be supported */
-#undef HAVE_STARTUP_NOTIFICATION
-
-/* Define to 1 if you have the <stdint.h> header file. */
-#undef HAVE_STDINT_H
-
-/* Define to 1 if you have the <stdlib.h> header file. */
-#undef HAVE_STDLIB_H
-
-/* Define to 1 if you have the <strings.h> header file. */
-#undef HAVE_STRINGS_H
-
-/* Define to 1 if you have the <string.h> header file. */
-#undef HAVE_STRING_H
-
-/* Define to 1 if you have the <stropts.h> header file. */
-#undef HAVE_STROPTS_H
-
-/* Define to 1 if the system has the type `struct lastlog'. */
-#undef HAVE_STRUCT_LASTLOG
-
-/* Define to 1 if the system has the type `struct lastlogx'. */
-#undef HAVE_STRUCT_LASTLOGX
-
-/* Define to 1 if the system has the type `struct utmp'. */
-#undef HAVE_STRUCT_UTMP
-
-/* Define to 1 if the system has the type `struct utmpx'. */
-#undef HAVE_STRUCT_UTMPX
-
-/* Define to 1 if you have the <sys/byteorder.h> header file. */
-#undef HAVE_SYS_BYTEORDER_H
-
-/* Define to 1 if you have the <sys/epoll.h> header file. */
-#undef HAVE_SYS_EPOLL_H
-
-/* Define to 1 if you have the <sys/eventfd.h> header file. */
-#undef HAVE_SYS_EVENTFD_H
-
-/* Define to 1 if you have the <sys/event.h> header file. */
-#undef HAVE_SYS_EVENT_H
-
-/* Define to 1 if you have the <sys/inotify.h> header file. */
-#undef HAVE_SYS_INOTIFY_H
-
-/* Define to 1 if you have the <sys/ioctl.h> header file. */
-#undef HAVE_SYS_IOCTL_H
-
-/* Define to 1 if you have the <sys/select.h> header file. */
-#undef HAVE_SYS_SELECT_H
-
-/* Define to 1 if you have the <sys/signalfd.h> header file. */
-#undef HAVE_SYS_SIGNALFD_H
-
-/* Define to 1 if you have the <sys/sockio.h> header file. */
-#undef HAVE_SYS_SOCKIO_H
-
-/* Define to 1 if you have the <sys/stat.h> header file. */
-#undef HAVE_SYS_STAT_H
-
-/* Define to 1 if you have the <sys/strredir.h> header file. */
-#undef HAVE_SYS_STRREDIR_H
-
-/* Define to 1 if you have the <sys/types.h> header file. */
-#undef HAVE_SYS_TYPES_H
-
-/* Define to 1 if you have the <unistd.h> header file. */
-#undef HAVE_UNISTD_H
-
 /* Define if sys/socket.h defines the necessary macros/functions for file
    handle passing */
 #undef HAVE_UNIX_FDPASS
 
-/* Define to 1 if you have the `unsetenv' function. */
-#undef HAVE_UNSETENV
-
-/* Define to 1 if you have the `updlastlogx' function. */
-#undef HAVE_UPDLASTLOGX
-
-/* Define to 1 if you have the `updwtmp' function. */
-#undef HAVE_UPDWTMP
-
-/* Define to 1 if you have the `updwtmpx' function. */
-#undef HAVE_UPDWTMPX
-
-/* Define to 1 if you have the <util.h> header file. */
-#undef HAVE_UTIL_H
-
-/* Define to 1 if you have the <utmpx.h> header file. */
-#undef HAVE_UTMPX_H
-
-/* Define if struct utmpx contains ut_host */
-#undef HAVE_UTMPX_HOST
-
-/* Define to 1 if you have the <utmp.h> header file. */
-#undef HAVE_UTMP_H
-
-/* Define if struct utmp contains ut_host */
-#undef HAVE_UTMP_HOST
-
-/* Define if struct utmp contains ut_pid */
-#undef HAVE_UTMP_PID
-
-/* Define to 1 if you have the <wchar.h> header file. */
-#undef HAVE_WCHAR_H
-
-/* Define to 1 if you have the <X11/Xft/Xft.h> header file. */
-#undef HAVE_X11_XFT_XFT_H
-
-/* Define to 1 if you have the `XftDrawString32' function. */
-#undef HAVE_XFTDRAWSTRING32
-
 /* Define to enable Xmu support */
 #undef HAVE_XMU
-
-/* Define if setlocale (defined to Xsetlocale) works */
-#undef HAVE_XSETLOCALE
-
-/* Define to 1 if you have the `_getpty' function. */
-#undef HAVE__GETPTY
 
 /* Define if you want ISO 14755 extended support */
 #undef ISO_14755
@@ -298,24 +85,6 @@
 /* Define if you want faded colors when focus is lost */
 #undef OFF_FOCUS_FADING
 
-/* Define to the address where bug reports for this package should be sent. */
-#undef PACKAGE_BUGREPORT
-
-/* Define to the full name of this package. */
-#undef PACKAGE_NAME
-
-/* Define to the full name and version of this package. */
-#undef PACKAGE_STRING
-
-/* Define to the one symbol short name of this package. */
-#undef PACKAGE_TARNAME
-
-/* Define to the home page for this package. */
-#undef PACKAGE_URL
-
-/* Define to the version of this package. */
-#undef PACKAGE_VERSION
-
 /* Support plain style scrollbars */
 #undef PLAIN_SCROLLBAR
 
@@ -337,17 +106,8 @@
 /* Define to a fallback location of wtmp */
 #undef PT_WTMP_FILE
 
-/* Resource class */
-#undef RESCLASS
-
 /* Fallback resource class */
 #undef RESFALLBACK
-
-/* Default resource name */
-#undef RESNAME
-
-/* Binary base name */
-#undef RXVTNAME
 
 /* Support Rxvt original style scrollbars */
 #undef RXVT_SCROLLBAR
@@ -377,31 +137,6 @@
 /* Define if you want to represent unicode characters outside plane 0 */
 #undef UNICODE_3
 
-/* "" */
-#undef UNIX98_PTY
-
-/* Enable extensions on AIX 3, Interix.  */
-#ifndef _ALL_SOURCE
-# undef _ALL_SOURCE
-#endif
-/* Enable GNU extensions on systems that have them.  */
-#ifndef _GNU_SOURCE
-# undef _GNU_SOURCE
-#endif
-/* Enable threading extensions on Solaris.  */
-#ifndef _POSIX_PTHREAD_SEMANTICS
-# undef _POSIX_PTHREAD_SEMANTICS
-#endif
-/* Enable extensions on HP NonStop.  */
-#ifndef _TANDEM_SOURCE
-# undef _TANDEM_SOURCE
-#endif
-/* Enable general extensions on Solaris.  */
-#ifndef __EXTENSIONS__
-# undef __EXTENSIONS__
-#endif
-
-
 /* Define if you want to have XIM (X Input Method) protocol support - required
    for multibyte characters input */
 #undef USE_XIM
@@ -412,70 +147,14 @@
 /* Define if you want to have wtmp support when utmp/utmpx is enabled */
 #undef WTMP_SUPPORT
 
-/* Define to enable xft support */
-#undef XFT
-
 /* Define if your XIMCallback specifies XIC as first type. */
 #undef XIMCB_PROTO_BROKEN
 
 /* Define ONLY iff Xlib.h supports it */
 #undef XLIB_ILLEGAL_ACCESS
 
-/* Define to enable xrender support */
-#undef XRENDER
-
 /* Support Xterm style scrollbars */
 #undef XTERM_SCROLLBAR
 
 /* Define to 1 if the X Window System is missing or not being used. */
 #undef X_DISPLAY_MISSING
-
-/* Define to 1 if on MINIX. */
-#undef _MINIX
-
-/* Define to 2 if the system does not provide POSIX.1 features except with
-   this defined. */
-#undef _POSIX_1_SOURCE
-
-/* Define to 1 if you need to in order for `stat' and other things to work. */
-#undef _POSIX_SOURCE
-
-/* Define for Solaris 2.5.1 so the uint32_t typedef from <sys/synch.h>,
-   <pthread.h>, or <semaphore.h> is not used. If the typedef were allowed, the
-   #define below would cause a syntax error. */
-#undef _UINT32_T
-
-/* Enable declarations of msg_control and msg_controllen on Solaris */
-#undef _XOPEN_SOURCE
-
-/* Enable declarations in utmp.h on Solaris when the XPG4v2 namespace is
-   active */
-#undef __EXTENSIONS__
-
-/* Define to `int' if <sys/types.h> doesn't define. */
-#undef gid_t
-
-/* Define to the type of a signed integer type of width exactly 16 bits if
-   such a type exists and the standard includes do not define it. */
-#undef int16_t
-
-/* Define to the type of a signed integer type of width exactly 32 bits if
-   such a type exists and the standard includes do not define it. */
-#undef int32_t
-
-/* Define to `int' if <sys/types.h> does not define. */
-#undef mode_t
-
-/* Define to `int' if <sys/types.h> does not define. */
-#undef pid_t
-
-/* Define to `int' if <sys/types.h> doesn't define. */
-#undef uid_t
-
-/* Define to the type of an unsigned integer type of width exactly 16 bits if
-   such a type exists and the standard includes do not define it. */
-#undef uint16_t
-
-/* Define to the type of an unsigned integer type of width exactly 32 bits if
-   such a type exists and the standard includes do not define it. */
-#undef uint32_t
