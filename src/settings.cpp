@@ -25,6 +25,7 @@
  *----------------------------------------------------------------------*/
 
 #include "../config.h"
+
 #include "rxvt.h"
 #include "version.h"
 
@@ -32,6 +33,7 @@
 #include <fstream>
 #include <vector>
 
+#include <basedir.h>
 #include <toml/toml.h>
 
 #ifdef KEYSYM_RESOURCE
@@ -957,7 +959,7 @@ load_settings_from(rxvt_term* term, const std::string& filename)
 void
 rxvt_term::load_settings()
 {
-  const char* const* config_dirs = xdgSearchableConfigDirectories(&xdg_handle);
+  const char* const* config_dirs = xdgSearchableConfigDirectories(nullptr);
 
   for (; config_dirs && *config_dirs; ++config_dirs)
   {

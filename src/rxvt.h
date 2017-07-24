@@ -34,7 +34,6 @@ extern "C" {
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xresource.h>
-#include <basedir.h>
 }
 
 #if UNICODE_3
@@ -1143,9 +1142,6 @@ struct rxvt_term : zero_initialized, rxvt_vars, rxvt_screen
   uint32_t        rgb24_color[RGB24_CUBE_SIZE];   // the 24-bit color value
   uint16_t        rgb24_seqno[RGB24_CUBE_SIZE];   // which one is older?
   uint16_t        rgb24_sequence;
-
-  xdgHandle xdg_handle;
-  bool xdg_handle_initialized;
 
   static vector<rxvt_term *> termlist; // a vector of all running rxvt_term's
 

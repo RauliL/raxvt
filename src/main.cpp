@@ -141,7 +141,6 @@ int rxvt_composite_vec::expand (unicode_t c, wchar_t *r)
 #endif
 
 rxvt_term::rxvt_term()
-  : xdg_handle_initialized(false)
 {
 #ifdef CURSOR_BLINK
   cursor_blink_ev.set     <rxvt_term, &rxvt_term::cursor_blink_cb> (this); cursor_blink_ev.set (0., CURSOR_BLINK_INTERVAL);
@@ -185,11 +184,6 @@ rxvt_term::rxvt_term()
 #ifdef KEYSYM_RESOURCE
   keyboard = new keyboard_manager;
 #endif
-
-  if (xdgInitHandle(&xdg_handle))
-  {
-    xdg_handle_initialized = true;
-  }
 }
 
 // clean up the most important stuff, do *not* call x or free mem etc.
@@ -283,11 +277,6 @@ rxvt_term::~rxvt_term ()
 #ifndef NO_RESOURCES
   XrmDestroyDatabase (option_db);
 #endif
-
-  if (xdg_handle_initialized)
-  {
-    xdgWipeHandle(&xdg_handle);
-  }
 
   SET_R ((rxvt_term *)0);
 }
