@@ -1,0 +1,18 @@
+language: cpp
+compiler:
+  - clang
+  - gcc
+git:
+  submodules: false
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y libfontconfig1-dev
+  - sudo apt-get install -y libgdk-pixbuf2.0-dev
+  - sudo apt-get install -y libglib2.0-dev
+  - sudo apt-get install -y libperl-dev
+  - sudo apt-get install -y libxft-dev
+  - sudo apt-get install -y libxrender-dev
+  - sudo apt-get install -y libxdg-basedir-dev
+  - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
+  - git submodule update --init --recursive
+script: ./configure && make
