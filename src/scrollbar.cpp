@@ -58,7 +58,7 @@ scrollBar_t::resize ()
   int delayed_init = 0;
   int window_sb_x = 0;
 
-  if (term->option (Opt_scrollBar_right))
+  if (term->get_option(Opt_scrollBar_right))
     window_sb_x = term->szHint.width - total_width ();
 
   update_data ();
@@ -139,9 +139,9 @@ scrollBar_t::setup (rxvt_term *term)
   const char *scrollalign, *scrollstyle, *thickness;
 
   this->term = term;
-  scrollalign = term->rs[Rs_scrollBar_align];
-  scrollstyle = term->rs[Rs_scrollstyle];
-  thickness = term->rs[Rs_scrollBar_thickness];
+  scrollalign = term->get_setting(Rs_scrollBar_align);
+  scrollstyle = term->get_setting(Rs_scrollstyle);
+  thickness = term->get_setting(Rs_scrollBar_thickness);
 
 # if defined(RXVT_SCROLLBAR)
   style = SB_STYLE_RXVT;
@@ -187,7 +187,7 @@ scrollBar_t::setup (rxvt_term *term)
       width = min (i, SB_WIDTH_MAXIMUM);
 
 # ifdef RXVT_SCROLLBAR
-  if (! term->option (Opt_scrollBar_floating) && style == SB_STYLE_RXVT)
+  if (! term->get_option(Opt_scrollBar_floating) && style == SB_STYLE_RXVT)
     shadow = SHADOW_WIDTH;
 # endif
 

@@ -114,7 +114,7 @@ static inline bool term_setting_is_info(const TermSetting& setting)
   return (setting.flag & TERM_SETTING_FLAG_INFO);
 }
 
-const std::vector<TermSetting> term_setting_list = {
+static const std::vector<TermSetting> term_setting_list = {
   STRG(Rs_display_name, NULL, "d", NULL, NULL),	/* short form */
   STRG(Rs_display_name, NULL, "display", "string", "X server to contact"),
   STRG(Rs_term_name, "termName", "tn", "string", "value of the TERM environment variable"),
@@ -409,6 +409,45 @@ const char rxvt_term::resval_undef [] = "<undef>";
 const char rxvt_term::resval_on []    = "on";
 const char rxvt_term::resval_off []   = "off";
 
+const char*
+rxvt_term::get_setting(int index) const
+{
+  const auto entry = m_settings.find(index);
+
+  return entry != m_settings.end() ? entry->second.c_str() : nullptr;
+}
+
+void
+rxvt_term::set_setting(int index, const char* value)
+{
+  if (!value)
+  {
+    const auto entry = m_settings.find(index);
+
+    if (entry != m_settings.end())
+    {
+      m_settings.erase(entry);
+    }
+    return;
+  }
+
+  m_settings[index] = std::string(value);
+}
+
+bool
+rxvt_term::get_option(int index) const
+{
+  const auto entry = m_options.find(index);
+
+  return entry != m_options.end() ? entry->second : false;
+}
+
+void
+rxvt_term::set_option(int index, bool value)
+{
+  m_options[index] = value;
+}
+
 /*{{{ usage: */
 /*----------------------------------------------------------------------*/
 void
@@ -594,7 +633,7 @@ rxvt_term::get_options (int argc, const char *const *argv)
               rxvt_fatal("option '%s' requires an argument, aborting.\n", argv[i]);
             }
 
-            rs[setting.doff] = flag ? argv[++i] : resval_undef;
+            set_setting(setting.doff, flag ? argv[++i] : nullptr);
           }
         } else {
           /* boolean value */
@@ -602,7 +641,7 @@ rxvt_term::get_options (int argc, const char *const *argv)
 
           if (setting.doff != -1)
           {
-            rs[setting.doff] = flag ? resval_on : resval_off;
+            set_setting(setting.doff, flag ? "true" : "false");
           }
         }
       }
@@ -837,7 +876,7 @@ rxvt_term::x_resource (const char *name)
 {
   XrmDatabase database = XrmGetDatabase (dpy);
 
-  const char *p = get_res (database, rs[Rs_name], name);
+  const char *p = get_res (database, get_setting(Rs_name), name);
   const char *p0 = get_res (database, "!INVALIDPROGRAMMENAMEDONTMATCH!", name);
 
   if (p == NULL || (p0 && strcmp (p, p0) == 0))
@@ -875,9 +914,11 @@ load_settings_from(rxvt_term* term, const std::string& filename)
   for (const auto& setting : term_setting_list)
   {
     const toml::Value* value;
-    char* value_as_string;
+    std::string value_as_string;
 
-    if (!setting.kw || term->rs[setting.doff] || !(value = pr.value.find(setting.kw)))
+    if (!setting.kw
+        || term->get_setting(setting.doff)
+        || !(value = pr.value.find(setting.kw)))
     {
       continue; // Previously set.
     }
@@ -886,7 +927,7 @@ load_settings_from(rxvt_term* term, const std::string& filename)
     {
       bool value_as_bool = value->as<bool>();
 
-      value_as_string = strdup(value_as_bool ? "true" : "false");
+      value_as_string = value_as_bool ? "true" : "false";
       if (term_setting_is_bool(setting))
       {
         if (term_setting_is_reverse(setting))
@@ -898,20 +939,16 @@ load_settings_from(rxvt_term* term, const std::string& filename)
     }
     else if (value->is<int>())
     {
-      value_as_string = strdup(std::to_string(value->as<int>()).c_str());
+      value_as_string = std::to_string(value->as<int>());
     }
     else if (value->is<std::string>())
     {
-      value_as_string = strdup(value->as<std::string>().c_str());
+      value_as_string = value->as<std::string>();
     } else {
       continue;
     }
 
-    if (term->rs[setting.doff])
-    {
-    }
-    term->rs[setting.doff] = value_as_string;
-    term->allocated.push_back(value_as_string);
+    term->set_setting(setting.doff, value_as_string.c_str());
   }
 
   return true;
@@ -969,7 +1006,7 @@ rxvt_term::enumerate_resources (void (*cb)(rxvt_term *, const char *, const char
   XrmEnumerateDatabase (database, name_prefix, class_prefix,
                         XrmEnumOneLevel, rxvt_enumerate_helper, (XPointer)closure);
 
-  name_prefix[0] = class_prefix[0] = XrmStringToName (rs[Rs_name]);
+  name_prefix[0] = class_prefix[0] = XrmStringToName (get_setting(Rs_name));
   XrmEnumerateDatabase (database, name_prefix, class_prefix,
                         XrmEnumOneLevel, rxvt_enumerate_helper, (XPointer)closure);
 #endif

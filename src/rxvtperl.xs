@@ -1826,19 +1826,12 @@ rxvt_term::_resource (octet_string name, int index, SV *newval = 0)
           croak ("requested out-of-bound resource %s+%d,", name, index - rs->value);
 
         if (GIMME_V != G_VOID)
-          XPUSHs (THIS->rs [index] ? sv_2mortal (newSVpv (THIS->rs [index], 0)) : &PL_sv_undef);
+          XPUSHs (THIS->get_setting(index) ? sv_2mortal (newSVpv (THIS->get_setting(index), 0)) : &PL_sv_undef);
 
         if (newval)
-          {
-            if (SvOK (newval))
-              {
-                char *str = strdup (SvPVbyte_nolen (newval));
-                THIS->rs [index] = str;
-                THIS->allocated.push_back (str);
-              }
-            else
-              THIS->rs [index] = 0;
-          }
+        {
+          THIS->set_setting(index, SvOK(newval) ? SvPVbyte_nolen(newval) : nullptr);
+        }
 }
 
 const char *
@@ -1848,11 +1841,11 @@ bool
 rxvt_term::option (U8 optval, int set = -1)
 	CODE:
 {
-	RETVAL = THIS->option (optval);
+	RETVAL = THIS->get_option(optval);
 
         if (set >= 0)
           {
-            THIS->set_option (optval, set);
+            THIS->set_option(optval, set);
 
             if (THIS->init_done) // avoid doing this before START
               switch (optval)

@@ -502,17 +502,17 @@ rxvt_term::init_vars ()
 
   oldcursor.row = oldcursor.col = -1;
 
-  set_option (Opt_scrollBar);
-  set_option (Opt_scrollTtyOutput);
-  set_option (Opt_jumpScroll);
-  set_option (Opt_skipScroll);
-  set_option (Opt_secondaryScreen);
-  set_option (Opt_secondaryScroll);
-  set_option (Opt_pastableTabs);
-  set_option (Opt_intensityStyles);
-  set_option (Opt_iso14755);
-  set_option (Opt_iso14755_52);
-  set_option (Opt_buffered);
+  set_option(Opt_scrollBar, true);
+  set_option(Opt_scrollTtyOutput, true);
+  set_option(Opt_jumpScroll, true);
+  set_option(Opt_skipScroll, true);
+  set_option(Opt_secondaryScreen, true);
+  set_option(Opt_secondaryScroll, true);
+  set_option(Opt_pastableTabs, true);
+  set_option(Opt_intensityStyles, true);
+  set_option(Opt_iso14755, true);
+  set_option(Opt_iso14755_52, true);
+  set_option(Opt_buffered, true);
 }
 
 #if ENABLE_PERL
@@ -530,19 +530,25 @@ rxvt_term::init_resources (int argc, const char *const *argv)
   int i;
   const char **cmd_argv;
 
-  rs[Rs_name] = rxvt_basename (argv[0]);
+  set_setting(Rs_name, rxvt_basename(argv[0]));
 
   /*
    * Open display, get options/resources and create the window
    */
+  {
+    const char* display_name = std::getenv("DISPLAY");
 
-  if ((rs[Rs_display_name] = getenv ("DISPLAY")) == NULL)
-    rs[Rs_display_name] = ":0";
+    if (!display_name)
+    {
+      display_name = ":0";
+    }
+    set_setting(Rs_display_name, display_name);
+  }
 
   cmd_argv = get_options (argc, argv);
 
-  if (!(display = displays.get (rs[Rs_display_name])))
-    rxvt_fatal ("can't open display %s, aborting.\n", rs[Rs_display_name]);
+  if (!(display = displays.get (get_setting(Rs_display_name))))
+    rxvt_fatal ("can't open display %s, aborting.\n", get_setting(Rs_display_name));
 
   // using a local pointer decreases code size a lot
   xa = display->xa;
@@ -551,23 +557,21 @@ rxvt_term::init_resources (int argc, const char *const *argv)
   load_settings();
 
 #if ENABLE_FRILLS
-  if (rs[Rs_visual])
-    select_visual (strtol (rs[Rs_visual], 0, 0));
-  else if (rs[Rs_depth])
-    select_depth (strtol (rs[Rs_depth], 0, 0));
+  if (get_setting(Rs_visual))
+    select_visual (strtol (get_setting(Rs_visual), 0, 0));
+  else if (get_setting(Rs_depth))
+    select_depth (strtol (get_setting(Rs_depth), 0, 0));
 #endif
 
-  for (int i = NUM_RESOURCES; i--; )
-    if (rs [i] == resval_undef)
-      rs [i] = 0;
-
 #if ENABLE_PERL
-  if (!rs[Rs_perl_ext_1])
-    rs[Rs_perl_ext_1] = "default";
+  if (!get_setting(Rs_perl_ext_1))
+  {
+    set_setting(Rs_perl_ext_1, "default");
+  }
 
-  if ((rs[Rs_perl_ext_1] && *rs[Rs_perl_ext_1])
-      || (rs[Rs_perl_ext_2] && *rs[Rs_perl_ext_2])
-      || (rs[Rs_perl_eval] && *rs[Rs_perl_eval]))
+  if ((get_setting(Rs_perl_ext_1) && *get_setting(Rs_perl_ext_1))
+      || (get_setting(Rs_perl_ext_2) && *get_setting(Rs_perl_ext_2))
+      || (get_setting(Rs_perl_eval) && *get_setting(Rs_perl_eval)))
     {
       rxvt_perl.init (this);
       enumerate_resources (rxvt_perl_parse_resource);
@@ -583,100 +587,126 @@ rxvt_term::init_resources (int argc, const char *const *argv)
    * set any defaults not already set
    */
   if (cmd_argv && cmd_argv[0])
+  {
+    if (!get_setting(Rs_title))
     {
-      if (!rs[Rs_title])
-        rs[Rs_title] = rxvt_basename (cmd_argv[0]);
-
-      if (!rs[Rs_iconName])
-        rs[Rs_iconName] = rs[Rs_title];
-    }
-  else
-    {
-      if (!rs[Rs_title])
-        rs[Rs_title] = rs[Rs_name];
-
-      if (!rs[Rs_iconName])
-        rs[Rs_iconName] = rs[Rs_name];
+      set_setting(Rs_title, rxvt_basename(cmd_argv[0]));
     }
 
-  if (rs[Rs_saveLines] && (i = atoi (rs[Rs_saveLines])) >= 0)
+    if (!get_setting(Rs_iconName))
+    {
+      set_setting(Rs_iconName, get_setting(Rs_title));
+    }
+  } else {
+    if (!get_setting(Rs_title))
+    {
+      set_setting(Rs_title, get_setting(Rs_name));
+    }
+
+    if (!get_setting(Rs_iconName))
+    {
+      set_setting(Rs_iconName, get_setting(Rs_name));
+    }
+  }
+
+  if (get_setting(Rs_saveLines) && (i = atoi (get_setting(Rs_saveLines))) >= 0)
     saveLines = min (i, MAX_SAVELINES);
 
 #if ENABLE_FRILLS
-  if (rs[Rs_int_bwidth] && (i = atoi (rs[Rs_int_bwidth])) >= 0)
+  if (get_setting(Rs_int_bwidth) && (i = atoi (get_setting(Rs_int_bwidth))) >= 0)
     int_bwidth = min (i, std::numeric_limits<int16_t>::max ());
 
-  if (rs[Rs_ext_bwidth] && (i = atoi (rs[Rs_ext_bwidth])) >= 0)
+  if (get_setting(Rs_ext_bwidth) && (i = atoi (get_setting(Rs_ext_bwidth))) >= 0)
     ext_bwidth = min (i, std::numeric_limits<int16_t>::max ());
 
-  if (rs[Rs_lineSpace] && (i = atoi (rs[Rs_lineSpace])) >= 0)
+  if (get_setting(Rs_lineSpace) && (i = atoi (get_setting(Rs_lineSpace))) >= 0)
     lineSpace = min (i, std::numeric_limits<int16_t>::max ());
 
-  if (rs[Rs_letterSpace])
-    letterSpace = atoi (rs[Rs_letterSpace]);
+  if (get_setting(Rs_letterSpace))
+    letterSpace = atoi (get_setting(Rs_letterSpace));
 #endif
 
 #ifdef POINTER_BLANK
-  if (rs[Rs_pointerBlankDelay] && (i = atoi (rs[Rs_pointerBlankDelay])) >= 0)
+  if (get_setting(Rs_pointerBlankDelay) && (i = atoi (get_setting(Rs_pointerBlankDelay))) >= 0)
     pointerBlankDelay = i;
   else
     pointerBlankDelay = 2;
 #endif
 
-  if (rs[Rs_multiClickTime] && (i = atoi (rs[Rs_multiClickTime])) >= 0)
+  if (get_setting(Rs_multiClickTime) && (i = atoi (get_setting(Rs_multiClickTime))) >= 0)
     multiClickTime = i;
   else
     multiClickTime = 500;
 
-  cursor_type = option (Opt_cursorUnderline) ? 1 : 0;
+  cursor_type = get_option(Opt_cursorUnderline) ? 1 : 0;
 
   /* no point having a scrollbar without having any scrollback! */
   if (!saveLines)
-    set_option (Opt_scrollBar, 0);
+    set_option(Opt_scrollBar, false);
 
-  if (!rs[Rs_cutchars])
-    rs[Rs_cutchars] = CUTCHARS;
+  if (!get_setting(Rs_cutchars))
+  {
+    set_setting(Rs_cutchars, CUTCHARS);
+  }
 
 #ifndef NO_BACKSPACE_KEY
-  if (!rs[Rs_backspace_key])
+  if (!get_setting(Rs_backspace_key))
+  {
 # ifdef DEFAULT_BACKSPACE
-    rs[Rs_backspace_key] = DEFAULT_BACKSPACE;
+    set_setting(Rs_backspace_key, DEFAULT_BACKSPACE);
 # else
-    rs[Rs_backspace_key] = "DEC";       /* can toggle between \010 or \177 */
+    set_setting(Rs_backspace_key, "DEC");       /* can toggle between \010 or \177 */
 # endif
+  }
 #endif
 
 #ifndef NO_DELETE_KEY
-  if (!rs[Rs_delete_key])
+  if (!get_setting(Rs_delete_key))
+  {
 # ifdef DEFAULT_DELETE
-    rs[Rs_delete_key] = DEFAULT_DELETE;
+    set_setting(Rs_delete_key, DEFAULT_DELETE);
 # else
-    rs[Rs_delete_key] = "\033[3~";
+    set_setting(Rs_delete_key, "\033[3~");
 # endif
+  }
 #endif
 
     scrollBar.setup (this);
 
 #ifdef XTERM_REVERSE_VIDEO
   /* this is how xterm implements reverseVideo */
-  if (option (Opt_reverseVideo))
+  if (get_option(Opt_reverseVideo))
+  {
+    if (!get_setting(Rs_color + Color_fg))
     {
-      if (!rs[Rs_color + Color_fg])
-        rs[Rs_color + Color_fg] = def_colorName[Color_bg];
-
-      if (!rs[Rs_color + Color_bg])
-        rs[Rs_color + Color_bg] = def_colorName[Color_fg];
+      set_setting(Rs_color + Color_fg, def_colorName[Color_bg]);
     }
+
+    if (!get_setting(Rs_color + Color_bg))
+    {
+      set_setting(Rs_color + Color_bg, def_colorName[Color_fg]);
+    }
+  }
 #endif
 
   for (i = 0; i < NRS_COLORS; i++)
-    if (!rs[Rs_color + i])
-      rs[Rs_color + i] = def_colorName[i];
+  {
+    if (!get_setting(Rs_color + i))
+    {
+      set_setting(Rs_color + i, def_colorName[i]);
+    }
+  }
 
 #ifndef XTERM_REVERSE_VIDEO
   /* this is how we implement reverseVideo */
-  if (option (Opt_reverseVideo))
-    ::swap (rs[Rs_color + Color_fg], rs[Rs_color + Color_bg]);
+  if (get_option(Opt_reverseVideo))
+  {
+    const char* a = get_setting(Rs_color + Color_fg);
+    const char* b = get_setting(Rs_color + Color_bg);
+
+    set_setting(Rs_color + Color_fg, b);
+    set_setting(Rs_color + Color_bg, a);
+  }
 #endif
 
   /* convenient aliases for setting fg/bg to colors */
@@ -695,8 +725,10 @@ rxvt_term::init_resources (int argc, const char *const *argv)
   color_aliases (Color_RV);
 #endif /* ! NO_BOLD_UNDERLINE_REVERSE */
 
-  if (!rs[Rs_color + Color_border])
-    rs[Rs_color + Color_border] = rs[Rs_color + Color_bg];
+  if (!get_setting(Rs_color + Color_border))
+  {
+    set_setting(Rs_color + Color_border, get_setting(Rs_color + Color_bg));
+  }
 
   return cmd_argv;
 }
@@ -752,7 +784,7 @@ rxvt_term::init2 (int argc, const char *const *argv)
   keyboard->register_done ();
 #endif
 
-  if (const char *path = rs[Rs_chdir])
+  if (const char *path = get_setting(Rs_chdir))
     if (*path) // ignored if empty
       {
         if (*path != '/')
@@ -762,7 +794,7 @@ rxvt_term::init2 (int argc, const char *const *argv)
           rxvt_fatal ("unable to change into specified shell working directory, aborting.\n");
       }
 
-  if (option (Opt_scrollBar))
+  if (get_option(Opt_scrollBar))
     scrollBar.state = SB_STATE_IDLE;    /* set existence for size calculations */
 
   pty = ptytty::create ();
@@ -773,7 +805,7 @@ rxvt_term::init2 (int argc, const char *const *argv)
 
   scr_poweron (); // initialize screen
 
-  if (option (Opt_scrollBar))
+  if (get_option(Opt_scrollBar))
     scrollBar.resize ();      /* create and map scrollbar */
 
 #if ENABLE_PERL
@@ -790,7 +822,7 @@ rxvt_term::init2 (int argc, const char *const *argv)
   HOOK_INVOKE ((this, HOOK_START, DT_END));
 
 #if ENABLE_XEMBED
-  if (rs[Rs_embed])
+  if (get_setting(Rs_embed))
     {
       long info[2] = { 0, XEMBED_MAPPED };
 
@@ -850,15 +882,17 @@ rxvt_term::init_env ()
    *
    * Giving out the display_name also affords a potential security hole
    */
-  val = rxvt_network_display (rs[Rs_display_name]);
-  rs[Rs_display_name] = (const char *)val;
+  val = rxvt_network_display (get_setting(Rs_display_name));
+  set_setting(Rs_display_name, val);
 
   if (val == NULL)
 #endif /* DISPLAY_IS_IP */
     val = XDisplayString (dpy);
 
-  if (rs[Rs_display_name] == NULL)
-    rs[Rs_display_name] = val;   /* use broken `:0' value */
+  if (!get_setting(Rs_display_name))
+  {
+    set_setting(Rs_display_name, val);   /* use broken `:0' value */
+  }
 
   env_display = rxvt_malloc<char>(std::strlen(val) + 9);
 
@@ -890,14 +924,14 @@ rxvt_term::init_env ()
   else
     putenv ("COLORTERM=" COLORTERMENVFULL);
 
-  if (rs[Rs_term_name] != NULL)
-    {
-      env_term = rxvt_malloc<char>(std::strlen(rs[Rs_term_name]) + 6);
-      sprintf (env_term, "TERM=%s", rs[Rs_term_name]);
-      putenv (env_term);
-    }
-  else
+  if (get_setting(Rs_term_name))
+  {
+    env_term = rxvt_malloc<char>(std::strlen(get_setting(Rs_term_name)) + 6);
+    sprintf (env_term, "TERM=%s", get_setting(Rs_term_name));
+    putenv (env_term);
+  } else {
     putenv ("TERM=" TERMENV);
+  }
 
 #ifdef HAVE_UNSETENV
   /* avoid passing old settings and confusing term size */
@@ -982,21 +1016,23 @@ rxvt_term::init_command (const char *const *argv)
    */
 
 #ifdef META8_OPTION
-  meta_char = option (Opt_meta8) ? 0x80 : C0_ESC;
+  meta_char = get_option(Opt_meta8) ? 0x80 : C0_ESC;
 #endif
 
   get_ourmods ();
 
-  if (!option (Opt_scrollTtyOutput))
+  if (!get_option(Opt_scrollTtyOutput))
     priv_modes |= PrivMode_TtyOutputInh;
-  if (option (Opt_scrollTtyKeypress))
+  if (get_option(Opt_scrollTtyKeypress))
     priv_modes |= PrivMode_Keypress;
-  if (!option (Opt_jumpScroll))
+  if (!get_option(Opt_jumpScroll))
     priv_modes |= PrivMode_smoothScroll;
 
 #ifndef NO_BACKSPACE_KEY
-  if (strcmp (rs[Rs_backspace_key], "DEC") == 0)
+  if (!std::strcmp(get_setting(Rs_backspace_key), "DEC"))
+  {
     priv_modes |= PrivMode_HaveBackSpace;
+  }
 #endif
 
   /* add value for scrollBar */
@@ -1020,8 +1056,14 @@ rxvt_term::get_colors ()
 #endif
 
   for (i = 0; i < NRS_COLORS; i++)
-    if (const char *name = rs[Rs_color + i])
-      set_color (pix_colors [i], name);
+  {
+    const char* name = get_setting(Rs_color + i);
+
+    if (name)
+    {
+      set_color(pix_colors[i], name);
+    }
+  }
 
   /*
    * get scrollBar shadow colors
@@ -1055,19 +1097,25 @@ rxvt_term::get_colors ()
 /*----------------------------------------------------------------------*/
 /* color aliases, fg/bg bright-bold */
 void
-rxvt_term::color_aliases (int idx)
+rxvt_term::color_aliases(int idx)
 {
-  if (rs[Rs_color + idx] && isdigit (*rs[Rs_color + idx]))
-    {
-      int i = atoi (rs[Rs_color + idx]);
+  const char* color = get_setting(Rs_color + idx);
 
-      if (i >= 8 && i <= 15)
-        /* bright colors */
-        rs[Rs_color + idx] = rs[Rs_color + minBrightCOLOR + i - 8];
-      else if (i >= 0 && i <= 7)
-        /* normal colors */
-        rs[Rs_color + idx] = rs[Rs_color + minCOLOR + i];
+  if (color && isdigit(*color))
+  {
+    const int i = std::atoi(color);
+
+    if (i >= 8 && i <= 15)
+    {
+      /* bright colors */
+      set_setting(Rs_color + idx, get_setting(Rs_color + minBrightCOLOR + i - 8));
     }
+    else if (i >= 0 && i <= 7)
+    {
+      /* normal colors */
+      set_setting(Rs_color + idx, get_setting(Rs_color + minCOLOR + i));
+    }
+  }
 }
 
 /*----------------------------------------------------------------------*/
@@ -1089,7 +1137,7 @@ rxvt_term::get_ourmods ()
     };
 
   requestedmeta = realmeta = realalt = 0;
-  rsmod = rs[Rs_modifier];
+  rsmod = get_setting(Rs_modifier);
 
   if (rsmod
       && strcasecmp (rsmod, "mod1") >= 0 && strcasecmp (rsmod, "mod5") <= 0)
@@ -1244,10 +1292,10 @@ rxvt_term::create_windows (int argc, const char *const *argv)
 
   parent = display->root;
 
-  attributes.override_redirect = !!option (Opt_override_redirect);
+  attributes.override_redirect = !!get_option(Opt_override_redirect);
 
 #if ENABLE_FRILLS
-  if (option (Opt_borderLess))
+  if (get_option(Opt_borderLess))
     {
       if (XInternAtom (dpy, "_MOTIF_WM_INFO", True) == None)
         {
@@ -1262,11 +1310,11 @@ rxvt_term::create_windows (int argc, const char *const *argv)
 #endif
 
 #if ENABLE_XEMBED
-  if (rs[Rs_embed])
+  if (get_setting(Rs_embed))
     {
       XWindowAttributes wattr;
 
-      parent = strtol (rs[Rs_embed], 0, 0);
+      parent = strtol (get_setting(Rs_embed), 0, 0);
 
       if (!XGetWindowAttributes (dpy, parent, &wattr))
         rxvt_fatal ("invalid window-id specified with -embed, aborting.\n");
@@ -1292,16 +1340,17 @@ rxvt_term::create_windows (int argc, const char *const *argv)
 
   this->parent = top;
 
-  set_title     (rs [Rs_title]);
-  set_icon_name (rs [Rs_iconName]);
+  set_title     (get_setting(Rs_title));
+  set_icon_name (get_setting(Rs_iconName));
 
-  classHint.res_name  = (char *)rs[Rs_name];
+  classHint.res_name = strdup(get_setting(Rs_name));
+  allocated.push_back(classHint.res_name);
   classHint.res_class = (char *)RESCLASS;
 
   wmHint.flags         = InputHint | StateHint | WindowGroupHint;
   wmHint.input         = True;
-  wmHint.initial_state = option (Opt_iconic) ? IconicState
-                         : option (Opt_dockapp) ? WithdrawnState
+  wmHint.initial_state = get_option(Opt_iconic) ? IconicState
+                         : get_option(Opt_dockapp) ? WithdrawnState
                          : NormalState;
   wmHint.window_group  = top;
 
@@ -1310,11 +1359,11 @@ rxvt_term::create_windows (int argc, const char *const *argv)
 #if ENABLE_EWMH
   /*
    * set up icon hint
-   * rs [Rs_iconfile] is path to icon
+   * get_setting(Rs_iconfile) is path to icon
    */
 
-  if (rs [Rs_iconfile])
-    set_icon (rs [Rs_iconfile]);
+  if (get_setting(Rs_iconfile))
+    set_icon (get_setting(Rs_iconfile));
 #endif
 
 #if ENABLE_FRILLS
@@ -1333,8 +1382,8 @@ rxvt_term::create_windows (int argc, const char *const *argv)
   XSetWMProtocols (dpy, top, protocols, ecb_array_length (protocols));
 
 #if ENABLE_FRILLS
-  if (rs[Rs_transient_for])
-    XSetTransientForHint (dpy, top, (Window)strtol (rs[Rs_transient_for], 0, 0));
+  if (get_setting(Rs_transient_for))
+    XSetTransientForHint (dpy, top, (Window)strtol (get_setting(Rs_transient_for), 0, 0));
 #endif
 
 #if ENABLE_EWMH
@@ -1361,9 +1410,9 @@ rxvt_term::create_windows (int argc, const char *const *argv)
   unsigned int shape = XC_xterm;
 
 #ifdef HAVE_XMU
-  if (rs[Rs_pointerShape])
+  if (get_setting(Rs_pointerShape))
     {
-      int stmp = XmuCursorNameToIndex (rs[Rs_pointerShape]);
+      int stmp = XmuCursorNameToIndex (get_setting(Rs_pointerShape));
       if (stmp >= 0)
         shape = stmp;
     }
@@ -1384,7 +1433,7 @@ rxvt_term::create_windows (int argc, const char *const *argv)
 
   vt_emask = ExposureMask | ButtonPressMask | ButtonReleaseMask | PropertyChangeMask;
 
-  if (option (Opt_pointerBlank))
+  if (get_option(Opt_pointerBlank))
     vt_emask |= PointerMotionMask;
   else
     vt_emask |= Button1MotionMask | Button3MotionMask;
@@ -1406,7 +1455,7 @@ rxvt_term::create_windows (int argc, const char *const *argv)
 
 #ifdef OFF_FOCUS_FADING
   // initially we are in unfocused state
-  if (rs[Rs_fade])
+  if (get_setting(Rs_fade))
     pix_colors = pix_colors_unfocused;
 #endif
 
@@ -1424,9 +1473,9 @@ void
 rxvt_term::run_command (const char *const *argv)
 {
 #if ENABLE_FRILLS
-  if (rs[Rs_pty_fd])
+  if (get_setting(Rs_pty_fd))
     {
-      pty->pty = atoi (rs[Rs_pty_fd]);
+      pty->pty = atoi (get_setting(Rs_pty_fd));
 
       if (pty->pty >= 0)
         {
@@ -1447,9 +1496,9 @@ rxvt_term::run_command (const char *const *argv)
   struct termios tio = def_tio;
 
 #ifndef NO_BACKSPACE_KEY
-  if (rs[Rs_backspace_key][0] && !rs[Rs_backspace_key][1])
-    tio.c_cc[VERASE] = rs[Rs_backspace_key][0];
-  else if (strcmp (rs[Rs_backspace_key], "DEC") == 0)
+  if (get_setting(Rs_backspace_key)[0] && !get_setting(Rs_backspace_key)[1])
+    tio.c_cc[VERASE] = get_setting(Rs_backspace_key)[0];
+  else if (strcmp (get_setting(Rs_backspace_key), "DEC") == 0)
     tio.c_cc[VERASE] = '\177';            /* the initial state anyway */
 #endif
 
@@ -1463,7 +1512,7 @@ rxvt_term::run_command (const char *const *argv)
   tt_winch ();
 
 #if ENABLE_FRILLS
-  if (rs[Rs_pty_fd])
+  if (get_setting(Rs_pty_fd))
     return;
 #endif
 
@@ -1501,14 +1550,14 @@ rxvt_term::run_command (const char *const *argv)
         _exit (EXIT_FAILURE);
 
       default:
-        if (!option (Opt_utmpInhibit))
+        if (!get_option(Opt_utmpInhibit))
           {
 #ifdef LOG_ONLY_ON_LOGIN
-            bool login_shell = option (Opt_loginShell);
+            bool login_shell = get_option(Opt_loginShell);
 #else
             bool login_shell = true;
 #endif
-            pty->login (cmd_pid, login_shell, rs[Rs_display_name]);
+            pty->login (cmd_pid, login_shell, get_setting(Rs_display_name));
           }
 
         pty->close_tty ();
@@ -1532,7 +1581,7 @@ rxvt_term::run_child (const char *const *argv)
 {
   char *login;
 
-  if (option (Opt_console))
+  if (get_option(Opt_console))
     {
       /* be virtual console, fail silently */
 #ifdef TIOCCONS
@@ -1589,7 +1638,7 @@ rxvt_term::run_child (const char *const *argv)
 
       argv0 = rxvt_basename (shell);
 
-      if (option (Opt_loginShell))
+      if (get_option(Opt_loginShell))
         {
           login = rxvt_malloc<char>(std::strlen(argv0) + 2);
 

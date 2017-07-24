@@ -9,7 +9,9 @@
 #include <cstdint>
 #include <cstring>
 #include <cassert>
+
 #include <string>
+#include <unordered_map>
 
 #include <sys/types.h>
 #include <unistd.h>
@@ -662,8 +664,8 @@ typedef struct _mwmhints
 
 #define RS_SAME(a,b)		(!(((a) ^ (b)) & ~RS_Careful))
 
-#define PIXCOLOR_NAME(idx)      rs[Rs_color + (idx)]
-#define ISSET_PIXCOLOR(idx)     (!!rs[Rs_color + (idx)])
+#define PIXCOLOR_NAME(idx)      get_setting(Rs_color + (idx))
+#define ISSET_PIXCOLOR(idx)     (!!get_setting(Rs_color + (idx)))
 
 #if ENABLE_STYLES
 # define FONTSET_of(t,style) (t)->fontset[GET_STYLE (style)]
@@ -974,7 +976,6 @@ enum {
 struct rxvt_vars : TermWin_t
 {
   scrollBar_t     scrollBar;
-  uint8_t         options[(Opt_count + 7) >> 3];
   XSizeHints      szHint;
   rxvt_color     *pix_colors;
   Cursor          TermWin_cursor;       /* cursor for vt window */
@@ -1128,7 +1129,6 @@ struct rxvt_term : zero_initialized, rxvt_vars, rxvt_screen
   XrmDatabase option_db;
 #endif
 
-  const char     *rs[NUM_RESOURCES];
   /* command input buffering */
   char           *cmdbuf_ptr, *cmdbuf_endp;
   char            cmdbuf_base[CBUFSIZ];
@@ -1327,20 +1327,13 @@ struct rxvt_term : zero_initialized, rxvt_vars, rxvt_screen
 
   // screen.C
 
-  bool option (uint8_t opt) const NOTHROW
-  {
-    return options[opt >> 3] & (1 << (opt & 7));
-  }
-
-  void set_option (uint8_t opt, bool set = true) NOTHROW;
-
   int fgcolor_of (rend_t r) const NOTHROW
   {
     int base = GET_BASEFG (r);
 #ifndef NO_BRIGHTCOLOR
     if (r & RS_Bold
 # if ENABLE_STYLES
-        && option (Opt_intensityStyles)
+        && get_option(Opt_intensityStyles)
 # endif
         && IN_RANGE_EXC (base, minCOLOR, minBrightCOLOR))
       base += minBrightCOLOR - minCOLOR;
@@ -1354,7 +1347,7 @@ struct rxvt_term : zero_initialized, rxvt_vars, rxvt_screen
 #ifndef NO_BRIGHTCOLOR
     if (r & RS_Blink
 # if ENABLE_STYLES
-        && option (Opt_intensityStyles)
+        && get_option(Opt_intensityStyles)
 # endif
         && IN_RANGE_EXC (base, minCOLOR, minBrightCOLOR))
       base += minBrightCOLOR - minCOLOR;
@@ -1447,19 +1440,29 @@ struct rxvt_term : zero_initialized, rxvt_vars, rxvt_screen
   void selection_extend (int x, int y, int flag) NOTHROW;
   void selection_rotate (int x, int y) NOTHROW;
 
+  // settings.cpp
+  const char* get_setting(int) const;
+  void set_setting(int, const char*);
+  bool get_option(int) const;
+  void set_option(int, bool);
+  void load_settings();
+
   // xdefaults.C
   void rxvt_usage (int type);
   const char **get_options (int argc, const char *const *argv);
   int parse_keysym (const char *str, unsigned int &state);
   int bind_action (const char *str, const char *arg);
   const char *x_resource (const char *name);
-  void load_settings();
   void enumerate_resources (void (*cb)(rxvt_term *, const char *, const char *), const char *name_p = 0, const char *class_p = 0);
   void enumerate_keysym_resources (void (*cb)(rxvt_term *, const char *, const char *))
   {
     enumerate_resources (cb, "keysym", "Keysym");
   }
   void extract_keysym_resources ();
+
+private:
+  std::unordered_map<int, std::string> m_settings;
+  std::unordered_map<int, bool> m_options;
 };
 
 #endif /* _RXVT_H_ */

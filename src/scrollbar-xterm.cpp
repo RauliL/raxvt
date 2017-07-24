@@ -59,7 +59,7 @@ scrollBar_t::show_xterm (int update)
       ShadowGC = XCreateGC (term->dpy, win, GCForeground, &gcvalue);
     }
 
-  xsb = term->option (Opt_scrollBar_right) ? 1 : 0;
+  xsb = term->get_option(Opt_scrollBar_right) ? 1 : 0;
 
   if (update)
     {

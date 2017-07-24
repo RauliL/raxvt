@@ -441,16 +441,16 @@ rxvt_term::key_press (XKeyEvent &ev)
 
           // the XOpenIM manpage lies about hardcoding the locale
           // at the point of XOpenIM, so temporarily switch locales
-          if (rs[Rs_imLocale])
+          if (get_setting(Rs_imLocale))
           {
-            rxvt_set_locale(rs[Rs_imLocale]);
+            rxvt_set_locale(get_setting(Rs_imLocale));
           }
 
           // assume wchar_t == unicode or better
           len = XwcLookupString (Input_Context, &ev, wkbuf,
                                  KBUFSZ, &keysym, &status_return);
 
-          if (rs[Rs_imLocale])
+          if (get_setting(Rs_imLocale))
           {
             rxvt_set_locale(locale);
           }
@@ -514,12 +514,12 @@ rxvt_term::key_press (XKeyEvent &ev)
                     kbuf[1] = '\0';
                   }
                 else
-                  std::strcpy(kbuf, rs[Rs_backspace_key]);
+                  std::strcpy(kbuf, get_setting(Rs_backspace_key));
                 break;
 #endif
 #ifndef NO_DELETE_KEY
               case XK_Delete:
-                std::strcpy(kbuf, rs[Rs_delete_key]);
+                std::strcpy(kbuf, get_setting(Rs_delete_key));
                 break;
 #endif
               case XK_Tab:
@@ -845,7 +845,7 @@ rxvt_term::key_press (XKeyEvent &ev)
               iso14755buf = 0;
             }
         }
-      else if (option (Opt_iso14755) &&
+      else if (get_option(Opt_iso14755) &&
                ((ctrl && (keysym == XK_Shift_L || keysym == XK_Shift_R))
                 || (shft && (keysym == XK_Control_L || keysym == XK_Control_R))))
         if (!(iso14755buf & ISO_14755_STARTED))
@@ -926,7 +926,7 @@ rxvt_term::key_release (XKeyEvent &ev)
         if (iso14755buf & ISO_14755_51)
           commit_iso14755 ();
 #if ISO_14755
-        else if (option (Opt_iso14755_52) && iso14755buf & ISO_14755_STARTED)
+        else if (get_option(Opt_iso14755_52) && iso14755buf & ISO_14755_STARTED)
           {
             iso14755buf = ISO_14755_52; // iso14755 part 5.2: remember empty begin/end pair
 
@@ -1045,7 +1045,7 @@ rxvt_term::cursor_blink_reset ()
       want_refresh = 1;
     }
 
-  if (option (Opt_cursorBlink) || (priv_modes & PrivMode_BlinkingCursor))
+  if (get_option(Opt_cursorBlink) || (priv_modes & PrivMode_BlinkingCursor))
     cursor_blink_ev.again ();
   else
     cursor_blink_ev.stop ();
@@ -1217,7 +1217,7 @@ rxvt_term::pty_fill ()
     {
       pty_ev.stop ();
 
-      if (!option (Opt_hold))
+      if (!get_option(Opt_hold))
         destroy ();
     }
 
@@ -1249,7 +1249,7 @@ rxvt_term::pointer_unblank ()
 #ifdef POINTER_BLANK
   hidden_pointer = 0;
 
-  if (option (Opt_pointerBlank))
+  if (get_option(Opt_pointerBlank))
     pointer_ev.start (pointerBlankDelay);
 #endif
 }
@@ -1258,7 +1258,7 @@ rxvt_term::pointer_unblank ()
 void ecb_cold
 rxvt_term::pointer_blank ()
 {
-  if (!option (Opt_pointerBlank))
+  if (!get_option(Opt_pointerBlank))
     return;
 
   XDefineCursor (dpy, vt, display->blank_cursor);
@@ -1698,7 +1698,7 @@ rxvt_term::x_cb (XEvent &ev)
 #endif
 
 #if defined(POINTER_BLANK)
-  if (option (Opt_pointerBlank) && pointerBlankDelay > 0)
+  if (get_option(Opt_pointerBlank) && pointerBlankDelay > 0)
     {
       if (ev.type == MotionNotify
           || ev.type == ButtonPress
@@ -1747,18 +1747,18 @@ rxvt_term::focus_in ()
         }
 #endif
 #if CURSOR_BLINK
-      if (option (Opt_cursorBlink))
+      if (get_option(Opt_cursorBlink))
         cursor_blink_ev.again ();
 #endif
 #if OFF_FOCUS_FADING
-      if (rs[Rs_fade])
+      if (get_setting(Rs_fade))
         {
           pix_colors = pix_colors_focused;
           scr_recolor ();
         }
 #endif
 #if ENABLE_FRILLS
-      if (option (Opt_urgentOnBell))
+      if (get_option(Opt_urgentOnBell))
         set_urgency (0);
 
       if (priv_modes & PrivMode_FocusEvent)
@@ -1778,7 +1778,7 @@ rxvt_term::focus_out ()
       want_refresh = 1;
 
 #if ENABLE_FRILLS
-      if (option (Opt_urgentOnBell))
+      if (get_option(Opt_urgentOnBell))
         set_urgency (0);
 
       if (priv_modes & PrivMode_FocusEvent)
@@ -1798,13 +1798,13 @@ rxvt_term::focus_out ()
         XUnsetICFocus (Input_Context);
 #endif
 #if CURSOR_BLINK
-      if (option (Opt_cursorBlink))
+      if (get_option(Opt_cursorBlink))
         cursor_blink_ev.stop ();
 
       hidden_cursor = 0;
 #endif
 #if OFF_FOCUS_FADING
-      if (rs[Rs_fade])
+      if (get_setting(Rs_fade))
         {
           pix_colors = pix_colors_unfocused;
           scr_recolor ();
@@ -1819,14 +1819,14 @@ void ecb_cold
 rxvt_term::update_fade_color (unsigned int idx, bool first_time)
 {
 #if OFF_FOCUS_FADING
-  if (rs[Rs_fade])
+  if (get_setting(Rs_fade))
     {
       if (!first_time)
         pix_colors_focused [idx].free (this);
 
       rgba c;
       pix_colors [Color_fade].get (c);
-      pix_colors_focused [idx].fade (this, atoi (rs[Rs_fade]), pix_colors_unfocused [idx], c);
+      pix_colors_focused [idx].fade (this, atoi (get_setting(Rs_fade)), pix_colors_unfocused [idx], c);
     }
 #endif
 }
@@ -2193,7 +2193,7 @@ rxvt_term::button_release (XButtonEvent &ev)
 
               if (ev.state & ShiftMask)
                 lines = 1;
-              else if (option (Opt_mouseWheelScrollPage))
+              else if (get_option(Opt_mouseWheelScrollPage))
                 lines = nrow - 1;
               else
                 lines = 5;
@@ -2276,11 +2276,11 @@ rxvt_term::cmd_parse ()
 
                   refresh_count++;
 
-                  if (!option (Opt_jumpScroll) || refresh_count >= nrow - 1)
+                  if (!get_option(Opt_jumpScroll) || refresh_count >= nrow - 1)
                     {
                       refresh_count = 0;
 
-                      if (!option (Opt_skipScroll) || ev_time () > ev::now () + 1. / 60.)
+                      if (!get_option(Opt_skipScroll) || ev_time () > ev::now () + 1. / 60.)
                         {
                           refreshnow = true;
                           ch = NOCHAR;
@@ -2425,7 +2425,7 @@ rxvt_term::cmd_get8 () THROW ((class out_of_input))
 FILE * ecb_cold
 rxvt_term::popen_printer ()
 {
-  FILE *stream = popen (rs[Rs_print_pipe] ? rs[Rs_print_pipe] : PRINTPIPE, "w");
+  FILE *stream = popen (get_setting(Rs_print_pipe) ? get_setting(Rs_print_pipe) : PRINTPIPE, "w");
 
   if (stream == NULL)
     rxvt_warn ("can't open printer pipe, not printing.\n");
@@ -2517,9 +2517,9 @@ rxvt_term::process_nonprinting (unicode_t ch)
         process_escape_seq ();
         break;
       case C0_ENQ:	/* terminal Status */
-        if (rs[Rs_answerbackstring])
+        if (get_setting(Rs_answerbackstring))
         {
-          tt_write(rs[Rs_answerbackstring], std::strlen(rs[Rs_answerbackstring]));
+          tt_write(get_setting(Rs_answerbackstring), std::strlen(get_setting(Rs_answerbackstring)));
         } else {
           tt_write(VT100_ANS, std::strlen(VT100_ANS));
         }
@@ -2697,7 +2697,7 @@ rxvt_term::process_escape_seq ()
         /* kidnapped escape sequence: Should be 8.3.48 */
       case C1_ESA:		/* ESC G */
         // used by original rxvt for rob nations own graphics mode
-        if (cmd_getc () == 'Q' && option (Opt_insecure))
+        if (cmd_getc () == 'Q' && get_option(Opt_insecure))
           tt_printf ("\033G0\012");	/* query graphics - no graphics */
         break;
 
@@ -3013,8 +3013,8 @@ rxvt_term::process_csi_seq ()
               scr_report_position ();
               break;
             case 7:			/* unofficial extension */
-              if (option (Opt_insecure))
-                tt_printf ("%-.250s\012", rs[Rs_display_name]);
+              if (get_option(Opt_insecure))
+                tt_printf ("%-.250s\012", get_setting(Rs_display_name));
               break;
             case 8:			/* unofficial extension */
               process_xterm_seq (XTerm_title, RESNAME "-" VERSION, CHAR_ST);
@@ -3191,7 +3191,7 @@ rxvt_term::process_window_ops (const int *args, unsigned int nargs)
         {
           char *s;
           XGetIconName (dpy, parent, &s);
-          tt_printf ("\033]L%-.250s\234", option (Opt_insecure) && s ? s : "");	/* 8bit ST */
+          tt_printf ("\033]L%-.250s\234", get_option(Opt_insecure) && s ? s : "");	/* 8bit ST */
           XFree (s);
         }
         break;
@@ -3199,7 +3199,7 @@ rxvt_term::process_window_ops (const int *args, unsigned int nargs)
         {
           char *s;
           XFetchName (dpy, parent, &s);
-          tt_printf ("\033]l%-.250s\234", option (Opt_insecure) && s ? s : "");	/* 8bit ST */
+          tt_printf ("\033]l%-.250s\234", get_option(Opt_insecure) && s ? s : "");	/* 8bit ST */
           XFree (s);
         }
         break;
@@ -3456,7 +3456,7 @@ rxvt_term::process_xterm_seq (int op, char *str, char resp)
                 && actual_format == 8)
               str = (const char *)(value);
 
-            tt_printf ("\033]%d;%s%c", op, option (Opt_insecure) ? str : "", resp);
+            tt_printf ("\033]%d;%s%c", op, get_option(Opt_insecure) ? str : "", resp);
 
             XFree (value);
           }
@@ -3548,32 +3548,28 @@ rxvt_term::process_xterm_seq (int op, char *str, char resp)
       case URxvt_boldItalicFont:
 #endif
         if (query)
+        {
           tt_printf ("\33]%d;%-.250s%c", saveop,
-                     option (Opt_insecure) && fontset[op - URxvt_font]->fontdesc
+                     get_option(Opt_insecure) && fontset[op - URxvt_font]->fontdesc
                        ? fontset[op - URxvt_font]->fontdesc : "",
                      resp);
-        else
-          {
-            const char *&res = rs[Rs_font + (op - URxvt_font)];
-
-            res = strdup (str);
-            allocated.push_back ((void *)res);
-            set_fonts ();
-          }
+        } else {
+          set_fonts();
+        }
         break;
 
       case URxvt_version:
         if (query)
           tt_printf ("\33]%d;rxvt-unicode;%-.20s;%c;%c%c",
                      op,
-                     rs[Rs_name], VERSION[0], VERSION[2],
+                     get_setting(Rs_name), VERSION[0], VERSION[2],
                      resp);
         break;
 
 #if !ENABLE_MINIMAL
       case URxvt_locale:
         if (query)
-          tt_printf ("\33]%d;%-.250s%c", op, option (Opt_insecure) ? locale : "", resp);
+          tt_printf ("\33]%d;%-.250s%c", op, get_option(Opt_insecure) ? locale : "", resp);
         else
           {
             set_locale (str);
@@ -3731,13 +3727,13 @@ rxvt_term::process_terminal_mode (int mode, int priv ecb_unused, unsigned int na
         {
 #if ENABLE_STYLES
           case 1021:
-            set_option (Opt_intensityStyles, mode);
+            set_option(Opt_intensityStyles, mode);
 
             scr_touch (true);
             break;
 #endif
           case 1048:		/* alternative cursor save */
-            if (option (Opt_secondaryScreen))
+            if (get_option(Opt_secondaryScreen))
               if (mode == 0)
                 scr_cursor (RESTORE);
               else if (mode == 1)
@@ -3762,7 +3758,7 @@ rxvt_term::process_terminal_mode (int mode, int priv ecb_unused, unsigned int na
                 set_widthheight ((state ? 132 : 80) * fwidth, 24 * fheight);
               break;
             case 4:			/* smooth scrolling */
-              set_option (Opt_jumpScroll, !state);
+              set_option(Opt_jumpScroll, !state);
               break;
             case 5:			/* reverse video */
               scr_rvideo_mode (state);
@@ -3819,26 +3815,26 @@ rxvt_term::process_terminal_mode (int mode, int priv ecb_unused, unsigned int na
               vt_select_input ();
               break;
             case 1010:		/* scroll to bottom on TTY output inhibit */
-              set_option (Opt_scrollTtyOutput, !state);
+              set_option(Opt_scrollTtyOutput, !state);
               break;
             case 1011:		/* scroll to bottom on key press */
-              set_option (Opt_scrollTtyKeypress, state);
+              set_option(Opt_scrollTtyKeypress, state);
               break;
             case 1047:		/* secondary screen w/ clearing last */
-              if (option (Opt_secondaryScreen))
+              if (get_option(Opt_secondaryScreen))
                 if (!state)
                   scr_erase_screen (2);
 
               scr_change_screen (state);
               break;
             case 1049:		/* secondary screen w/ clearing first */
-              if (option (Opt_secondaryScreen))
+              if (get_option(Opt_secondaryScreen))
                 if (state)
                   scr_cursor (SAVE);
 
               scr_change_screen (state);
 
-              if (option (Opt_secondaryScreen))
+              if (get_option(Opt_secondaryScreen))
                 if (state)
                   scr_erase_screen (2);
                 else
@@ -4029,10 +4025,10 @@ rxvt_term::set_cursor_style (int style)
     style = 1;
 
   cursor_type = (style - 1) / 2;
-  set_option (Opt_cursorUnderline, cursor_type == 1);
+  set_option(Opt_cursorUnderline, cursor_type == 1);
 
 #ifdef CURSOR_BLINK
-  set_option (Opt_cursorBlink, style & 1);
+  set_option(Opt_cursorBlink, style & 1);
   cursor_blink_reset ();
 #endif
 
@@ -4068,7 +4064,7 @@ rxvt_term::tt_write_user_input (const char *data, unsigned int len)
   if (HOOK_INVOKE ((this, HOOK_TT_WRITE, DT_STR_LEN, data, len, DT_END)))
     return;
 
-  if (option (Opt_scrollTtyKeypress))
+  if (get_option(Opt_scrollTtyKeypress))
     if (view_start)
       {
         view_start = 0;
