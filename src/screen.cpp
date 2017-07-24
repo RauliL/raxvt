@@ -43,7 +43,7 @@ fill_text (text_t *start, text_t value, int len)
  *             GENERAL SCREEN AND SELECTION UPDATE ROUTINES                  *
  * ------------------------------------------------------------------------- */
 #define ZERO_SCROLLBACK()                                              \
-    if (option (Opt_scrollTtyOutput))                                  \
+    if (get_option(Opt_scrollTtyOutput))                                  \
         view_start = 0
 #define CLEAR_SELECTION()                                              \
     selection.beg.row = selection.beg.col                              \
@@ -536,7 +536,7 @@ rxvt_term::scr_cursor (cursor_mode mode) NOTHROW
 void
 rxvt_term::scr_swap_screen () NOTHROW
 {
-  if (!option (Opt_secondaryScreen))
+  if (!get_option(Opt_secondaryScreen))
     return;
 
   for (int i = prev_nrow; i--; )
@@ -573,7 +573,7 @@ rxvt_term::scr_change_screen (int scrn)
   current_screen = scrn;
 
 #if NSCREENS
-  if (option (Opt_secondaryScreen))
+  if (get_option(Opt_secondaryScreen))
     {
       num_scr = 0;
 
@@ -586,7 +586,7 @@ rxvt_term::scr_change_screen (int scrn)
     }
   else
 #endif
-    if (option (Opt_secondaryScroll))
+    if (get_option(Opt_secondaryScroll))
       scr_scroll_text (0, prev_nrow - 1, prev_nrow);
 }
 
@@ -655,7 +655,7 @@ rxvt_term::scr_scroll_text (int row1, int row2, int count) NOTHROW
 
   if (count > 0
       && row1 == 0
-      && (current_screen == PRIMARY || option (Opt_secondaryScroll)))
+      && (current_screen == PRIMARY || get_option(Opt_secondaryScroll)))
     {
       min_it (count, total_rows - (nrow - (row2 + 1)));
 
@@ -712,7 +712,7 @@ rxvt_term::scr_scroll_text (int row1, int row2, int count) NOTHROW
         }
 
       // finally move the view window, if desired
-      if (option (Opt_scrollWithBuffer)
+      if (get_option(Opt_scrollWithBuffer)
           && view_start != 0
           && view_start != -saveLines)
         scr_page (count);
@@ -1104,7 +1104,7 @@ rxvt_term::scr_tab (int count, bool ht) NOTHROW
 
       // store horizontal tab commands as characters inside the text
       // buffer so they can be selected and pasted.
-      if (ht && option (Opt_pastableTabs))
+      if (ht && get_option(Opt_pastableTabs))
         {
           base_rend = SET_FONT (base_rend, 0);
 
@@ -1718,7 +1718,7 @@ rxvt_term::scr_rvideo_mode (bool on) NOTHROW
       rvideo_state = on;
 
 #if OFF_FOCUS_FADING
-      if (rs[Rs_fade])
+      if (get_setting(Rs_fade))
         {
           ::swap (pix_colors_focused[Color_fg], pix_colors_focused[Color_bg]);
           ::swap (pix_colors_unfocused[Color_fg], pix_colors_unfocused[Color_bg]);
@@ -1928,17 +1928,17 @@ rxvt_term::scr_bell () NOTHROW
 
 # ifndef NO_MAPALERT
 #  ifdef MAPALERT_OPTION
-  if (option (Opt_mapAlert))
+  if (get_option(Opt_mapAlert))
 #  endif
     XMapWindow (dpy, parent);
 # endif
 
 # if ENABLE_FRILLS
-  if (option (Opt_urgentOnBell))
+  if (get_option(Opt_urgentOnBell))
     set_urgency (1);
 # endif
 
-  if (option (Opt_visualBell))
+  if (get_option(Opt_visualBell))
     {
       rvideo_bell = true;
       scr_rvideo_mode (rvideo_mode);
@@ -2961,7 +2961,7 @@ rxvt_term::selection_start_colrow (int col, int row) NOTHROW
 
 /* what do we want: spaces/tabs are delimiters or cutchars or non-cutchars */
 #define DELIMIT_TEXT(x)		\
-    (unicode::is_space (x) ? 2 : (x) <= 0xff && !!std::strchr(rs[Rs_cutchars], (x)))
+    (unicode::is_space (x) ? 2 : (x) <= 0xff && !!std::strchr(get_setting(Rs_cutchars), (x)))
 #define DELIMIT_REND(x)        1
 
 void ecb_cold
@@ -3224,7 +3224,7 @@ rxvt_term::selection_extend_colrow (int32_t col, int32_t row, int button3, int b
   else if (selection.clicks == 3)
     {
 #if ENABLE_FRILLS
-      if (option (Opt_tripleclickwords))
+      if (get_option(Opt_tripleclickwords))
         {
           selection_delimit_word (UP, &selection.beg, &selection.beg);
 

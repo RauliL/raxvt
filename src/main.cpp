@@ -141,7 +141,6 @@ int rxvt_composite_vec::expand (unicode_t c, wchar_t *r)
 #endif
 
 rxvt_term::rxvt_term()
-  : xdg_handle_initialized(false)
 {
 #ifdef CURSOR_BLINK
   cursor_blink_ev.set     <rxvt_term, &rxvt_term::cursor_blink_cb> (this); cursor_blink_ev.set (0., CURSOR_BLINK_INTERVAL);
@@ -185,11 +184,6 @@ rxvt_term::rxvt_term()
 #ifdef KEYSYM_RESOURCE
   keyboard = new keyboard_manager;
 #endif
-
-  if (xdgInitHandle(&xdg_handle))
-  {
-    xdg_handle_initialized = true;
-  }
 }
 
 // clean up the most important stuff, do *not* call x or free mem etc.
@@ -245,7 +239,7 @@ rxvt_term::~rxvt_term ()
           {
             pix_colors_focused   [i].free (this);
 #if OFF_FOCUS_FADING
-            if (rs[Rs_fade])
+            if (get_setting(Rs_fade))
               pix_colors_unfocused [i].free (this);
 #endif
           }
@@ -284,11 +278,6 @@ rxvt_term::~rxvt_term ()
   XrmDestroyDatabase (option_db);
 #endif
 
-  if (xdg_handle_initialized)
-  {
-    xdgWipeHandle(&xdg_handle);
-  }
-
   SET_R ((rxvt_term *)0);
 }
 
@@ -300,7 +289,7 @@ rxvt_term::child_cb (ev::child &w, int status)
 
   cmd_pid = 0;
 
-  if (!option (Opt_hold))
+  if (!get_option(Opt_hold))
     destroy ();
 }
 
@@ -356,18 +345,6 @@ rxvt_term::destroy_cb (ev::idle &w, int revents)
   make_current ();
 
   delete this;
-}
-
-void
-rxvt_term::set_option (uint8_t opt, bool set) NOTHROW
-{
-  if (!opt)
-    return;
-
-  uint8_t mask = 1 << (opt & 7);
-  uint8_t &val = options [opt >> 3];
-
-  val = val & ~mask | (set ? mask : 0);
 }
 
 /*----------------------------------------------------------------------*/
@@ -629,8 +606,8 @@ rxvt_term::window_calc (unsigned int newwidth, unsigned int newheight)
     {
       parsed_geometry = 1;
 
-      if (rs[Rs_geometry])
-        flags = XParseGeometry (rs[Rs_geometry], &x, &y, &w, &h);
+      if (get_setting(Rs_geometry))
+        flags = XParseGeometry (get_setting(Rs_geometry), &x, &y, &w, &h);
 
       if (flags & WidthValue)
         {
@@ -694,7 +671,7 @@ rxvt_term::window_calc (unsigned int newwidth, unsigned int newheight)
       int sb_w = scrollBar.total_width ();
       szHint.base_width += sb_w;
 
-      if (!option (Opt_scrollBar_right))
+      if (!get_option(Opt_scrollBar_right))
         window_vt_x += sb_w;
     }
 
@@ -773,7 +750,7 @@ rxvt_term::set_fonts ()
   rxvt_fontprop prop;
 
   if (!fs
-      || !fs->populate (rs[Rs_font] ? rs[Rs_font] : "fixed")
+      || !fs->populate (get_setting(Rs_font) ? get_setting(Rs_font) : "fixed")
       || !fs->realize_font (1))
     {
       delete fs;
@@ -801,7 +778,7 @@ rxvt_term::set_fonts ()
   for (int style = 1; style < 4; style++)
     {
 #if ENABLE_STYLES
-      const char *res = rs[Rs_font + style];
+      const char *res = get_setting(Rs_font + style);
 
       if (res && !*res)
         fontset[style] = fontset[0];
@@ -914,42 +891,42 @@ void
 rxvt_term::set_window_color (int idx, const char *color)
 {
 #ifdef XTERM_COLOR_CHANGE
-  if (color == NULL || *color == '\0')
+  if (!color || !*color)
+  {
     return;
+  }
 
-  color = strdup (color);
-  allocated.push_back ((void *)color);
-  rs[Rs_color + idx] = color;
+  set_setting(Rs_color + idx, color);
 
   /* handle color aliases */
   if (isdigit (*color))
+  {
+    const int i = std::atoi(color);
+
+    if (i >= 8 && i <= 15)
     {
-      int i = atoi (color);
-
-      if (i >= 8 && i <= 15)
-        {
-          /* bright colors */
-          alias_color (idx, minBrightCOLOR + i - 8);
-          goto done;
-        }
-
-      if (i >= 0 && i <= 7)
-        {
-          /* normal colors */
-          alias_color (idx, minCOLOR + i);
-          goto done;
-        }
+      /* bright colors */
+      alias_color(idx, minBrightCOLOR + i - 8);
+      goto done;
     }
 
-  pix_colors_focused[idx].free (this);
-  set_color (pix_colors_focused[idx], color);
+    if (i >= 0 && i <= 7)
+    {
+      /* normal colors */
+      alias_color(idx, minCOLOR + i);
+      goto done;
+    }
+  }
+
+  pix_colors_focused[idx].free(this);
+  set_color(pix_colors_focused[idx], color);
 
 done:
   /*TODO: handle Color_BD, scrollbar background, etc. */
 
-  update_fade_color (idx);
-  recolor_cursor ();
-  scr_recolor ();
+  update_fade_color(idx);
+  recolor_cursor();
+  scr_recolor();
 #endif /* XTERM_COLOR_CHANGE */
 }
 
@@ -1017,10 +994,13 @@ rxvt_term::set_color (rxvt_color &color, const char *name)
 }
 
 void
-rxvt_term::alias_color (int dst, int src)
+rxvt_term::alias_color(int dst, int src)
 {
-  pix_colors[dst].free (this);
-  pix_colors[dst].set (this, rs[Rs_color + dst] = rs[Rs_color + src]);
+  const char* color = get_setting(Rs_color + src);
+
+  pix_colors[dst].free(this);
+  set_setting(Rs_color + dst, color);
+  pix_colors[dst].set(this, color);
 }
 
 #ifdef SMART_RESIZE
@@ -1300,15 +1280,15 @@ xim_preedit_draw (XIC ic, XPointer client_data, XIMPreeditDrawCallbackStruct *ca
       if (!text->encoding_is_wchar && text->string.multi_byte)
         {
           // of course, X makes it ugly again
-          if (term->rs[Rs_imLocale])
+          if (term->get_setting(Rs_imLocale))
           {
-            rxvt_set_locale(term->rs[Rs_imLocale]);
+            rxvt_set_locale(term->get_setting(Rs_imLocale));
           }
 
           str = rxvt_temp_buf<wchar_t> (text->length + 1);
           mbstowcs (str, text->string.multi_byte, text->length + 1);
 
-          if (term->rs[Rs_imLocale])
+          if (term->get_setting(Rs_imLocale))
           {
             rxvt_set_locale(term->locale);
           }
@@ -1369,7 +1349,7 @@ rxvt_term::im_get_ic (const char *modifiers)
       return false;
     }
 
-  const char *pet[] = { rs[Rs_preeditType], "OverTheSpot,OffTheSpot,Root,None" };
+  const char *pet[] = { get_setting(Rs_preeditType), "OverTheSpot,OffTheSpot,Root,None" };
 
   for (int pi = 0; pi < 2; pi++)
     {
@@ -1443,7 +1423,7 @@ foundpet:
                fheight + 1, fheight - 1,
                fheight - 2, fheight + 2);
 
-      fs = XCreateFontSet (dpy, rs[Rs_imFont] ? rs[Rs_imFont] : pat,
+      fs = XCreateFontSet (dpy, get_setting(Rs_imFont) ? get_setting(Rs_imFont) : pat,
                            &missing_charset_list, &missing_charset_count, &def_string);
 
       if (missing_charset_list)
@@ -1554,12 +1534,12 @@ rxvt_term::im_cb ()
   if (Input_Context)
     return;
 
-  if (rs[Rs_imLocale])
+  if (get_setting(Rs_imLocale))
   {
-    rxvt_set_locale(rs[Rs_imLocale]);
+    rxvt_set_locale(get_setting(Rs_imLocale));
   }
 
-  p = rs[Rs_inputMethod];
+  p = get_setting(Rs_inputMethod);
   if (p && *p)
     {
       bool found = false;
@@ -1595,7 +1575,7 @@ rxvt_term::im_cb ()
     goto done;
 
 done:
-  if (rs[Rs_imLocale])
+  if (get_setting(Rs_imLocale))
   {
     rxvt_set_locale(locale);
   }

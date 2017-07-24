@@ -288,7 +288,7 @@ struct rxvt_font_default : rxvt_font {
 
 #ifdef BUILTIN_GLYPHS
     if (unicode >= 0x2500 && unicode <= 0x259f &&
-        !term->option (Opt_skipBuiltinGlyphs))
+        !term->get_option(Opt_skipBuiltinGlyphs))
       return true;
 #endif
 
@@ -1321,7 +1321,7 @@ rxvt_font_xft::draw (rxvt_drawable &d, int x, int y,
   int h = term->fheight;
 
   bool buffered = bg >= Color_transparent
-                  && term->option (Opt_buffered);
+                  && term->get_option(Opt_buffered);
 
   // cut trailing spaces
   while (len && text [len - 1] == ' ')
