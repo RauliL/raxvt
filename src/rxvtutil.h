@@ -69,6 +69,4 @@ struct stringvec : simplevec<char *>
   }
 };
 
-typedef estl::scoped_array<char> auto_str;
-
 #endif

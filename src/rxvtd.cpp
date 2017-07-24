@@ -156,66 +156,77 @@ void server::err (const char *format, ...)
   delete this;
 }
 
-void server::read_cb (ev::io &w, int revents)
+void server::read_cb(ev::io& w, int revents)
 {
-  auto_str tok;
+  std::string tok;
 
-  if (recv (tok))
+  if (!recv(tok))
+  {
+    return err();
+  }
+
+  if (!tok.compare("NEW"))
+  {
+    stringvec* argv = new stringvec();
+    stringvec* envv = new stringvec();
+    rxvt_term* term;
+    bool success = true;
+
+    for (;;)
     {
-      if (!strcmp (tok, "NEW"))
-        {
-          stringvec *argv = new stringvec;
-          stringvec *envv = new stringvec;
+      if (!recv(tok))
+      {
+        return err();
+      }
 
-          for (;;)
-            {
-              if (!recv (tok))
-                return err ();
-
-              if (!strcmp (tok, "END"))
-                break;
-              else if (!strcmp (tok, "ENV") && recv (tok))
-                envv->push_back (strdup (tok));
-              else if (!strcmp (tok, "ARG") && recv (tok))
-                argv->push_back (strdup (tok));
-              else
-                return err ("protocol error: unexpected NEW token.\n");
-            }
-
-          {
-            rxvt_term *term = new rxvt_term;
-
-            term->log_hook = &log_cb;
-            term->getfd_hook = &getfd_cb;
-
-            bool success = true;
-
-            try
-              {
-                term->init (argv, envv);
-              }
-            catch (const class rxvt_failure_exception &e)
-              {
-                success = false;
-              }
-
-            term->log_hook = 0;
-
-            chdir ("/"); // init might change to different working directory
-
-            if (!success)
-              term->destroy ();
-
-            send ("END"); send (success ? 1 : 0);
-          }
-        }
-      else if (!strcmp (tok, "QUIT"))
-        _exit (0);
-      else
-        return err ("protocol error: request '%s' unsupported.\n", (char *)tok);
+      if (!tok.compare("END"))
+      {
+        break;
+      }
+      else if (!tok.compare("ENV") && recv(tok))
+      {
+        envv->push_back(::strdup(tok.c_str()));
+      }
+      else if (!tok.compare("ARG") && recv(tok))
+      {
+        argv->push_back(::strdup(tok.c_str()));
+      } else {
+        return err("protocol error: unexpected NEW token.\n");
+      }
     }
-  else
-    return err ();
+
+    term = new rxvt_term();
+    term->log_hook = &log_cb;
+    term->getfd_hook = &getfd_cb;
+
+    try
+    {
+      term->init(argv, envv);
+    }
+    catch (const rxvt_failure_exception& e)
+    {
+      success = false;
+    }
+
+    term->log_hook = nullptr;
+
+    // Init might change to different working directory.
+    ::chdir("/");
+
+    if (!success)
+    {
+      term->destroy();
+    }
+
+    send("END");
+    send(success ? 1 : 0);
+  }
+  else if (!tok.compare("QUIT"))
+  {
+    ::_exit(EXIT_SUCCESS);
+  } else {
+    return err("protocol error: request '%s' unsupported.\n", tok.c_str());
+  }
 }
 
 int

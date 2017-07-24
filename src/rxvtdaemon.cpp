@@ -35,7 +35,8 @@
 
 #include "rxvtdaemon.h"
 
-char* rxvt_connection::unix_sockname()
+char*
+rxvt_connection::unix_sockname()
 {
   const char* path = std::getenv("RAXVT_SOCKET");
 
@@ -60,69 +61,89 @@ char* rxvt_connection::unix_sockname()
   return strdup(path);
 }
 
-void rxvt_connection::send (const char *data, int len)
+void
+rxvt_connection::send(const char *data, std::size_t length)
 {
   uint8_t s[2];
 
-  if (len > 65535)
-    len = 65535;
+  if (length > 65535)
+  {
+    length = 65535;
+  }
 
-  s[0] = len >> 8; s[1] = len;
+  s[0] = length >> 8;
+  s[1] = length;
 
-  write (fd, s, 2);
-  write (fd, data, len);
+  ::write(fd, s, 2);
+  ::write(fd, data, length);
 }
 
-void rxvt_connection::send (const char *data)
+void
+rxvt_connection::send(const char* data)
 {
   send(data, std::strlen(data));
 }
 
-bool rxvt_connection::recv (auto_str &data, int *len)
+bool
+rxvt_connection::recv(std::string& data, std::size_t* length)
 {
   uint8_t s[2];
-  int l;
+  std::size_t l;
+  char* buffer;
+  bool success;
 
-  if (read (fd, s, 2) != 2)
+  if (::read(fd, s, 2) != 2)
+  {
     return false;
+  }
 
   l = (s[0] << 8) + s[1];
   if (l > 65535)
+  {
     return false;
+  }
 
-  if (len)
-    *len = l;
+  if (length)
+  {
+    *length = l;
+  }
 
-  data.reset (new char[l + 1]);
+  buffer = new char[l];
+  success = ::read(fd, buffer, l) == l;
+  if (success)
+  {
+    data.reserve(l);
+    data.assign(buffer, l);
+  }
+  delete[] buffer;
 
-  if (read (fd, data, l) != l)
-    return false;
-
-  data[l] = 0;
-
-  return true;
+  return success;
 }
 
-void rxvt_connection::send (int data)
+void
+rxvt_connection::send(int data)
 {
   uint8_t s[4];
 
-  s[0] = data >> 24; s[1] = data >> 16; s[2] = data >> 8; s[3] = data;
+  s[0] = data >> 24;
+  s[1] = data >> 16;
+  s[2] = data >> 8;
+  s[3] = data;
 
-  write (fd, s, 4);
+  ::write(fd, s, 4);
 }
 
-bool rxvt_connection::recv (int &data)
+bool
+rxvt_connection::recv(int& data)
 {
   uint8_t s[4];
 
-  if (read (fd, s, 4) != 4)
+  if (::read(fd, s, 4) != 4)
+  {
     return false;
+  }
 
   data = (((((s[0] << 8) | s[1]) << 8) | s[2]) << 8) | s[3];
 
   return true;
 }
-
-
-

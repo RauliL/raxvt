@@ -118,37 +118,42 @@ main (int argc, const char *const *argv)
 
   c.send ("END");
 
-  auto_str tok;
+  std::string tok;
   int cint;
 
   for (;;)
-    if (!c.recv (tok))
+  {
+    if (!c.recv(tok))
+    {
+      std::fprintf(stderr, "protocol error: unexpected eof from server.\n");
+      break;
+    }
+    else if (!tok.compare("MSG") && c.recv(tok))
+    {
+      std::fprintf(stderr, "%s", tok.c_str());
+    }
+    else if (!tok.compare("GETFD") && c.recv(cint))
+    {
+      if (!ptytty::send_fd (c.fd, cint))
       {
-        fprintf (stderr, "protocol error: unexpected eof from server.\n");
-        break;
+        std::fprintf(stderr, "unable to send fd %d: ", cint);
+        std::perror(0);
+        std::exit(STATUS_FAILURE);
       }
-    else if (!strcmp (tok, "MSG") && c.recv (tok))
-      fprintf (stderr, "%s", (const char *)tok);
-    else if (!strcmp (tok, "GETFD") && c.recv (cint))
-      {
-        if (!ptytty::send_fd (c.fd, cint))
-          {
-            fprintf (stderr, "unable to send fd %d: ", cint); perror (0);
-            exit (STATUS_FAILURE);
-          }
-      }
-    else if (!strcmp (tok, "END"))
-      {
-        int success;
+    }
+    else if (!tok.compare("END"))
+    {
+      int success;
 
-        if (c.recv (success))
-          exit (success ? STATUS_SUCCESS : STATUS_FAILURE);
-      }
-    else
+      if (c.recv(success))
       {
-        fprintf (stderr, "protocol error: received unsupported token '%s'.\n", (const char *)tok);
-        break;
+        std::exit(success ? STATUS_SUCCESS : STATUS_FAILURE);
       }
+    } else {
+      std::fprintf(stderr, "protocol error: received unsupported token '%s'.\n", tok.c_str());
+      break;
+    }
+  }
 
   return STATUS_FAILURE;
 }
