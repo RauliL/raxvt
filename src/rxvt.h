@@ -18,9 +18,6 @@
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
-#ifdef HAVE_SYS_STRREDIR_H
-#include <sys/strredir.h>
-#endif
 
 // we assume that Xlib.h defines XPointer, and it does since at least 1994...
 

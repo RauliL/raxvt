@@ -168,9 +168,6 @@
 /* Define to 1 if the system has the type `struct utmpx'. */
 #undef HAVE_STRUCT_UTMPX
 
-/* Define to 1 if you have the <sys/byteorder.h> header file. */
-#undef HAVE_SYS_BYTEORDER_H
-
 /* Define to 1 if you have the <sys/epoll.h> header file. */
 #undef HAVE_SYS_EPOLL_H
 
@@ -192,14 +189,8 @@
 /* Define to 1 if you have the <sys/signalfd.h> header file. */
 #undef HAVE_SYS_SIGNALFD_H
 
-/* Define to 1 if you have the <sys/sockio.h> header file. */
-#undef HAVE_SYS_SOCKIO_H
-
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #undef HAVE_SYS_STAT_H
-
-/* Define to 1 if you have the <sys/strredir.h> header file. */
-#undef HAVE_SYS_STRREDIR_H
 
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
