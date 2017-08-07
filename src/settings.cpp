@@ -599,9 +599,9 @@ rxvt_term::get_options (int argc, const char *const *argv)
         rxvt_usage (0);
 
       /* feature: always try to match long-options */
-      for (entry = 0; i < term_setting_list.size(); ++i)
+      for (entry = 0; entry < term_setting_list.size(); ++entry)
       {
-        const TermSetting& setting = term_setting_list[i];
+        const TermSetting& setting = term_setting_list[entry];
 
         if ((setting.kw && !std::strcmp(opt, setting.kw))
             || (!longopt
@@ -611,9 +611,9 @@ rxvt_term::get_options (int argc, const char *const *argv)
         }
       }
 
-      if (entry < term_setting_list.size() && !term_setting_is_info(term_setting_list[i]))
+      if (entry < term_setting_list.size() && !term_setting_is_info(term_setting_list[entry]))
       {
-        const TermSetting& setting = term_setting_list[i];
+        const TermSetting& setting = term_setting_list[entry];
 
         if (term_setting_is_reverse(setting))
         {
