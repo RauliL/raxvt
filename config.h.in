@@ -241,9 +241,6 @@
 /* Define if struct utmp contains ut_pid */
 #undef HAVE_UTMP_PID
 
-/* Define to 1 if you have the <wchar.h> header file. */
-#undef HAVE_WCHAR_H
-
 /* Define to 1 if you have the <X11/Xft/Xft.h> header file. */
 #undef HAVE_X11_XFT_XFT_H
 

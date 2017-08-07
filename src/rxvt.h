@@ -22,12 +22,6 @@
 #include <sys/strredir.h>
 #endif
 
-#if HAVE_WCHAR_H
-# include <wchar.h>
-#else
-// stdlib.h might provide it
-#endif
-
 // we assume that Xlib.h defines XPointer, and it does since at least 1994...
 
 extern "C" {

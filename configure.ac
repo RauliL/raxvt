@@ -440,7 +440,6 @@ AC_CHECK_HEADERS( \
 	sys/sockio.h \
 	sys/strredir.h \
 	stdint.h \
-	wchar.h \
 )
 
 AC_CACHE_CHECK([for XLIB_ILLEGAL_ACCESS], rxvt_cv_xlib_illegal_access,
