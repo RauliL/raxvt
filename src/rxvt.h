@@ -37,13 +37,13 @@ extern "C" {
 }
 
 #if UNICODE_3
-typedef uint32_t text_t;
+typedef std::uint32_t text_t;
 #else
-typedef uint16_t text_t; // saves lots of memory
+typedef std::uint16_t text_t; // saves lots of memory
 #endif
-typedef uint32_t rend_t;
-typedef  int32_t tlen_t;  // was int16_t, but this results in smaller code and memory use
-typedef  int32_t tlen_t_; // specifically for use in the line_t structure
+typedef std::uint32_t rend_t;
+typedef std::int32_t tlen_t;  // was int16_t, but this results in smaller code and memory use
+typedef std::int32_t tlen_t_; // specifically for use in the line_t structure
 
 #include "feature.h"
 
@@ -690,7 +690,7 @@ struct line_t
    text_t *t; // terminal the text
    rend_t *r; // rendition, uses RS_ flags
    tlen_t_ l; // length of each text line
-   uint32_t f; // flags
+   std::uint32_t f; // flags
 
    bool valid ()
    {
@@ -1092,7 +1092,7 @@ struct rxvt_term : zero_initialized, rxvt_vars, rxvt_screen
     BG_NEEDS_REFRESH     = 1 << 2,
   };
 
-  uint8_t bg_flags;
+  std::uint8_t bg_flags;
 
   rxvt_img *bg_img;
 #endif
@@ -1139,9 +1139,9 @@ struct rxvt_term : zero_initialized, rxvt_vars, rxvt_screen
   void           *chunk;
   size_t          chunk_size;
 
-  uint32_t        rgb24_color[RGB24_CUBE_SIZE];   // the 24-bit color value
-  uint16_t        rgb24_seqno[RGB24_CUBE_SIZE];   // which one is older?
-  uint16_t        rgb24_sequence;
+  std::uint32_t        rgb24_color[RGB24_CUBE_SIZE];   // the 24-bit color value
+  std::uint16_t        rgb24_seqno[RGB24_CUBE_SIZE];   // which one is older?
+  std::uint16_t        rgb24_sequence;
 
   static vector<rxvt_term *> termlist; // a vector of all running rxvt_term's
 
@@ -1247,8 +1247,8 @@ struct rxvt_term : zero_initialized, rxvt_vars, rxvt_screen
 
   wchar_t next_char () NOTHROW;
   wchar_t cmd_getc () THROW ((class out_of_input));
-  uint32_t next_octet () NOTHROW;
-  uint32_t cmd_get8 () THROW ((class out_of_input));
+  std::uint32_t next_octet () NOTHROW;
+  std::uint32_t cmd_get8 () THROW ((class out_of_input));
 
   void cmd_parse ();
   void mouse_report (XButtonEvent &ev);

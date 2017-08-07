@@ -2387,7 +2387,7 @@ rxvt_term::next_char () NOTHROW
 }
 
 // read the next octet
-uint32_t ecb_hot
+std::uint32_t ecb_hot
 rxvt_term::next_octet () NOTHROW
 {
   return cmdbuf_ptr < cmdbuf_endp
@@ -2408,7 +2408,7 @@ rxvt_term::cmd_getc () THROW ((class out_of_input))
   return c;
 }
 
-uint32_t ecb_hot
+std::uint32_t ecb_hot
 rxvt_term::cmd_get8 () THROW ((class out_of_input))
 {
   uint32_t c = next_octet ();
