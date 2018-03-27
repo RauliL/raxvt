@@ -19,7 +19,7 @@ DEFS = @DEFS@
 LIBS = @LIBS@
 XINC = @X_CFLAGS@ @PIXBUF_CFLAGS@ @STARTUP_NOTIFICATION_CFLAGS@
 XLIB = @X_LIBS@ -lX11 @X_EXTRA_LIBS@ @PIXBUF_LIBS@ @STARTUP_NOTIFICATION_LIBS@
-COMPILE = $(CXX) -I.. -I$(srcdir) -I. -I$(srcdir)/../libev -I$(srcdir)/../libptytty/src -I$(srcdir)/../tinytoml/include $(DEFS) $(CPPFLAGS) $(CXXFLAGS) $(XINC)
+COMPILE = $(CXX) -I.. -I../include -I$(srcdir) -I. -I$(srcdir)/../libev -I$(srcdir)/../libptytty/src -I$(srcdir)/../tinytoml/include $(DEFS) $(CPPFLAGS) $(CXXFLAGS) $(XINC)
 LINK = @LINKER@ $(LDFLAGS)
 EXEEXT = @EXEEXT@
 PERLFLAGS = @PERLFLAGS@
@@ -38,7 +38,7 @@ COMMON = \
 	rxvttoolkit.o rxvtutil.o keyboard.o rxvtimg.o \
 	settings.o ev_cpp.o fdpass_wrapper.o ptytty_wrapper.o @PERL_O@
 
-COMMON_DAEMON = rxvtdaemon.o
+COMMON_DAEMON = connection.o
 
 RXVT_BINNAME=$(DESTDIR)$(bindir)/$(RXVTNAME)$(EXEEXT)
 RXVTC_BINNAME=$(DESTDIR)$(bindir)/$(RXVTNAME)c$(EXEEXT)
@@ -191,15 +191,15 @@ rxvt.o: rxvtutil.h ../libptytty/src/estl.h emman.h rxvtfont.h rxvttoolkit.h
 rxvt.o: ev_cpp.h ../config.h ../libev/ev++.h ../libev/ev.h callback.h
 rxvt.o: rxvtimg.h scrollbar.h ../libptytty/src/libptytty.h rxvtperl.h
 rxvt.o: hookinc.h rsinc.h optinc.h
-rxvtc.o: ../config.h rxvtdaemon.h rxvtutil.h ../libptytty/src/ecb.h
+rxvtc.o: ../config.h ../include/raxvt/connection.hpp rxvtutil.h ../libptytty/src/ecb.h
 rxvtc.o: ../libptytty/src/estl.h emman.h ../libptytty/src/libptytty.h
 rxvtd.o: ../config.h rxvt.h feature.h ../libptytty/src/ecb.h encoding.h
 rxvtd.o: rxvtutil.h ../libptytty/src/estl.h emman.h rxvtfont.h rxvttoolkit.h
 rxvtd.o: ev_cpp.h ../config.h ../libev/ev++.h ../libev/ev.h callback.h
 rxvtd.o: rxvtimg.h scrollbar.h ../libptytty/src/libptytty.h rxvtperl.h
-rxvtd.o: hookinc.h rsinc.h optinc.h rxvtdaemon.h
-rxvtdaemon.o: rxvtdaemon.h rxvtutil.h ../libptytty/src/ecb.h
-rxvtdaemon.o: ../libptytty/src/estl.h emman.h
+rxvtd.o: hookinc.h rsinc.h optinc.h ../include/raxvt/connection.hpp
+connection.o: ../include/raxvt/connection.hpp rxvtutil.h ../libptytty/src/ecb.h
+connection.o: ../libptytty/src/estl.h emman.h
 rxvtfont.o: ../config.h rxvt.h feature.h ../libptytty/src/ecb.h encoding.h
 rxvtfont.o: rxvtutil.h ../libptytty/src/estl.h emman.h rxvtfont.h
 rxvtfont.o: rxvttoolkit.h ev_cpp.h ../config.h ../libev/ev++.h ../libev/ev.h

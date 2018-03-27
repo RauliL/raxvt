@@ -38,10 +38,10 @@
 #endif
 
 #include "rxvt.h"
-#include "rxvtdaemon.h"
+#include "raxvt/connection.hpp"
 #include "libptytty.h"
 
-struct server : rxvt_connection {
+struct server : raxvt::connection {
   log_callback log_cb;
   getfd_callback getfd_cb;
 
@@ -280,7 +280,7 @@ main (int argc, char *argv[])
     if (const char *dpy = getenv ("DISPLAY"))
       displays.get (dpy ? dpy : ":0"); // move string logic into rxvt_display maybe?
 
-  char *sockname = rxvt_connection::unix_sockname ();
+  char *sockname = raxvt::connection::unix_sockname ();
   unix_listener l (sockname);
 
   chdir ("/");

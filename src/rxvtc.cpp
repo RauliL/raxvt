@@ -19,10 +19,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *----------------------------------------------------------------------*/
-
 #include "../config.h"
-#include <cstdio>
-#include <cstdlib>
+
 #include <cstring>
 #include <csignal>
 
@@ -30,93 +28,104 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 
-#include "rxvtdaemon.h"
+#include "raxvt/connection.hpp"
 #include "libptytty.h"
 
-#define STATUS_SUCCESS           0
-#define STATUS_FAILURE           1
-#define STATUS_CONNECTION_FAILED 2
+extern char** environ;
 
-struct client : rxvt_connection
+static const int STATUS_SUCCESS = EXIT_SUCCESS;
+static const int STATUS_FAILURE = EXIT_FAILURE;
+static const int STATUS_CONNECTION_FAILED = 2;
+
+struct client : raxvt::connection
 {
-  client ();
+  client()
+  {
+    sockaddr_un sa;
+    char* sockname = raxvt::connection::unix_sockname();
+
+    if (std::strlen(sockname) >= sizeof(sa.sun_path))
+    {
+      std::fputs("socket name too long, aborting.\n", stderr);
+      std::exit(STATUS_FAILURE);
+    }
+
+    if ((fd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
+    {
+      std::perror("unable to create communications socket");
+      std::exit(STATUS_FAILURE);
+    }
+
+    sa.sun_family = AF_UNIX;
+    std::strcpy(sa.sun_path, sockname);
+    std::free(sockname);
+
+    if (connect(fd, reinterpret_cast<sockaddr*>(&sa), sizeof(sa)))
+    {
+      std::perror("unable to connect to the rxvt-unicode daemon");
+      std::exit(STATUS_CONNECTION_FAILED);
+    }
+  }
 };
-
-client::client()
-{
-  sockaddr_un sa;
-  char* sockname = rxvt_connection::unix_sockname();
-
-  if (std::strlen(sockname) >= sizeof(sa.sun_path))
-  {
-    std::fputs("socket name too long, aborting.\n", stderr);
-    std::exit(STATUS_FAILURE);
-  }
-
-  if ((fd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
-  {
-    std::perror("unable to create communications socket");
-    std::exit(STATUS_FAILURE);
-  }
-
-  sa.sun_family = AF_UNIX;
-  std::strcpy(sa.sun_path, sockname);
-  std::free(sockname);
-
-  if (connect(fd, (sockaddr*) &sa, sizeof(sa)))
-  {
-    std::perror("unable to connect to the rxvt-unicode daemon");
-    std::exit(STATUS_CONNECTION_FAILED);
-  }
-}
 
 extern char **environ;
 
 int
-main (int argc, const char *const *argv)
+main(int argc, const char *const *argv)
 {
   // instead of getcwd we could opendir (".") and pass the fd for fchdir *g*
   char cwd[PATH_MAX];
 
-  if (!getcwd (cwd, sizeof (cwd)))
-    {
-      perror ("unable to determine current working directory");
-      exit (STATUS_FAILURE);
-    }
+  if (!getcwd(cwd, sizeof(cwd)))
+  {
+    std::perror("unable to determine current working directory");
+    std::exit(STATUS_FAILURE);
+  }
 
   client c;
 
   {
     sigset_t ss;
 
-    sigemptyset (&ss);
-    sigaddset (&ss, SIGHUP);
-    sigaddset (&ss, SIGPIPE);
-    sigprocmask (SIG_BLOCK, &ss, 0);
+    sigemptyset(&ss);
+    sigaddset(&ss, SIGHUP);
+    sigaddset(&ss, SIGPIPE);
+    sigprocmask(SIG_BLOCK, &ss, 0);
   }
 
-  if (argc >= 2 && !strcmp (argv[1], "-k"))
-    {
-      c.send ("QUIT");
-      return 0;
-    }
+  if (argc >= 2 && !std::strcmp(argv[1], "-k"))
+  {
+    c.send("QUIT");
+    std::exit(STATUS_SUCCESS);
+  }
 
-  c.send ("NEW");
+  c.send("NEW");
 
-  for (char **var = environ; *var; var++)
-    c.send ("ENV"), c.send (*var);
+  for (char* const* var = environ; *var; ++var)
+  {
+    c.send("ENV");
+    c.send(*var);
+  }
 
-  const char *base = strrchr (argv[0], '/');
+  const char* base = std::strrchr(argv[0], '/');
   base = base ? base + 1 : argv[0];
-  c.send ("ARG"), c.send (strcmp (base, RXVTNAME "c") ? base : RXVTNAME);
 
-  c.send ("ARG"), c.send ("-cd");
-  c.send ("ARG"), c.send (cwd);
+  c.send("ARG");
+  c.send(std::strcmp(base, RXVTNAME "c") ? base : RXVTNAME);
+
+  c.send("ARG");
+  c.send("-cd");
+
+  c.send("ARG");
+  c.send(cwd);
 
   for (int i = 1; i < argc; i++)
-    c.send ("ARG"), c.send (argv[i]);
+  {
+    c.send("ARG");
+    c.send (argv[i]);
+  }
 
-  c.send ("END");
+  c.send("END");
 
   std::string tok;
   int cint;
