@@ -56,6 +56,8 @@
 # include "keyboard.h"
 #endif
 
+#include "raxvt/display.hpp"
+
 #include <signal.h>
 
 #if LINUX_YIELD_HACK
@@ -1209,7 +1211,7 @@ rxvt_term::pty_fill ()
   else if (r < 0 && (errno == EAGAIN || errno == EINTR))
     {
 #if LINUX_YIELD_HACK
-      if (display->is_local)
+      if (display->local())
         event_handler.yield_ev.start ();
 #endif
     }
@@ -1254,14 +1256,14 @@ rxvt_term::pointer_unblank ()
 #endif
 }
 
-#ifdef POINTER_BLANK
+#if defined(POINTER_BLANK)
 void ecb_cold
 rxvt_term::pointer_blank ()
 {
   if (!get_option(Opt_pointerBlank))
     return;
 
-  XDefineCursor (dpy, vt, display->blank_cursor);
+  XDefineCursor (dpy, vt, display->blank_cursor());
   XFlush (dpy);
 
   hidden_pointer = 1;

@@ -39,6 +39,7 @@
 
 #include "rxvt.h"
 #include "raxvt/connection.hpp"
+#include "raxvt/display.hpp"
 #include "libptytty.h"
 
 struct server : raxvt::connection {
@@ -277,8 +278,12 @@ main (int argc, char *argv[])
 
   // optionally open display and never release it.
   if (opt_opendisplay)
-    if (const char *dpy = getenv ("DISPLAY"))
-      displays.get (dpy ? dpy : ":0"); // move string logic into rxvt_display maybe?
+  {
+    if (const char *dpy = std::getenv("DISPLAY"))
+    {
+      raxvt::display::get(dpy ? dpy : ":0"); // move string logic into rxvt_display maybe?
+    }
+  }
 
   char *sockname = raxvt::connection::unix_sockname ();
   unix_listener l (sockname);

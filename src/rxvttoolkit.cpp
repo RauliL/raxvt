@@ -25,6 +25,8 @@
 #include <rxvt.h>
 #include <rxvttoolkit.h>
 
+#include "raxvt/display.hpp"
+
 #include <stdlib.h>
 
 #include <unistd.h>
@@ -36,63 +38,6 @@
 
 #include <X11/extensions/Xrender.h>
 
-static const char *const xa_names[] =
-{
-  "TEXT",
-  "COMPOUND_TEXT",
-  "UTF8_STRING",
-  "MULTIPLE",
-  "TARGETS",
-  "TIMESTAMP",
-  "VT_SELECTION",
-  "INCR",
-  "WM_PROTOCOLS",
-  "WM_DELETE_WINDOW",
-  "CLIPBOARD",
-  "AVERAGE_WIDTH",
-  "WEIGHT_NAME",
-  "SLANT",
-  "CHARSET_REGISTRY",
-  "CHARSET_ENCODING",
-#if ENABLE_FRILLS
-  "_MOTIF_WM_HINTS",
-#endif
-#if ENABLE_EWMH
-  "_NET_WM_PID",
-  "_NET_WM_NAME",
-  "_NET_WM_ICON_NAME",
-  "_NET_WM_PING",
-  "_NET_WM_ICON",
-#endif
-#if USE_XIM
-  "WM_LOCALE_NAME",
-  "XIM_SERVERS",
-#endif
-#if HAVE_IMG || ENABLE_PERL
-  "_XROOTPMAP_ID",
-  "ESETROOT_PMAP_ID",
-#endif
-#if ENABLE_XEMBED
-  "_XEMBED",
-  "_XEMBED_INFO",
-#endif
-#if !ENABLE_MINIMAL
-  "SCREEN_RESOURCES",
-  "XDCCC_LINEAR_RGB_CORRECTION",
-  "XDCCC_LINEAR_RGB_MATRICES",
-  "WM_COLORMAP_WINDOWS",
-  "WM_STATE",
-  "cursor",
-# if USE_XIM
-  "TRANSPORT",
-  "LOCALES",
-  "_XIM_PROTOCOL",
-  "_XIM_XCONNECT",
-  "_XIM_MOREDATA",
-# endif
-#endif
-};
-
 /////////////////////////////////////////////////////////////////////////////
 
 refcounted::refcounted (const char *id)
@@ -103,54 +48,6 @@ refcounted::refcounted (const char *id)
 refcounted::~refcounted ()
 {
   free (id);
-}
-
-template<class T>
-T *refcache<T>::get (const char *id)
-{
-  for (T **i = this->begin (); i < this->end (); ++i)
-    {
-      if (!strcmp (id, (*i)->id))
-        {
-          ++(*i)->referenced;
-          (*i)->ref_next ();
-          return *i;
-        }
-    }
-
-  T *obj = new T (id);
-
-  if (obj && obj->ref_init ())
-    {
-      obj->referenced = 1;
-      this->push_back (obj);
-      return obj;
-    }
-  else
-    {
-      delete obj;
-      return 0;
-    }
-}
-
-template<class T>
-void refcache<T>::put (T *obj)
-{
-  if (!obj)
-    return;
-
-  if (!--obj->referenced)
-    {
-      this->erase (find (this->begin (), this->end (), obj));
-      delete obj;
-    }
-}
-
-template<class T>
-void refcache<T>::clear ()
-{
-  while (this->size ())
-    put (*this->begin ());
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -165,12 +62,12 @@ im_destroy_cb (XIM unused1, XPointer client_data, XPointer unused3)
 #endif
 {
   rxvt_xim *xim = (rxvt_xim *)client_data;
-  rxvt_display *display = xim->display;
+  raxvt::display* display = xim->display;
 
   xim->xim = 0;
 
-  display->xims.erase (find (display->xims.begin (), display->xims.end (), xim));
-  display->im_change_cb ();
+  display->xims.erase(find(display->xims.begin(), display->xims.end(), xim));
+  display->im_change_cb();
 }
 
 bool
@@ -178,7 +75,7 @@ rxvt_xim::ref_init ()
 {
   display = GET_R->display; //HACK: TODO
 
-  xim = XOpenIM (display->dpy, 0, 0, 0);
+  xim = XOpenIM(display->dpy(), 0, 0, 0);
 
   if (!xim)
     return false;
@@ -244,10 +141,10 @@ rxvt_drawable &rxvt_screen::scratch_drawable (int w, int h)
 }
 
 void
-rxvt_screen::set (rxvt_display *disp)
+rxvt_screen::set(raxvt::display* disp)
 {
   display = disp;
-  dpy     = disp->dpy;
+  dpy = disp->dpy();
 
   Screen *screen = ScreenOfDisplay (dpy, disp->screen);
 
@@ -306,430 +203,32 @@ rxvt_screen::clear ()
 
 /////////////////////////////////////////////////////////////////////////////
 
-rxvt_display::rxvt_display (const char *id)
-: refcounted (id)
-, selection_owner (0)
-, clipboard_owner (0)
+#if defined(USE_XIM)
+void
+im_watcher::start(raxvt::display* display)
 {
-  x_ev    .set<rxvt_display, &rxvt_display::x_cb    > (this);
-  flush_ev.set<rxvt_display, &rxvt_display::flush_cb> (this);
-}
-
-XrmDatabase
-rxvt_display::get_resources (bool refresh)
-{
-  char *homedir = getenv ("HOME");
-  char fname[1024];
-
-  /*
-   * get resources using the X library function
-   */
-  char *displayResource, *xe;
-  XrmDatabase rdb1, database = 0;
-
-#if !XLIB_ILLEGAL_ACCESS
-  /* work around a bug in XrmSetDatabase where it frees the db, see ref_next */
-  database = XrmGetStringDatabase ("");
-#endif
-
-  // for ordering, see for example http://www.faqs.org/faqs/Xt-FAQ/ Subject: 20
-  // as opposed to "standard practise", we always read in ~/.Xdefaults
-
-  // 6. System wide per application default file.
-
-  /* Add in $XAPPLRESDIR/Rxvt only; not bothering with XUSERFILESEARCHPATH */
-  if ((xe = getenv ("XAPPLRESDIR")))
-    {
-      snprintf (fname, sizeof (fname), "%s/%s", xe, RESCLASS);
-
-      if ((rdb1 = XrmGetFileDatabase (fname)))
-        XrmMergeDatabases (rdb1, &database);
-    }
-
-  // 5. User's per application default file.
-  // none
-
-  // 4. User's defaults file.
-  if (homedir)
-    {
-      snprintf (fname, sizeof (fname), "%s/.Xdefaults", homedir);
-
-      if ((rdb1 = XrmGetFileDatabase (fname)))
-        XrmMergeDatabases (rdb1, &database);
-    }
-
-  /* Get any Xserver defaults */
-  if (refresh)
-    {
-      // fucking xlib keeps a copy of the rm string
-      Atom actual_type;
-      int actual_format;
-      unsigned long nitems, nremaining;
-      char *val = 0;
-
-#if XLIB_ILLEGAL_ACCESS
-      if (dpy->xdefaults)
-        XFree (dpy->xdefaults);
-#endif
-
-      if (XGetWindowProperty (dpy, RootWindow (dpy, 0), XA_RESOURCE_MANAGER,
-                              0L, 100000000L, False,
-                              XA_STRING, &actual_type, &actual_format,
-                              &nitems, &nremaining,
-                              (unsigned char **)&val) == Success
-          && actual_type == XA_STRING
-          && actual_format == 8)
-        displayResource = val;
-      else
-        {
-          displayResource = 0;
-
-          if (val)
-            XFree (val);
-        }
-
-#if XLIB_ILLEGAL_ACCESS
-      dpy->xdefaults = displayResource;
-#endif
-    }
-  else
-    displayResource = XResourceManagerString (dpy);
-
-  if (displayResource)
-    {
-      if ((rdb1 = XrmGetStringDatabase (displayResource)))
-        XrmMergeDatabases (rdb1, &database);
-    }
-
-#if !XLIB_ILLEGAL_ACCESS
-  if (refresh && displayResource)
-    XFree (displayResource);
-#endif
-
-  /* Get screen specific resources */
-  displayResource = XScreenResourceString (ScreenOfDisplay (dpy, screen));
-
-  if (displayResource)
-    {
-      if ((rdb1 = XrmGetStringDatabase (displayResource)))
-        /* Merge with screen-independent resources */
-        XrmMergeDatabases (rdb1, &database);
-
-      XFree (displayResource);
-    }
-
-  // 3. User's per host defaults file
-  /* Add in XENVIRONMENT file */
-  if ((xe = getenv ("XENVIRONMENT"))
-      && (rdb1 = XrmGetFileDatabase (xe)))
-    XrmMergeDatabases (rdb1, &database);
-  else if (homedir)
-    {
-      struct utsname un;
-
-      if (!uname (&un))
-        {
-          snprintf (fname, sizeof (fname), "%s/.Xdefaults-%s", homedir, un.nodename);
-
-          if ((rdb1 = XrmGetFileDatabase (fname)))
-            XrmMergeDatabases (rdb1, &database);
-        }
-    }
-
-  return database;
-}
-
-bool rxvt_display::ref_init ()
-{
-#ifdef LOCAL_X_IS_UNIX
-  if (id[0] == ':')
-    {
-      char* val = rxvt_temp_buf<char>(5 + std::strlen(id) + 1);
-
-      std::strcpy(val, "unix/");
-      std::strcat(val, id);
-
-      dpy = XOpenDisplay (val);
-    }
-  else
-#endif
-    dpy = 0;
-
-  if (!dpy)
-    dpy = XOpenDisplay (id);
-
-  if (!dpy)
-    return false;
-
-  screen = DefaultScreen     (dpy);
-  root   = DefaultRootWindow (dpy);
-
-  assert (ecb_array_length (xa_names) == NUM_XA);
-  XInternAtoms (dpy, (char **)xa_names, NUM_XA, False, xa);
-
-  XrmSetDatabase (dpy, get_resources (false));
-
-#ifdef POINTER_BLANK
-  XColor blackcolour;
-  blackcolour.red   = 0;
-  blackcolour.green = 0;
-  blackcolour.blue  = 0;
-  Font f = XLoadFont (dpy, "fixed");
-  blank_cursor = XCreateGlyphCursor (dpy, f, f, ' ', ' ',
-                                     &blackcolour, &blackcolour);
-  XUnloadFont (dpy, f);
-#endif
-
-  flags = 0;
-#if XRENDER
-  int major, minor;
-  if (XRenderQueryVersion (dpy, &major, &minor))
-    if (major > 0 || (major == 0 && minor >= 11))
-      {
-        flags |= DISPLAY_HAS_RENDER;
-
-        if (XFilters *filters = XRenderQueryFilters (dpy, root))
-          {
-            for (int i = 0; i < filters->nfilter; i++)
-              if (!strcmp (filters->filter [i], FilterConvolution))
-                flags |= DISPLAY_HAS_RENDER_CONV;
-
-            XFree (filters);
-          }
-      }
-#endif
-
-  int fd = XConnectionNumber (dpy);
-
-  // try to detect whether we have a local connection.
-  // assume unix domain socket == local, everything else not
-  // TODO: might want to check for inet/127.0.0.1
-  is_local = 0;
-  sockaddr_un sa;
-  socklen_t sl = sizeof (sa);
-
-  if (!getsockname (fd, (sockaddr *)&sa, &sl))
-    is_local = sa.sun_family == AF_UNIX;
-
-  flush_ev.start ();
-  x_ev.start (fd, ev::READ);
-  fcntl (fd, F_SETFD, FD_CLOEXEC);
-
-  XSelectInput (dpy, root, PropertyChangeMask);
-
-  flush ();
-
-  return true;
+  display->reg(this);
 }
 
 void
-rxvt_display::ref_next ()
+im_watcher::stop(raxvt::display* display)
 {
-  // TODO: somehow check whether the database files/resources changed
-  // before affording re-loading/parsing
-  XrmDestroyDatabase (XrmGetDatabase (dpy));
-#if XLIB_ILLEGAL_ACCESS
-  /* work around a bug in XrmSetDatabase where it frees the db */
-  dpy->db = 0;
-#endif
-  XrmSetDatabase (dpy, get_resources (true));
-}
-
-rxvt_display::~rxvt_display ()
-{
-  if (!dpy)
-    return;
-
-#ifdef POINTER_BLANK
-  XFreeCursor (dpy, blank_cursor);
-#endif
-  x_ev.stop ();
-  flush_ev.stop ();
-#if USE_XIM
-  xims.clear ();
-#endif
-  XrmDestroyDatabase (XrmGetDatabase (dpy));
-  XCloseDisplay (dpy);
-}
-
-#if USE_XIM
-void rxvt_display::im_change_cb ()
-{
-  for (im_watcher **i = imw.begin (); i != imw.end (); ++i)
-    (*i)->call ();
-}
-
-void rxvt_display::im_change_check ()
-{
-  // try to only call im_change_cb when a new input method
-  // registers, as xlib crashes due to a race otherwise.
-  Atom actual_type, *atoms;
-  int actual_format;
-  unsigned long nitems, bytes_after;
-
-  if (XGetWindowProperty (dpy, root, xa[XA_XIM_SERVERS], 0L, 1000000L,
-                          False, XA_ATOM, &actual_type, &actual_format,
-                          &nitems, &bytes_after, (unsigned char **)&atoms)
-      != Success)
-    return;
-
-  if (actual_type == XA_ATOM && actual_format == 32)
-    for (int i = 0; i < nitems; i++)
-      if (XGetSelectionOwner (dpy, atoms[i]))
-        {
-          im_change_cb ();
-          break;
-        }
-
-  XFree (atoms);
+  display->unreg(this);
 }
 #endif
 
-void rxvt_display::x_cb (ev::io &w, int revents)
+void
+xevent_watcher::start(raxvt::display* display, Window window)
 {
-  flush_ev.start ();
+  this->window = window;
+  display->reg(this);
 }
 
-void rxvt_display::flush_cb (ev::prepare &w, int revents)
+void
+xevent_watcher::stop(raxvt::display* display)
 {
-  while (XEventsQueued (dpy, QueuedAfterFlush))
-    do
-      {
-        XEvent xev;
-        XNextEvent (dpy, &xev);
-
-#if USE_XIM
-        if (!XFilterEvent (&xev, None))
-          {
-            if (xev.type == PropertyNotify
-                && xev.xany.window == root
-                && xev.xproperty.atom == xa[XA_XIM_SERVERS])
-              im_change_check ();
-#endif
-            if (xev.type == MappingNotify)
-              XRefreshKeyboardMapping (&xev.xmapping);
-
-            for (int i = xw.size (); i--; )
-              {
-                if (!xw[i])
-                  xw.erase_unordered (i);
-                else if (xw[i]->window == xev.xany.window)
-                  xw[i]->call (xev);
-              }
-#if USE_XIM
-          }
-#endif
-      }
-    while (XEventsQueued (dpy, QueuedAlready));
-
-  w.stop ();
+  display->unreg(this);
 }
-
-void rxvt_display::reg (xevent_watcher *w)
-{
-  if (!w->active)
-    {
-      xw.push_back (w);
-      w->active = xw.size ();
-    }
-}
-
-void rxvt_display::unreg (xevent_watcher *w)
-{
-  if (w->active)
-    {
-      xw[w->active - 1] = 0;
-      w->active = 0;
-    }
-}
-
-void rxvt_display::set_selection_owner (rxvt_term *owner, bool clipboard)
-{
-  rxvt_term * &cur_owner = !clipboard ? selection_owner : clipboard_owner;
-
-  if (cur_owner && cur_owner != owner)
-    {
-      rxvt_term *term = cur_owner;
-      term->selection_clear (clipboard);
-      term->flush ();
-    }
-
-  cur_owner = owner;
-}
-
-#if USE_XIM
-
-void rxvt_display::reg (im_watcher *w)
-{
-  imw.push_back (w);
-}
-
-void rxvt_display::unreg (im_watcher *w)
-{
-  imw.erase (find (imw.begin (), imw.end (), w));
-}
-
-rxvt_xim*
-rxvt_display::get_xim(const char* locale, const char* modifiers)
-{
-  char* id;
-  const std::size_t l = std::strlen(locale);
-  const std::size_t m = std::strlen(modifiers);
-
-  if (!(id = rxvt_temp_buf<char> (l + m + 2)))
-  {
-    return nullptr;
-  }
-
-  std::memcpy(id, locale, l);
-  id[l] = '\n';
-
-  std::memcpy(id + l + 1, modifiers, m);
-  id[l + m + 1] = 0;
-
-  return xims.get(id);
-}
-
-void rxvt_display::put_xim (rxvt_xim *xim)
-{
-# if XLIB_IS_RACEFREE
-  xims.put (xim);
-# endif
-}
-
-#endif
-
-Atom rxvt_display::atom (const char *name)
-{
-  return XInternAtom (dpy, name, False);
-}
-
-Pixmap
-rxvt_display::get_pixmap_property (Atom property)
-{
-  Pixmap pixmap = None;
-
-  int aformat;
-  unsigned long nitems, bytes_after;
-  Atom atype;
-  unsigned char *prop;
-  int result = XGetWindowProperty (dpy, root, property,
-                                   0L, 1L, False, XA_PIXMAP, &atype, &aformat,
-                                   &nitems, &bytes_after, &prop);
-  if (result == Success)
-    {
-      if (atype == XA_PIXMAP)
-        pixmap = *(Pixmap *)prop;
-      XFree (prop);
-    }
-
-  return pixmap;
-}
-
-/////////////////////////////////////////////////////////////////////////////
-
-template class refcache<rxvt_display>;
-refcache<rxvt_display> displays;
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -950,7 +449,12 @@ rxvt_color::fade (rxvt_screen *screen, int percent, rxvt_color &result, const rg
   );
 }
 
-rxvt_selection::rxvt_selection (rxvt_display *disp, int selnum, Time tm, Window win, Atom prop, rxvt_term *term)
+rxvt_selection::rxvt_selection(raxvt::display* disp,
+                               int selnum,
+                               Time tm,
+                               Window win,
+                               Atom prop,
+                               rxvt_term* term)
 : display (disp), request_time (tm), request_win (win), request_prop (prop), term (term)
 {
   assert (selnum >= Sel_Primary && selnum <= Sel_Clipboard);
@@ -1044,10 +548,16 @@ rxvt_selection::request (Atom target, int selnum)
   else
     sel = display->xa[XA_CLIPBOARD];
 
-  if (XGetSelectionOwner (display->dpy, sel) != None)
+  if (XGetSelectionOwner(display->dpy(), sel) != None)
     {
-      XConvertSelection (display->dpy, sel, target, request_prop,
-                         request_win, request_time);
+      XConvertSelection(
+        display->dpy(),
+        sel,
+        target,
+        request_prop,
+        request_win,
+        request_time
+      );
       x_ev.start (display, request_win);
       timer_ev.again ();
       return true;
@@ -1059,7 +569,7 @@ rxvt_selection::request (Atom target, int selnum)
 void
 rxvt_selection::handle_selection (Window win, Atom prop, bool delete_prop)
 {
-  Display *dpy = display->dpy;
+  auto dpy = display->dpy();
   char *data = 0;
   unsigned int data_len = 0;
   unsigned long bytes_after;

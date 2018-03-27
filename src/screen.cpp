@@ -29,6 +29,8 @@
 #include "rxvt.h"               /* NECESSARY */
 #include "rxvtperl.h"           /* NECESSARY */
 
+#include "raxvt/display.hpp"
+
 static inline void
 fill_text (text_t *start, text_t value, int len)
 {
@@ -1830,7 +1832,7 @@ rxvt_term::scr_expose (int x, int y, int ewidth, int eheight, bool refresh) NOTH
     return;
 
 #ifndef NO_SLOW_LINK_SUPPORT
-  if (refresh_type == FAST_REFRESH && !display->is_local)
+  if (refresh_type == FAST_REFRESH && !display->local())
     {
       y = 0;
       eheight = height;
@@ -2133,7 +2135,7 @@ rxvt_term::scr_refresh () NOTHROW
    * D: CopyArea pass - very useful for slower links
    *    This has been deliberately kept simple.
    */
-  if (!display->is_local
+  if (!display->local()
       && refresh_type == FAST_REFRESH && num_scr_allow && num_scr
       && abs (num_scr) < nrow && !have_bg)
     {
@@ -2724,7 +2726,7 @@ rxvt_term::selection_clear (bool clipboard) NOTHROW
       CLEAR_SELECTION ();
 
       if (display->selection_owner == this)
-        display->selection_owner = 0;
+        display->selection_owner = nullptr;
     }
   else
     {
@@ -2733,7 +2735,7 @@ rxvt_term::selection_clear (bool clipboard) NOTHROW
       selection.clip_len = 0;
 
       if (display->clipboard_owner == this)
-        display->clipboard_owner = 0;
+        display->clipboard_owner = nullptr;
     }
 }
 

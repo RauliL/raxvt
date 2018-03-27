@@ -24,6 +24,8 @@
 #include "rxvtutil.h"
 #include "rxvtfont.h"
 
+#include "raxvt/display.hpp"
+
 #include <fontconfig/fontconfig.h>
 
 #define MAX_OVERLAP_ROMAN  (8 + 2)	// max. character width in 8ths of the base width

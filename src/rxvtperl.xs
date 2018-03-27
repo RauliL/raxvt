@@ -40,6 +40,8 @@
 #include "rxvtutil.h"
 #include "rxvtperl.h"
 
+#include "raxvt/display.hpp"
+
 #include "perlxsi.c"
 
 #define GRAB_CURSOR THIS->scrollBar.leftptr_cursor
@@ -1456,7 +1458,7 @@ rxvt_term::ModLevel3Mask ()
         OUTPUT:
         RETVAL
 
-char *
+const char*
 rxvt_term::display_id ()
 	ALIAS:
            display_id = 0
@@ -1464,7 +1466,7 @@ rxvt_term::display_id ()
 	CODE:
         switch (ix)
           {
-            case 0: RETVAL = THIS->display->id; break;
+            case 0: RETVAL = THIS->display->id().c_str(); break;
             case 1: RETVAL = THIS->locale;      break;
           }
         OUTPUT:
@@ -2225,7 +2227,7 @@ rxvt_term::XTranslateCoordinates (Window src, Window dst, int x, int y)
 bool
 rxvt_term::has_render ()
 	CODE:
-        RETVAL = THIS->display->flags & DISPLAY_HAS_RENDER;
+        RETVAL = THIS->display->has_flag(raxvt::display::has_render);
 	OUTPUT:
         RETVAL
 

@@ -99,11 +99,6 @@ typedef std::int32_t tlen_t_; // specifically for use in the line_t structure
 # define STDERR_FILENO  2
 #endif
 
-#ifndef EXIT_SUCCESS            /* missing from <stdlib.h> */
-# define EXIT_SUCCESS           0       /* exit function success */
-# define EXIT_FAILURE           1       /* exit function failure */
-#endif
-
 /****************************************************************************/
 
 // exception thrown on fatal (per-instance) errors

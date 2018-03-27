@@ -37,6 +37,8 @@
 #include "keyboard.h"
 #include "rxvtperl.h"
 
+#include "raxvt/display.hpp"
+
 #include <limits>
 #include <csignal>
 #include <termios.h>
@@ -247,7 +249,7 @@ rxvt_term::~rxvt_term ()
       clear ();
 
       display->flush (); /* ideally .put should do this */
-      displays.put (display);
+      raxvt::display::remove(display->id());
     }
 
   scr_release ();

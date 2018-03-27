@@ -32,7 +32,7 @@ first_rule: all
 dummy:
 
 COMMON = \
-	command.o rxvtfont.o init.o main.o misc.o \
+	command.o display.o rxvtfont.o init.o main.o misc.o \
 	screen.o scrollbar.o scrollbar-next.o scrollbar-rxvt.o \
 	scrollbar-xterm.o scrollbar-plain.o encoding.o \
 	rxvttoolkit.o rxvtutil.o keyboard.o rxvtimg.o \

@@ -25,6 +25,8 @@
 #include "../config.h"
 #include "rxvt.h"
 
+#include "raxvt/display.hpp"
+
 #if HAVE_IMG
 
 typedef rxvt_img::nv nv;
@@ -165,7 +167,7 @@ namespace
       else if (!this->dstimg->pm) // somewhat unsatisfying
         this->dstimg->alloc ();
 
-      dpy =       srcimg->d->dpy;
+      dpy =       srcimg->d->dpy();
       src =       srcimg->picture ();
       dst = this->dstimg->picture ();
     }
@@ -253,7 +255,13 @@ rxvt_img::rxvt_img (rxvt_screen *screen, XRenderPictFormat *format, int x, int y
 {
 }
 
-rxvt_img::rxvt_img (rxvt_display *display, XRenderPictFormat *format, int x, int y, int width, int height, int repeat)
+rxvt_img::rxvt_img(raxvt::display* display,
+                   XRenderPictFormat* format,
+                   int x,
+                   int y,
+                   int width,
+                   int height,
+                   int repeat)
 : d(display), x(x), y(y), w(width), h(height), format(format), repeat(repeat),
   pm(0), ref(0)
 {
@@ -421,7 +429,7 @@ rxvt_img::destroy ()
     return;
 
   if (pm && ref->ours)
-    XFreePixmap (d->dpy, pm);
+    XFreePixmap (d->dpy(), pm);
 
   delete ref;
 }
@@ -434,7 +442,7 @@ rxvt_img::~rxvt_img ()
 void
 rxvt_img::alloc ()
 {
-  pm = XCreatePixmap (d->dpy, d->root, w, h, format->depth);
+  pm = XCreatePixmap (d->dpy(), d->root, w, h, format->depth);
   ref = new pixref (w, h);
 }
 
@@ -450,7 +458,7 @@ rxvt_img::new_empty ()
 Picture
 rxvt_img::picture ()
 {
-  Display *dpy = d->dpy;
+  auto dpy = d->dpy();
 
   XRenderPictureAttributes pa;
   pa.repeat = repeat;
@@ -465,10 +473,10 @@ rxvt_img::unshare ()
   if (ref->cnt == 1 && ref->ours)
     return;
 
-  Pixmap pm2 = XCreatePixmap (d->dpy, d->root, ref->w, ref->h, format->depth);
-  GC gc = XCreateGC (d->dpy, pm, 0, 0);
-  XCopyArea (d->dpy, pm, pm2, gc, 0, 0, ref->w, ref->h, 0, 0);
-  XFreeGC (d->dpy, gc);
+  Pixmap pm2 = XCreatePixmap (d->dpy(), d->root, ref->w, ref->h, format->depth);
+  GC gc = XCreateGC (d->dpy(), pm, 0, 0);
+  XCopyArea (d->dpy(), pm, pm2, gc, 0, 0, ref->w, ref->h, 0, 0);
+  XFreeGC (d->dpy(), gc);
 
   destroy ();
 
@@ -481,7 +489,7 @@ rxvt_img::fill (const rgba &c, int x, int y, int w, int h)
 {
   XRenderColor rc = { c.r, c.g, c.b, c.a };
 
-  Display *dpy = d->dpy;
+  auto dpy = d->dpy();
   Picture src = picture ();
   XRenderFillRectangle (dpy, PictOpSrc, src, &rc, x, y, w, h);
   XRenderFreePicture (dpy, src);
@@ -499,8 +507,8 @@ rxvt_img::add_alpha ()
   if (format->direct.alphaMask)
     return;
 
-  composer cc (this, new rxvt_img (d, find_alpha_format_for (d->dpy, format), x, y, w, h, repeat));
-  
+  composer cc (this, new rxvt_img (d, find_alpha_format_for (d->dpy(), format), x, y, w, h, repeat));
+
   XRenderComposite (cc.dpy, PictOpSrc, cc.src, None, cc.dst, 0, 0, 0, 0, 0, 0, w, h);
 
   rxvt_img *img = cc;
@@ -535,11 +543,13 @@ get_gaussian_kernel (int radius, int width, nv *kernel, XFixed *params)
 rxvt_img *
 rxvt_img::blur (int rh, int rv)
 {
-  if (!(d->flags & DISPLAY_HAS_RENDER_CONV))
-    return clone ();
+  if (!d->has_flag(raxvt::display::has_render_conv))
+  {
+    return clone();
+  }
 
-  Display *dpy = d->dpy;
-  int size = max (rh, rv) * 2 + 1;
+  auto dpy = d->dpy();
+  int size = std::max(rh, rv) * 2 + 1;
   nv *kernel = static_cast<nv*>(std::malloc(size * sizeof(nv)));
   XFixed *params = rxvt_temp_buf<XFixed> (size + 2);
   rxvt_img *img = new_empty ();
@@ -676,7 +686,7 @@ rxvt_img::brightness (int32_t r, int32_t g, int32_t b, int32_t a)
 {
   unshare ();
 
-  Display *dpy = d->dpy;
+  auto dpy = d->dpy();
   Picture dst = XRenderCreatePicture (dpy, pm, format, 0, 0);
 
   // loop should not be needed for brightness, as only -1..1 makes sense
@@ -746,7 +756,7 @@ rxvt_img::draw (rxvt_img *img, int op, nv mask)
   unshare ();
 
   composer cc (img, this);
-  
+
   if (mask != 1.)
     cc.mask (rgba (0, 0, 0, float_to_component (mask)));
 
@@ -770,7 +780,7 @@ rxvt_img::reify ()
                && (x || y)               // we need one because of non-zero offset
                && repeat == RepeatNone;  // and we have no good pixels to fill with
 
-  composer cc (this, new rxvt_img (d, alpha ? find_alpha_format_for (d->dpy, format) : format,
+  composer cc (this, new rxvt_img (d, alpha ? find_alpha_format_for (d->dpy(), format) : format,
                                    0, 0, w, h, repeat));
 
   if (repeat == RepeatNone)

@@ -38,6 +38,8 @@
 #include "init.h"
 #include "keyboard.h"
 
+#include "raxvt/display.hpp"
+
 #include <limits>
 
 #include <signal.h>
@@ -539,8 +541,10 @@ rxvt_term::init_resources (int argc, const char *const *argv)
 
   cmd_argv = get_options (argc, argv);
 
-  if (!(display = displays.get (get_setting(Rs_display_name))))
+  if (!(display = raxvt::display::get(get_setting(Rs_display_name))))
+  {
     rxvt_fatal ("can't open display %s, aborting.\n", get_setting(Rs_display_name));
+  }
 
   // using a local pointer decreases code size a lot
   xa = display->xa;

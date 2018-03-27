@@ -95,24 +95,14 @@ enum {
 };
 
 struct rxvt_term;
-struct rxvt_display;
+
+namespace raxvt
+{
+  struct display;
+}
 
 struct im_watcher;
 struct xevent_watcher;
-
-template<class watcher>
-struct event_vec : vector<watcher *>
-{
-  void erase_unordered (unsigned int pos)
-  {
-    watcher *w = (*this)[this->size () - 1];
-    this->pop_back ();
-
-    if (!this->empty ())
-      if (((*this)[pos] = w)) // '=' is correct!
-        w->active = pos + 1;
-  }
-};
 
 struct rxvt_watcher
 {
@@ -135,15 +125,61 @@ struct refcounted
 };
 
 template<class T>
-struct refcache : vector<T *>
+struct refcache : vector<T*>
 {
-  T *get (const char *id);
-  void put (T *obj);
-  void clear ();
-
-  ~refcache ()
+public:
+  ~refcache()
   {
-    clear ();
+    clear();
+  }
+
+  T* get(const char* id)
+  {
+    for (T** i = this->begin(); i < this->end(); ++i)
+    {
+      if (!std::strcmp(id, (*i)->id))
+      {
+        ++(*i)->referenced;
+        (*i)->ref_next();
+
+        return *i;
+      }
+    }
+
+    T* obj = new T(id);
+
+    if (obj && obj->ref_init())
+    {
+      obj->referenced = 1;
+      this->push_back(obj);
+
+      return obj;
+    }
+
+    delete obj;
+
+    return nullptr;
+  }
+
+  void put(T* obj)
+  {
+    if (!obj)
+    {
+      return;
+    }
+    if (!--obj->referenced)
+    {
+      this->erase(find(this->begin(), this->end(), obj));
+      delete obj;
+    }
+  }
+
+  void clear()
+  {
+    while (this->size())
+    {
+      put(*this->begin());
+    }
   }
 };
 
@@ -174,7 +210,7 @@ struct rxvt_drawable
 struct rxvt_xim : refcounted
 {
   void destroy ();
-  rxvt_display *display;
+  raxvt::display* display;
 
 //public
   XIM xim;
@@ -187,7 +223,7 @@ struct rxvt_xim : refcounted
 
 struct rxvt_screen
 {
-  rxvt_display *display;
+  raxvt::display* display;
   Display *dpy;
   int depth;
   Visual *visual;
@@ -201,85 +237,17 @@ struct rxvt_screen
 
   rxvt_screen ();
 
-  void set (rxvt_display *disp);
+  void set(raxvt::display* disp);
   void select_visual (int id);
   void select_depth (int bitdepth); // select visual by depth
   void clear ();
 };
 
-enum
-{
-  DISPLAY_HAS_RENDER      = 1 << 0,
-  DISPLAY_HAS_RENDER_CONV = 1 << 1,
-};
-
-struct rxvt_display : refcounted
-{
-  event_vec<xevent_watcher> xw;
-
-  ev::prepare flush_ev; void flush_cb (ev::prepare &w, int revents);
-  ev::io      x_ev    ; void x_cb     (ev::io      &w, int revents);
-
-#if USE_XIM
-  refcache<rxvt_xim> xims;
-  vector<im_watcher *> imw;
-
-  void im_change_cb ();
-  void im_change_check ();
-#endif
-
-//public
-  Display   *dpy;
-  int       screen;
-  Window    root;
-  rxvt_term *selection_owner;
-  rxvt_term *clipboard_owner;
-  Atom      xa[NUM_XA];
-  bool      is_local;
-#ifdef POINTER_BLANK
-  Cursor    blank_cursor;
-#endif
-  uint8_t   flags;
-
-  rxvt_display (const char *id);
-  XrmDatabase get_resources (bool refresh);
-  bool ref_init ();
-  void ref_next ();
-  ~rxvt_display ();
-
-  void flush ()
-  {
-    flush_ev.start ();
-  }
-
-  Atom atom (const char *name);
-  Pixmap get_pixmap_property (Atom property);
-  void set_selection_owner (rxvt_term *owner, bool clipboard);
-
-  void reg (xevent_watcher *w);
-  void unreg (xevent_watcher *w);
-
-#if USE_XIM
-  void reg (im_watcher *w);
-  void unreg (im_watcher *w);
-
-  rxvt_xim *get_xim (const char *locale, const char *modifiers);
-  void put_xim (rxvt_xim *xim);
-#endif
-};
-
 #if USE_XIM
 struct im_watcher : rxvt_watcher, callback<void (void)>
 {
-  void start (rxvt_display *display)
-  {
-    display->reg (this);
-  }
-
-  void stop (rxvt_display *display)
-  {
-    display->unreg (this);
-  }
+  void start(raxvt::display* display);
+  void stop(raxvt::display* display);
 };
 #endif
 
@@ -287,19 +255,9 @@ struct xevent_watcher : rxvt_watcher, callback<void (XEvent &)>
 {
   Window window;
 
-  void start (rxvt_display *display, Window window)
-  {
-    this->window = window;
-    display->reg (this);
-  }
-
-  void stop (rxvt_display *display)
-  {
-    display->unreg (this);
-  }
+  void start(raxvt::display* display, Window window);
+  void stop(raxvt::display* display);
 };
-
-extern refcache<rxvt_display> displays;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -362,14 +320,19 @@ struct rxvt_color
 
 struct rxvt_selection
 {
-  rxvt_selection (rxvt_display *disp, int selnum, Time tm, Window win, Atom prop, rxvt_term *term);
+  rxvt_selection(raxvt::display* disp,
+                 int selnum,
+                 Time tm,
+                 Window win,
+                 Atom prop,
+                 rxvt_term* term);
   void run ();
   ~rxvt_selection ();
 
   rxvt_term *term; // terminal to paste to, may be 0
   void *cb_sv;     // managed by perl
 
-  rxvt_display *display;
+  raxvt::display* display;
   Time request_time;
   Window request_win;
   Atom request_prop;
