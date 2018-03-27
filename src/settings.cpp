@@ -903,7 +903,21 @@ rxvt_term::x_resource (const char *name)
 static bool
 load_settings_from(rxvt_term* term, const std::string& filename)
 {
+  // Make sure that the file exists before attempting to read from it.
+  if (::access(filename.c_str(), F_OK))
+  {
+    return false;
+  }
+
   std::ifstream stream(filename);
+
+  if (!stream)
+  {
+    std::cerr << "Unable to read configuration from " << filename << std::endl;
+
+    return false;
+  }
+
   toml::ParseResult pr = toml::parse(stream);
 
   if (!pr.valid())
