@@ -31,8 +31,6 @@
 
 #include "rxvtutil.h"
 
-#include "callback.h"
-
 // see rxvttoolkit.C:xa_names, which must be kept in sync
 enum {
   XA_TEXT,
@@ -244,15 +242,18 @@ struct rxvt_screen
 };
 
 #if USE_XIM
-struct im_watcher : rxvt_watcher, callback<void (void)>
+struct im_watcher : rxvt_watcher
 {
+  std::function<void(void)> callback;
+
   void start(raxvt::display* display);
   void stop(raxvt::display* display);
 };
 #endif
 
-struct xevent_watcher : rxvt_watcher, callback<void (XEvent &)>
+struct xevent_watcher : rxvt_watcher
 {
+  std::function<void(XEvent&)> callback;
   Window window;
 
   void start(raxvt::display* display, Window window);

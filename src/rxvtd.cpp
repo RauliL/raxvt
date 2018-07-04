@@ -53,8 +53,8 @@ struct server : raxvt::connection {
   server (int fd)
   {
     read_ev.set <server, &server::read_cb> (this);
-    log_cb.set  <server, &server::log_msg> (this);
-    getfd_cb.set<server, &server::getfd>   (this);
+    log_cb = std::bind(&server::log_msg, this, std::placeholders::_1);
+    getfd_cb = std::bind(&server::getfd, this, std::placeholders::_1);
 
     this->fd = fd;
     fcntl (fd, F_SETFD, FD_CLOEXEC);

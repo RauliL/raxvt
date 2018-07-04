@@ -401,7 +401,10 @@ namespace raxvt
   {
     for (const auto& i : m_im_watchers)
     {
-      i->call();
+      if (i->callback)
+      {
+        i->callback();
+      }
     }
   }
 
@@ -501,7 +504,10 @@ namespace raxvt
             }
             else if (m_xevent_watchers[i]->window == xev.xany.window)
             {
-              m_xevent_watchers[i]->call(xev);
+              if (m_xevent_watchers[i]->callback)
+              {
+                m_xevent_watchers[i]->callback(xev);
+              }
             }
           }
 #if defined(USE_XIM)

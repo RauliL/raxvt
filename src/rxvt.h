@@ -10,6 +10,7 @@
 #include <cstring>
 #include <cassert>
 
+#include <functional>
 #include <string>
 #include <unordered_map>
 
@@ -660,8 +661,8 @@ typedef struct _mwmhints
 
 #define FONTSET(style) FONTSET_of (this, style)
 
-typedef callback<void (const char *)> log_callback;
-typedef callback<int (int)> getfd_callback;
+using log_callback = std::function<void(const char*)>;
+using getfd_callback = std::function<int(int)>;
 
 /****************************************************************************/
 

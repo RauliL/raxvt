@@ -144,6 +144,8 @@ int rxvt_composite_vec::expand (unicode_t c, wchar_t *r)
 
 rxvt_term::rxvt_term()
 {
+  using namespace std::placeholders;
+
 #ifdef CURSOR_BLINK
   cursor_blink_ev.set     <rxvt_term, &rxvt_term::cursor_blink_cb> (this); cursor_blink_ev.set (0., CURSOR_BLINK_INTERVAL);
 #endif
@@ -160,11 +162,11 @@ rxvt_term::rxvt_term()
   slip_wheel_ev.set       <rxvt_term, &rxvt_term::slip_wheel_cb>   (this);
 #endif
 #if ENABLE_PERL
-  rootwin_ev.set          <rxvt_term, &rxvt_term::rootwin_cb> (this),
+  rootwin_ev.callback = std::bind(&rxvt_term::rootwin_cb, this, _1);
 #endif
-  scrollbar_ev.set        <rxvt_term, &rxvt_term::x_cb>       (this),
+  scrollbar_ev.callback = std::bind(&rxvt_term::x_cb, this, _1);
 #if USE_XIM
-  im_ev.set               <rxvt_term, &rxvt_term::im_cb>      (this),
+  im_ev.callback = std::bind(&rxvt_term::im_cb, this);
 #endif
 #ifdef POINTER_BLANK
   pointer_ev.set          <rxvt_term, &rxvt_term::pointer_cb> (this);
@@ -176,8 +178,8 @@ rxvt_term::rxvt_term()
   flush_ev.set            <rxvt_term, &rxvt_term::flush_cb>   (this);
   destroy_ev.set          <rxvt_term, &rxvt_term::destroy_cb> (this);
   pty_ev.set              <rxvt_term, &rxvt_term::pty_cb>     (this);
-  termwin_ev.set          <rxvt_term, &rxvt_term::x_cb>       (this);
-  vt_ev.set               <rxvt_term, &rxvt_term::x_cb>       (this);
+  termwin_ev.callback = std::bind(&rxvt_term::x_cb, this, _1);
+  vt_ev.callback = std::bind(&rxvt_term::x_cb, this, _1);
 
   cmdbuf_ptr = cmdbuf_endp = cmdbuf_base;
 

@@ -461,7 +461,7 @@ rxvt_selection::rxvt_selection(raxvt::display* disp,
 
   timer_ev.set<rxvt_selection, &rxvt_selection::timer_cb> (this);
   timer_ev.repeat = 10.;
-  x_ev.set<rxvt_selection, &rxvt_selection::x_cb> (this);
+  x_ev.callback = std::bind(&rxvt_selection::x_cb, this, std::placeholders::_1);
 
   incr_buf = 0;
   incr_buf_size = incr_buf_fill = 0;
