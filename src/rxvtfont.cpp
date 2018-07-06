@@ -431,7 +431,7 @@ rxvt_font_default::draw (rxvt_drawable &d, int x, int y,
           chrs [1] = NOCHAR;
 
           *chrs = cc->c1;
-          rxvt_font *f1 = (*fs)[fs->find_font_idx (cc->c1)];
+          auto f1 = (*fs)[fs->find_font_idx (cc->c1)];
           f1->draw (d, x, y, chrs, width, fg, bg);
 
           if (cc->c2 != NOCHAR)
@@ -440,7 +440,7 @@ rxvt_font_default::draw (rxvt_drawable &d, int x, int y,
 
               // prefer font of first character, for no good reasons
               *chrs = cc->c2;
-              rxvt_font *f2 = (f1->has_char (cc->c2, 0, careful) && !careful)
+              auto f2 = (f1->has_char (cc->c2, 0, careful) && !careful)
                                 ? f1
                                 : (*fs)[fs->find_font_idx (cc->c2)];
 
@@ -1449,8 +1449,11 @@ rxvt_fontset::clear ()
     = rxvt_fontprop::unset;
   force_prop = false;
 
-  for (rxvt_font **i = fonts.begin (); i != fonts.end (); i++)
-    (*i)->unref ();
+  for (auto& font : fonts)
+  {
+    font->clear();
+    font.reset();
+  }
 
   for (pagemap **p = fmap.begin (); p != fmap.end (); p++)
     delete *p;
@@ -1463,60 +1466,60 @@ rxvt_fontset::clear ()
 }
 
 void
-rxvt_fontset::prepare_font (rxvt_font *font, codeset cs)
+rxvt_fontset::prepare_font(const std::shared_ptr<rxvt_font>& font, codeset cs)
 {
-  font->set_term (term);
+  font->set_term(term);
 
   font->cs = cs;
   font->loaded = false;
 }
 
-rxvt_font *
+std::shared_ptr<rxvt_font>
 rxvt_fontset::new_font (const char *name, codeset cs)
 {
-  rxvt_font *f;
+  std::shared_ptr<rxvt_font> font;
 
   if (!name || !*name)
-    {
-      name = "";
-      f = new rxvt_font_default (this);
-    }
-  else if (!strncmp (name, "xft:", 4))
-    {
-      name += 4;
-      f = new rxvt_font_xft ();
-    }
-  else if (!strncmp (name, "x:", 2))
-    {
-      name += 2;
-      f = new rxvt_font_x11;
-    }
-  else
-    f = new rxvt_font_x11;
+  {
+    name = "";
+    font = std::make_shared<rxvt_font_default>(this);
+  }
+  else if (!strncmp(name, "xft:", 4))
+  {
+    name += 4;
+    font = std::make_shared<rxvt_font_xft>();
+  }
+  else if (!strncmp(name, "x:", 2))
+  {
+    name += 2;
+    font = std::make_shared<rxvt_font_x11>();
+  } else {
+    font = std::make_shared<rxvt_font_x11>();
+  }
 
-  f->set_name (strdup (name));
-  prepare_font (f, cs);
+  font->set_name(strdup(name));
+  prepare_font(font, cs);
 
-  return f;
+  return font;
 }
 
 /////////////////////////////////////////////////////////////////////////////
 
 void
-rxvt_fontset::push_font (rxvt_font *font)
+rxvt_fontset::push_font(const std::shared_ptr<rxvt_font>& font)
 {
   // the fontCount index is reserved for the overflow font, it is only
   // necessary when we get fontCount or more fonts, as they cannot be
   // represented in the rendition.
   if (fonts.size () == fontCount)
-    {
-      rxvt_font *f = new rxvt_font_overflow (this);
+  {
+    auto f = std::make_shared<rxvt_font_overflow>(this);
 
-      prepare_font (f, CS_UNICODE);
-      fonts.push_back (f);
-    }
+    prepare_font(f, CS_UNICODE);
+    fonts.push_back(f);
+  }
 
-  fonts.push_back (font);
+  fonts.push_back(font);
 }
 
 void
@@ -1617,11 +1620,19 @@ rxvt_fontset::populate (const char *desc)
 }
 
 int
-rxvt_fontset::find_font (const char *name) const
+rxvt_fontset::find_font(const char* name) const
 {
-  for (rxvt_font *const *f = fonts.begin (); f < fonts.end (); f++)
-    if ((*f)->name && !strcmp ((*f)->name, name))
-      return f - fonts.begin ();
+  const auto size = fonts.size();
+
+  for (std::size_t i = 0; i < size; ++i)
+  {
+    auto& font = fonts[i];
+
+    if (font->name && !std::strcmp(font->name, name))
+    {
+      return static_cast<int>(i);
+    }
+  }
 
   return -1;
 }
@@ -1643,7 +1654,7 @@ rxvt_fontset::find_font_idx (unicode_t unicode)
 
   for (i = 0; i < fonts.size (); i++)
     {
-      rxvt_font *f = fonts[i];
+      auto f = fonts[i];
 
       if (!f->loaded)
         {

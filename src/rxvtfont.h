@@ -1,10 +1,12 @@
 #ifndef DEFAULTFONT_H_
 #define DEFAULTFONT_H_
 
+#include <cstdint>
+#include <memory>
+#include <vector>
+
 #include <X11/Xlib.h>
 #include <X11/Xft/Xft.h>
-
-#include <inttypes.h>
 
 #include "encoding.h"
 #include "rxvtutil.h"
@@ -55,12 +57,6 @@ struct rxvt_font
                      int x, int y,
                      const text_t *text, int len,
                      int fg, int bg) = 0;
-
-  void unref ()
-  {
-    clear ();
-    delete this;
-  }
 };
 
 struct rxvt_fallback_font;
@@ -84,7 +80,7 @@ struct rxvt_fontset
   int find_font (const char *name) const;
   bool realize_font (int i);
 
-  rxvt_font *operator [] (int id) const
+  const std::shared_ptr<rxvt_font>& operator[](int id) const
   {
     return fonts[id >> 1];
   }
@@ -99,7 +95,7 @@ private:
   rxvt_term *term;
   rxvt_fontprop prop;
   bool force_prop;
-  simplevec<rxvt_font *> fonts;
+  std::vector<std::shared_ptr<rxvt_font>> fonts;
   const rxvt_fallback_font *fallback;
 
   // this once was a "typedef xxx pagemap[256]
@@ -117,10 +113,10 @@ private:
   vector<pagemap *> fmap;
 
   void clear ();
-  rxvt_font *new_font (const char *name, codeset cs);
-  void prepare_font (rxvt_font *font, codeset cs);
+  std::shared_ptr<rxvt_font> new_font(const char *name, codeset cs);
+  void prepare_font(const std::shared_ptr<rxvt_font>& font, codeset cs);
   void add_fonts (const char *desc);
-  void push_font (rxvt_font *font);
+  void push_font(const std::shared_ptr<rxvt_font>& font);
 };
 
 #endif /* _DEFAULTFONT_H_ */
