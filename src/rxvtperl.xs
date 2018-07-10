@@ -1591,7 +1591,7 @@ rxvt_term::key_press (unsigned int state, unsigned int keycode, Time time = Curr
         xkey.type      = ix ? KeyRelease : KeyPress;
         xkey.display   = THIS->dpy;
         xkey.window    = THIS->vt;
-        xkey.root      = THIS->display->root;
+        xkey.root      = THIS->display->root();
         xkey.subwindow = THIS->vt;
 
         if (ix)
@@ -2181,11 +2181,11 @@ XDeleteProperty (rxvt_term *term, Window window, Atom property)
 	C_ARGS: term->dpy, window, property
 
 Window
-rxvt_term::DefaultRootWindow ()
+rxvt_term::DefaultRootWindow()
 	CODE:
-        RETVAL = THIS->display->root;
-        OUTPUT:
-        RETVAL
+    RETVAL = THIS->display->root();
+  OUTPUT:
+    RETVAL
 
 void
 XReparentWindow (rxvt_term *term, Window window, Window parent, int x = 0, int y = 0)

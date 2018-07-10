@@ -1,6 +1,7 @@
 #ifndef RAXVT_DISPLAY_HPP_GUARD
 #define RAXVT_DISPLAY_HPP_GUARD
 
+#include <bitset>
 #include <string>
 #include <vector>
 
@@ -13,8 +14,8 @@ namespace raxvt
   public:
     enum flag
     {
-      has_render = 1 << 0,
-      has_render_conv = 1 << 1
+      has_render = 0,
+      has_render_conv = 1
     };
 
     static display* get(const std::string& id);
@@ -29,7 +30,7 @@ namespace raxvt
 
     inline bool has_flag(flag f) const
     {
-      return (m_flags & f) != 0;
+      return m_flags[f];
     }
 
     inline bool local() const
@@ -49,12 +50,57 @@ namespace raxvt
     }
 #endif
 
+    inline int screen() const
+    {
+      return m_screen;
+    }
+
+    inline Window root() const
+    {
+      return m_root;
+    }
+
+    inline ::Atom* xa()
+    {
+      return m_xa;
+    }
+
+    inline const ::Atom* xa() const
+    {
+      return m_xa;
+    }
+
+    inline const rxvt_term* selection_owner() const
+    {
+      return m_selection_owner;
+    }
+
+    inline void reset_selection_owner()
+    {
+      m_selection_owner = nullptr;
+    }
+
+    inline const rxvt_term* clipboard_owner() const
+    {
+      return m_clipboard_owner;
+    }
+
+    inline void reset_clipboard_owner()
+    {
+      m_clipboard_owner = nullptr;
+    }
+
     void flush_cb(ev::prepare& w, int revents);
     void x_cb(ev::io& w, int revents);
 
 #if defined(USE_XIM)
     void im_change_cb();
     void im_change_check();
+
+    inline void remove_xim(rxvt_xim* xim)
+    {
+      m_xims.erase(find(m_xims.begin(), m_xims.end(), xim));
+    }
 #endif
 
     bool ref_init();
@@ -77,15 +123,6 @@ namespace raxvt
     void put_xim(rxvt_xim* xim);
 #endif
 
-#if defined(USE_XIM)
-    refcache<rxvt_xim> xims;
-#endif
-    int screen;
-    ::Window root;
-    rxvt_term* selection_owner;
-    rxvt_term* clipboard_owner;
-    ::Atom xa[NUM_XA];
-
   private:
     explicit display(const std::string& id);
     display(const display&) = delete;
@@ -95,7 +132,7 @@ namespace raxvt
 
   private:
     const std::string m_id;
-    std::uint8_t m_flags;
+    std::bitset<2> m_flags;
     bool m_local;
     ::Display* m_dpy;
     std::vector<xevent_watcher*> m_xevent_watchers;
@@ -105,6 +142,14 @@ namespace raxvt
 #if defined(POINTER_BLANK)
     ::Cursor m_blank_cursor;
 #endif
+#if defined(USE_XIM)
+    refcache<rxvt_xim> m_xims;
+#endif
+    int m_screen;
+    ::Window m_root;
+    rxvt_term* m_selection_owner;
+    rxvt_term* m_clipboard_owner;
+    ::Atom m_xa[NUM_XA];
   };
 }
 

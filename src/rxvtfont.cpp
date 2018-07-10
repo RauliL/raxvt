@@ -1175,7 +1175,7 @@ rxvt_font_xft::load (const rxvt_fontprop &prop, bool force_prop)
   set_name ((char *)FcNameUnparse (p));
 
   XftResult result;
-  FcPattern *match = XftFontMatch (disp, term->display->screen, p, &result);
+  FcPattern *match = XftFontMatch(disp, term->display->screen(), p, &result);
 
   FcPatternDestroy (p);
 

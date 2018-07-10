@@ -112,8 +112,8 @@ namespace raxvt
       return nullptr;
     }
 
-    disp->screen = DefaultScreen(disp->m_dpy);
-    disp->root = DefaultRootWindow(disp->m_dpy);
+    disp->m_screen = DefaultScreen(disp->m_dpy);
+    disp->m_root = DefaultRootWindow(disp->m_dpy);
 
     assert(ecb_array_length(xa_names) == NUM_XA);
     ::XInternAtoms(
@@ -121,7 +121,7 @@ namespace raxvt
       const_cast<char**>(xa_names),
       NUM_XA,
       False,
-      disp->xa
+      disp->m_xa
     );
 
     ::XrmSetDatabase(disp->m_dpy, disp->get_resources(false));
@@ -153,15 +153,15 @@ namespace raxvt
     {
       if (major > 0 || (major == 0 && minor >= 11))
       {
-        disp->m_flags |= has_render;
+        disp->m_flags.set(has_render);
 
-        if (auto filters = ::XRenderQueryFilters(disp->m_dpy, disp->root))
+        if (auto filters = ::XRenderQueryFilters(disp->m_dpy, disp->m_root))
         {
           for (int i = 0; i < filters->nfilter; ++i)
           {
             if (!std::strcmp(filters->filter[i], FilterConvolution))
             {
-              disp->m_flags |= has_render_conv;
+              disp->m_flags.set(has_render_conv);
             }
           }
 
@@ -189,7 +189,7 @@ namespace raxvt
     disp->m_x_event.start(fd, ev::READ);
     ::fcntl(fd, F_SETFD, FD_CLOEXEC);
 
-    ::XSelectInput(disp->m_dpy, disp->root, PropertyChangeMask);
+    ::XSelectInput(disp->m_dpy, disp->m_root, PropertyChangeMask);
 
     disp->flush();
 
@@ -205,13 +205,12 @@ namespace raxvt
   }
 
   display::display(const std::string& id)
-    : screen(0)
-    , selection_owner(nullptr)
-    , clipboard_owner(nullptr)
-    , m_id(id)
-    , m_flags(0)
+    : m_id(id)
     , m_local(false)
     , m_dpy(nullptr)
+    , m_screen(0)
+    , m_selection_owner(nullptr)
+    , m_clipboard_owner(nullptr)
   {
     m_x_event.set<display, &display::x_cb>(this);
     m_flush_event.set<display, &display::flush_cb>(this);
@@ -230,7 +229,7 @@ namespace raxvt
     m_x_event.stop();
     m_flush_event.stop();
 #if defined(USE_XIM)
-    xims.clear();
+    m_xims.clear();
 #endif
     ::XrmDestroyDatabase(::XrmGetDatabase(m_dpy));
     ::XCloseDisplay(m_dpy);
@@ -352,7 +351,10 @@ namespace raxvt
 #endif
 
     /* Get screen specific resources */
-    displayResource = ::XScreenResourceString(ScreenOfDisplay(m_dpy, screen));
+    displayResource = ::XScreenResourceString(ScreenOfDisplay(
+      m_dpy,
+      m_screen
+    ));
 
     if (displayResource)
     {
@@ -420,8 +422,8 @@ namespace raxvt
     unsigned long bytes_after;
     const auto result = ::XGetWindowProperty(
       m_dpy,
-      root,
-      xa[XA_XIM_SERVERS],
+      m_root,
+      m_xa[XA_XIM_SERVERS],
       0L,
       1000000L,
       False,
@@ -475,8 +477,8 @@ namespace raxvt
         if (!::XFilterEvent(&xev, None))
         {
           if (xev.type == PropertyNotify
-              && xev.xany.window == root
-              && xev.xproperty.atom == xa[XA_XIM_SERVERS])
+              && xev.xany.window == m_root
+              && xev.xproperty.atom == m_xa[XA_XIM_SERVERS])
           {
             im_change_check();
           }
@@ -543,7 +545,7 @@ namespace raxvt
   void
   display::set_selection_owner(rxvt_term* owner, bool clipboard)
   {
-    rxvt_term*& cur_owner = !clipboard ? selection_owner : clipboard_owner;
+    rxvt_term*& cur_owner = !clipboard ? m_selection_owner : m_clipboard_owner;
 
     if (cur_owner && cur_owner != owner)
     {
@@ -596,7 +598,7 @@ namespace raxvt
     std::memcpy(id + l + 1, modifiers, m);
     id[l + m + 1] = 0;
 
-    return xims.get(id);
+    return m_xims.get(id);
   }
 
   void
@@ -624,7 +626,7 @@ namespace raxvt
     unsigned char *prop;
     const auto result = ::XGetWindowProperty(
       m_dpy,
-      root,
+      m_root,
       property,
       0L,
       1L,

@@ -2715,28 +2715,32 @@ rxvt_term::selection_request (Time tm, int selnum) NOTHROW
  * EXT: SelectionClear
  */
 void
-rxvt_term::selection_clear (bool clipboard) NOTHROW
+rxvt_term::selection_clear(bool clipboard) NOTHROW
 {
   if (!clipboard)
-    {
-      want_refresh = 1;
-      free (selection.text);
-      selection.text = NULL;
-      selection.len = 0;
-      CLEAR_SELECTION ();
+  {
+    want_refresh = 1;
+    std::free(selection.text);
+    selection.text = nullptr;
+    selection.len = 0;
+    CLEAR_SELECTION ();
 
-      if (display->selection_owner == this)
-        display->selection_owner = nullptr;
+    if (display->selection_owner() == this)
+    {
+      display->reset_selection_owner();
     }
+  }
   else
-    {
-      free (selection.clip_text);
-      selection.clip_text = NULL;
-      selection.clip_len = 0;
+  {
+    std::free(selection.clip_text);
+    selection.clip_text = nullptr;
+    selection.clip_len = 0;
 
-      if (display->clipboard_owner == this)
-        display->clipboard_owner = nullptr;
+    if (display->clipboard_owner() == this)
+    {
+      display->reset_clipboard_owner();
     }
+  }
 }
 
 /* ------------------------------------------------------------------------- */

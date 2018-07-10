@@ -66,7 +66,7 @@ im_destroy_cb (XIM unused1, XPointer client_data, XPointer unused3)
 
   xim->xim = 0;
 
-  display->xims.erase(find(display->xims.begin(), display->xims.end(), xim));
+  display->remove_xim(xim);
   display->im_change_cb();
 }
 
@@ -121,21 +121,26 @@ rxvt_screen::rxvt_screen ()
 {
 }
 
-rxvt_drawable &rxvt_screen::scratch_drawable (int w, int h)
+rxvt_drawable& rxvt_screen::scratch_drawable(int w, int h)
 {
   if (!scratch_area || w > scratch_w || h > scratch_h)
+  {
+    if (scratch_area)
     {
-      if (scratch_area)
-        {
-          XFreePixmap (dpy, scratch_area->drawable);
-          delete scratch_area;
-        }
-
-      Pixmap pm = XCreatePixmap (dpy, RootWindowOfScreen (ScreenOfDisplay (dpy, display->screen)),
-                                 scratch_w = w, scratch_h = h, depth);
-
-      scratch_area = new rxvt_drawable (this, pm);
+      XFreePixmap(dpy, scratch_area->drawable);
+      delete scratch_area;
     }
+
+    Pixmap pm = XCreatePixmap(
+      dpy,
+      RootWindowOfScreen(ScreenOfDisplay(dpy, display->screen())),
+      scratch_w = w,
+      scratch_h = h,
+      depth
+    );
+
+    scratch_area = new rxvt_drawable (this, pm);
+  }
 
   return *scratch_area;
 }
@@ -146,7 +151,7 @@ rxvt_screen::set(raxvt::display* disp)
   display = disp;
   dpy = disp->dpy();
 
-  Screen *screen = ScreenOfDisplay (dpy, disp->screen);
+  Screen *screen = ScreenOfDisplay (dpy, disp->screen());
 
   depth   = DefaultDepthOfScreen    (screen);
   visual  = DefaultVisualOfScreen   (screen);
@@ -156,49 +161,60 @@ rxvt_screen::set(raxvt::display* disp)
 #if ENABLE_FRILLS
 
 void
-rxvt_screen::select_visual (int id)
+rxvt_screen::select_visual(int id)
 {
   XVisualInfo vinfo;
-  vinfo.visualid = id;
   int n;
 
-  if (XVisualInfo *vi = XGetVisualInfo (dpy, VisualIDMask, &vinfo, &n))
-    {
-      depth  = vi->depth;
-      visual = vi->visual;
+  vinfo.visualid = id;
 
-      XFree (vi);
+  if (auto vi = XGetVisualInfo(dpy, VisualIDMask, &vinfo, &n))
+  {
+    depth = vi->depth;
+    visual = vi->visual;
 
-      cmap = XCreateColormap (dpy, display->root, visual, AllocNone);
-    }
-  else
-    rxvt_warn ("no visual found for requested id 0x%02x, using default visual.\n", id);
+    XFree(vi);
+
+    cmap = XCreateColormap(dpy, display->root(), visual, AllocNone);
+  } else {
+    rxvt_warn(
+      "no visual found for requested id 0x%02x, using default visual.\n",
+      id
+    );
+  }
 }
 
 void
-rxvt_screen::select_depth (int bitdepth)
+rxvt_screen::select_depth(int bitdepth)
 {
   XVisualInfo vinfo;
 
-  if (XMatchVisualInfo (dpy, display->screen, bitdepth, TrueColor, &vinfo))
-    select_visual (vinfo.visualid);
-  else
-    rxvt_warn ("no visual found for requested depth %d, using default visual.\n", bitdepth);
+  if (XMatchVisualInfo(dpy, display->screen(), bitdepth, TrueColor, &vinfo))
+  {
+    select_visual(vinfo.visualid);
+  } else {
+    rxvt_warn(
+      "no visual found for requested depth %d, using default visual.\n",
+      bitdepth
+    );
+  }
 }
 
 #endif
 
 void
-rxvt_screen::clear ()
+rxvt_screen::clear()
 {
   if (scratch_area)
-    {
-      XFreePixmap (dpy, scratch_area->drawable);
-      delete scratch_area;
-    }
+  {
+    XFreePixmap(dpy, scratch_area->drawable);
+    delete scratch_area;
+  }
 
-  if (cmap != DefaultColormapOfScreen (ScreenOfDisplay (dpy, display->screen)))
-    XFreeColormap (dpy, cmap);
+  if (cmap != DefaultColormapOfScreen(ScreenOfDisplay(dpy, display->screen())))
+  {
+    XFreeColormap(dpy, cmap);
+  }
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -490,28 +506,32 @@ rxvt_selection::run ()
   int selnum = selection_type;
 
 #if ENABLE_FRILLS
-  if (selnum == Sel_Primary && display->selection_owner)
-    {
-      /* internal selection */
-      char *str = rxvt_wcstombs (display->selection_owner->selection.text, display->selection_owner->selection.len);
-      finish(str, std::strlen(str));
-      std::free(str);
-      return;
-    }
+  if (selnum == Sel_Primary && display->selection_owner())
+  {
+    /* internal selection */
+    auto str = rxvt_wcstombs(
+      display->selection_owner()->selection.text,
+      display->selection_owner()->selection.len
+    );
+
+    finish(str, std::strlen(str));
+    std::free(str);
+    return;
+  }
 #endif
 
 #if X_HAVE_UTF8_STRING
   selection_type = Sel_UTF8String;
-  if (request (display->xa[XA_UTF8_STRING], selnum))
+  if (request (display->xa()[XA_UTF8_STRING], selnum))
     return;
 #else
   selection_type = Sel_CompoundText;
-  if (request (display->xa[XA_COMPOUND_TEXT], selnum))
+  if (request (display->xa()[XA_COMPOUND_TEXT], selnum))
     return;
 #endif
 
   // fallback to CUT_BUFFER0 if the requested property has no owner
-  handle_selection (display->root, XA_CUT_BUFFER0, false);
+  handle_selection(display->root(), XA_CUT_BUFFER0, false);
 }
 
 void
@@ -546,7 +566,7 @@ rxvt_selection::request (Atom target, int selnum)
   else if (selnum == Sel_Secondary)
     sel = XA_SECONDARY;
   else
-    sel = display->xa[XA_CLIPBOARD];
+    sel = display->xa()[XA_CLIPBOARD];
 
   if (XGetSelectionOwner(display->dpy(), sel) != None)
     {
@@ -577,30 +597,30 @@ rxvt_selection::handle_selection (Window win, Atom prop, bool delete_prop)
 
   // check for failed XConvertSelection
   if (prop == None)
+  {
+    bool error = true;
+    int selnum = selection_type & Sel_whereMask;
+
+    if (selection_type & Sel_CompoundText)
     {
-      bool error = true;
-      int selnum = selection_type & Sel_whereMask;
-
-      if (selection_type & Sel_CompoundText)
-        {
-          selection_type = 0;
-          error = !request (XA_STRING, selnum);
-        }
-
-      if (selection_type & Sel_UTF8String)
-        {
-          selection_type = Sel_CompoundText;
-          error = !request (display->xa[XA_COMPOUND_TEXT], selnum);
-        }
-
-      if (error)
-        {
-          ct.value = 0;
-          goto bailout;
-        }
-
-      return;
+      selection_type = 0;
+      error = !request(XA_STRING, selnum);
     }
+
+    if (selection_type & Sel_UTF8String)
+    {
+      selection_type = Sel_CompoundText;
+      error = !request(display->xa()[XA_COMPOUND_TEXT], selnum);
+    }
+
+    if (error)
+    {
+      ct.value = 0;
+      goto bailout;
+    }
+
+    return;
+  }
 
   // length == (2^31 - 1) / 4, as gdk
   if (XGetWindowProperty (dpy, win, prop,
@@ -620,62 +640,62 @@ rxvt_selection::handle_selection (Window win, Atom prop, bool delete_prop)
   if (ct.value == 0)
     goto bailout;
 
-  if (ct.encoding == display->xa[XA_INCR])
+  if (ct.encoding == display->xa()[XA_INCR])
+  {
+    // INCR selection, start handshake
+    if (!delete_prop)
     {
-      // INCR selection, start handshake
-      if (!delete_prop)
-        XDeleteProperty (dpy, win, prop);
-
-      selection_wait = Sel_incr;
-      timer_ev.again ();
-
-      goto bailout;
+      XDeleteProperty(dpy, win, prop);
     }
+
+    selection_wait = Sel_incr;
+    timer_ev.again();
+
+    goto bailout;
+  }
 
   if (ct.nitems == 0)
+  {
+    if (selection_wait == Sel_incr)
     {
-      if (selection_wait == Sel_incr)
-        {
-          XFree (ct.value);
+      XFree(ct.value);
 
-          // finally complete, now paste the whole thing
-          selection_wait = Sel_normal;
-          ct.value = (unsigned char *)incr_buf;
-          ct.nitems = incr_buf_fill;
-          incr_buf = 0;
-          timer_ev.stop ();
-        }
-      else
-        {
-          // avoid recursion
-          if (win != display->root || prop != XA_CUT_BUFFER0)
-            {
-              XFree (ct.value);
+      // finally complete, now paste the whole thing
+      selection_wait = Sel_normal;
+      ct.value = (unsigned char *)incr_buf;
+      ct.nitems = incr_buf_fill;
+      incr_buf = 0;
+      timer_ev.stop();
+    } else {
+      // avoid recursion
+      if (win != display->root() || prop != XA_CUT_BUFFER0)
+      {
+        XFree(ct.value);
 
-               // fallback to CUT_BUFFER0 if the requested property
-               // has an owner but is empty
-              handle_selection (display->root, XA_CUT_BUFFER0, False);
-              return;
-            }
-
-          goto bailout;
-        }
-    }
-  else if (selection_wait == Sel_incr)
-    {
-      timer_ev.again ();
-
-      while (incr_buf_fill + ct.nitems > incr_buf_size)
-        {
-          incr_buf_size = incr_buf_size ? incr_buf_size * 2 : 128*1024;
-          incr_buf = (char *)rxvt_realloc (incr_buf, incr_buf_size);
-        }
-
-      std::memcpy(incr_buf + incr_buf_fill, ct.value, ct.nitems);
-      incr_buf_fill += ct.nitems;
+         // fallback to CUT_BUFFER0 if the requested property
+         // has an owner but is empty
+        handle_selection(display->root(), XA_CUT_BUFFER0, False);
+        return;
+      }
 
       goto bailout;
     }
+  }
+  else if (selection_wait == Sel_incr)
+  {
+    timer_ev.again ();
+
+    while (incr_buf_fill + ct.nitems > incr_buf_size)
+    {
+      incr_buf_size = incr_buf_size ? incr_buf_size * 2 : 128*1024;
+      incr_buf = (char *)rxvt_realloc (incr_buf, incr_buf_size);
+    }
+
+    std::memcpy(incr_buf + incr_buf_fill, ct.value, ct.nitems);
+    incr_buf_fill += ct.nitems;
+
+    goto bailout;
+  }
 
   char **cl;
   int cr;
@@ -685,25 +705,23 @@ rxvt_selection::handle_selection (Window win, Atom prop, bool delete_prop)
 #if !ENABLE_MINIMAL
   // xlib is horribly broken with respect to UTF8_STRING, and nobody cares to fix it
   // so recode it manually
-  if (ct.encoding == display->xa[XA_UTF8_STRING])
-    {
-      wchar_t *w = rxvt_utf8towcs ((const char *)ct.value, ct.nitems);
-      data = rxvt_wcstombs (w);
-      std::free(w);
-    }
+  if (ct.encoding == display->xa()[XA_UTF8_STRING])
+  {
+    auto w = rxvt_utf8towcs((const char *)ct.value, ct.nitems);
+
+    data = rxvt_wcstombs(w);
+    std::free(w);
+  }
   else
 #endif
-  if (XmbTextPropertyToTextList (dpy, &ct, &cl, &cr) >= 0
-      && cl)
-    {
-      data = strdup(cl[0]);
-      XFreeStringList (cl);
-    }
-  else
-    {
-      // paste raw
-      data = strdup ((const char *)ct.value);
-    }
+  if (XmbTextPropertyToTextList (dpy, &ct, &cl, &cr) >= 0 && cl)
+  {
+    data = strdup(cl[0]);
+    XFreeStringList(cl);
+  } else {
+    // paste raw
+    data = strdup ((const char *)ct.value);
+  }
 
   data_len = std::strlen(data);
 

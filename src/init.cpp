@@ -549,7 +549,7 @@ rxvt_term::init_resources(const std::vector<std::string>& argv)
   }
 
   // using a local pointer decreases code size a lot
-  xa = display->xa;
+  xa = display->xa();
 
   set (display);
   load_settings();
@@ -809,7 +809,7 @@ rxvt_term::init2(const std::vector<std::string>& argv)
     scrollBar.resize ();      /* create and map scrollbar */
 
 #if ENABLE_PERL
-  rootwin_ev.start (display, display->root);
+  rootwin_ev.start(display, display->root());
 #endif
 
   init_done = 1;
@@ -1290,7 +1290,7 @@ rxvt_term::create_windows(const std::vector<std::string>& argv)
   if (!set_fonts ())
     rxvt_fatal ("unable to load base fontset, please specify a valid one using -fn, aborting.\n");
 
-  parent = display->root;
+  parent = display->root();
 
   attributes.override_redirect = !!get_option(Opt_override_redirect);
 

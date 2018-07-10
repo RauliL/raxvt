@@ -1421,9 +1421,15 @@ rxvt_term::x_cb (XEvent &ev)
                       }
 #if ENABLE_EWMH
                     else if (ev.xclient.data.l[0] == xa[XA_NET_WM_PING])
-                      XSendEvent (dpy, ev.xclient.window = display->root,
-                                  False, SubstructureRedirectMask | SubstructureNotifyMask,
-                                  &ev);
+                    {
+                      XSendEvent(
+                        dpy,
+                        ev.xclient.window = display->root(),
+                        False,
+                        SubstructureRedirectMask | SubstructureNotifyMask,
+                        &ev
+                      );
+                    }
 #endif
                   }
               }
@@ -3136,7 +3142,7 @@ rxvt_term::process_window_ops (const int *args, unsigned int nargs)
         XMapWindow (dpy, parent);
         break;
       case 2:			/* iconify window */
-        XIconifyWindow (dpy, parent, display->screen);
+        XIconifyWindow(dpy, parent, display->screen());
         break;
       case 3:			/* set position (pixels) */
         XMoveWindow (dpy, parent, args[1], args[2]);

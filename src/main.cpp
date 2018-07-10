@@ -701,10 +701,20 @@ rxvt_term::window_calc (unsigned int newwidth, unsigned int newheight)
     }
 
   if (recalc_x)
-    szHint.x += DisplayWidth  (dpy, display->screen) - szHint.width  - 2 * ext_bwidth;
+  {
+    szHint.x += DisplayWidth(
+      dpy,
+      display->screen()
+    ) - szHint.width  - 2 * ext_bwidth;
+  }
 
   if (recalc_y)
-    szHint.y += DisplayHeight (dpy, display->screen) - szHint.height - 2 * ext_bwidth;
+  {
+    szHint.y += DisplayHeight(
+      dpy,
+      display->screen()
+    ) - szHint.height - 2 * ext_bwidth;
+  }
 
   ncol = width  / fwidth;
   nrow = height / fheight;
@@ -1128,7 +1138,7 @@ rxvt_term::set_widthheight (unsigned int newwidth, unsigned int newheight)
 
   if (newwidth == 0 || newheight == 0)
     {
-      XGetWindowAttributes (dpy, display->root, &wattr);
+      XGetWindowAttributes(dpy, display->root(), &wattr);
 
       if (newwidth == 0)
         newwidth = wattr.width - szHint.base_width;
@@ -1625,10 +1635,11 @@ rxvt_term::im_set_position ()
 #endif /* USE_XIM */
 
 void
-rxvt_term::get_window_origin (int &x, int &y)
+rxvt_term::get_window_origin(int& x, int& y)
 {
   Window cr;
-  XTranslateCoordinates (dpy, parent, display->root, 0, 0, &x, &y, &cr);
+
+  XTranslateCoordinates(dpy, parent, display->root(), 0, 0, &x, &y, &cr);
 }
 
 void*

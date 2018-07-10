@@ -278,9 +278,9 @@ rxvt_img::new_from_root (rxvt_screen *s)
 {
   Display *dpy = s->dpy;
   unsigned int root_pm_w, root_pm_h;
-  Pixmap root_pixmap = s->display->get_pixmap_property (s->display->xa [XA_XROOTPMAP_ID]);
+  Pixmap root_pixmap = s->display->get_pixmap_property (s->display->xa()[XA_XROOTPMAP_ID]);
   if (root_pixmap == None)
-    root_pixmap = s->display->get_pixmap_property (s->display->xa [XA_ESETROOT_PMAP_ID]);
+    root_pixmap = s->display->get_pixmap_property (s->display->xa()[XA_ESETROOT_PMAP_ID]);
 
   if (root_pixmap == None)
     return 0;
@@ -292,9 +292,9 @@ rxvt_img::new_from_root (rxvt_screen *s)
   if (!XGetGeometry (dpy, root_pixmap, &wdummy, &idummy, &idummy, &root_pm_w, &root_pm_h, &udummy, &udummy))
     return 0;
 
-  rxvt_img *img = new rxvt_img (
+  rxvt_img *img = new rxvt_img(
      s,
-     XRenderFindVisualFormat (dpy, DefaultVisual (dpy, s->display->screen)),
+     XRenderFindVisualFormat(dpy, DefaultVisual(dpy, s->display->screen())),
      0,
      0,
      root_pm_w,
@@ -440,10 +440,10 @@ rxvt_img::~rxvt_img ()
 }
 
 void
-rxvt_img::alloc ()
+rxvt_img::alloc()
 {
-  pm = XCreatePixmap (d->dpy(), d->root, w, h, format->depth);
-  ref = new pixref (w, h);
+  pm = XCreatePixmap(d->dpy(), d->root(), w, h, format->depth);
+  ref = new pixref(w, h);
 }
 
 rxvt_img *
@@ -473,7 +473,13 @@ rxvt_img::unshare ()
   if (ref->cnt == 1 && ref->ours)
     return;
 
-  Pixmap pm2 = XCreatePixmap (d->dpy(), d->root, ref->w, ref->h, format->depth);
+  Pixmap pm2 = XCreatePixmap(
+    d->dpy(),
+    d->root(),
+    ref->w,
+    ref->h,
+    format->depth
+  );
   GC gc = XCreateGC (d->dpy(), pm, 0, 0);
   XCopyArea (d->dpy(), pm, pm2, gc, 0, 0, ref->w, ref->h, 0, 0);
   XFreeGC (d->dpy(), gc);
