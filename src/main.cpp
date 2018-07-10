@@ -1637,4 +1637,20 @@ rxvt_term::get_window_origin (int &x, int &y)
   XTranslateCoordinates (dpy, parent, display->root, 0, 0, &x, &y, &cr);
 }
 
+void*
+rxvt_term::operator new(std::size_t size)
+{
+  auto ptr = std::malloc(size);
+
+  std::memset(ptr, 0, size);
+
+  return ptr;
+}
+
+void
+rxvt_term::operator delete(void* ptr)
+{
+  std::free(ptr);
+}
+
 /*----------------------- end-of-file (C source) -----------------------*/

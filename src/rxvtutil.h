@@ -53,13 +53,6 @@ rxvt_temp_buf (int len)
 // for m >= -n, ensure remainder lies between 0..n-1
 #define MOD(m,n) (((m) + (n)) % (n))
 
-// makes dynamically allocated objects zero-initialised
-struct zero_initialized
-{
-  void *operator new (size_t s);
-  void operator delete (void *p, size_t s);
-};
-
 struct stringvec : simplevec<char *>
 {
   ~stringvec ()

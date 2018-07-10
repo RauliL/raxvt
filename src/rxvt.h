@@ -979,7 +979,7 @@ struct rxvt_vars : TermWin_t
 #endif
 };
 
-struct rxvt_term : zero_initialized, rxvt_vars, rxvt_screen
+struct rxvt_term : rxvt_vars, rxvt_screen
 {
 
   // special markers with magic addresses
@@ -1442,6 +1442,9 @@ struct rxvt_term : zero_initialized, rxvt_vars, rxvt_screen
     enumerate_resources (cb, "keysym", "Keysym");
   }
   void extract_keysym_resources ();
+
+  void* operator new(std::size_t size);
+  void operator delete(void* ptr);
 
 private:
   std::unordered_map<int, std::string> m_settings;

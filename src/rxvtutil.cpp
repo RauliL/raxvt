@@ -34,22 +34,6 @@
 
 #include "rxvtutil.h"
 
-void*
-zero_initialized::operator new(std::size_t s)
-{
-  void *p = std::malloc(s);
-
-  std::memset(p, 0, s);
-
-  return p;
-}
-
-void
-zero_initialized::operator delete(void* p, std::size_t s)
-{
-  std::free(p);
-}
-
 static void *temp_buf;
 static uint32_t temp_len;
 
