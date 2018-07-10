@@ -1177,32 +1177,35 @@ _delete_selection_request (IV req_)
 
 MODULE = raxvt             PACKAGE = raxvt::term
 
-SV *
-_new (AV *env, AV *arg)
+SV*
+_new(AV* env, AV* arg)
 	CODE:
 {
-        rxvt_term *term = new rxvt_term;
+  auto term = new rxvt_term;
+  std::vector<std::string> term_argv;
+  std::vector<std::string> term_envv;
 
-	stringvec *argv = new stringvec;
-        for (int i = 0; i <= AvFILL (arg); i++)
-          argv->push_back (strdup (SvPVbyte_nolen (*av_fetch (arg, i, 1))));
+  for (int i = 0; i <= AvFILL(arg); ++i)
+  {
+    term_argv.push_back(SvPVbyte_nolen(*av_fetch(arg, i, 1)));
+  }
 
-	stringvec *envv = new stringvec;
-        for (int i = AvFILL (env) + 1; i--; )
-          envv->push_back (strdup (SvPVbyte_nolen (*av_fetch (env, i, 1))));
+  for (int i = AvFILL(env) + 1; --i;)
+  {
+    term_envv.push_back(SvPVbyte_nolen(*av_fetch(env, i, 1)));
+  }
 
-        try
-          {
-            term->init (argv, envv);
-          }
-        catch (const class rxvt_failure_exception &e)
-          {
-            term->destroy ();
-            croak ("error while initializing new terminal instance");
-          }
+  try
+  {
+    term->init(term_argv, term_envv);
+  }
+  catch (const class rxvt_failure_exception& e)
+  {
+    term->destroy();
+    croak("error while initializing new terminal instance");
+  }
 
-        RETVAL = term && term->perl.self
-                 ? newSVterm (term) : &PL_sv_undef;
+  RETVAL = term && term->perl.self ? newSVterm(term) : &PL_sv_undef;
 }
 	OUTPUT:
         RETVAL
@@ -1472,19 +1475,23 @@ rxvt_term::display_id ()
         OUTPUT:
         RETVAL
 
-SV *
+SV*
 rxvt_term::envv ()
 	ALIAS:
-        argv = 1
+    argv = 1
 	PPCODE:
 {
-	stringvec *vec = ix ? THIS->argv : THIS->envv;
+	const auto& vec = ix ? THIS->argv : THIS->envv;
 
-        EXTEND (SP, vec->size ());
+  EXTEND(SP, vec.size());
 
-        for (char **i = vec->begin (); i != vec->end (); ++i)
-          if (*i)
-            PUSHs (sv_2mortal (newSVpv (*i, 0)));
+  for (const auto& i : vec)
+  {
+    if (!i.empty())
+    {
+      PUSHs(sv_2mortal(newSVpv(i.c_str(), 0)));
+    }
+  }
 }
 
 int

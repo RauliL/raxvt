@@ -1105,7 +1105,8 @@ struct rxvt_term : rxvt_vars, rxvt_screen
   char            charsets[4];
   char           *v_buffer;           /* pointer to physical buffer */
   unsigned int    v_buflen;           /* size of area to write */
-  stringvec      *argv, *envv;        /* if != 0, will be freed at destroy time */
+  std::vector<std::string> argv;
+  std::vector<std::string> envv;
   char           **env;
 
 #ifdef KEYSYM_RESOURCE
@@ -1270,19 +1271,22 @@ struct rxvt_term : rxvt_vars, rxvt_screen
   void process_sgr_mode (unsigned int nargs, const int *arg);
   void set_cursor_style (int style);
   // init.C
-  void init (stringvec *argv, stringvec *envv);
+  void init(
+    const std::vector<std::string>& argv,
+    const std::vector<std::string>& envv
+  );
   void init (int argc, const char *const *argv, const char *const *envv);
-  void init2 (int argc, const char *const *argv);
+  void init2(const std::vector<std::string>& argv);
   void init_vars ();
-  const char **init_resources (int argc, const char *const *argv);
+  std::vector<std::string> init_resources(const std::vector<std::string>& argv);
   void init_env ();
   void set_locale (const char *locale);
   void init_xlocale ();
-  void init_command (const char *const *argv);
-  void run_command (const char *const *argv);
-  int run_child (const char *const *argv);
+  void init_command(const std::vector<std::string>& argv);
+  void run_command (const std::vector<std::string>& argv);
+  int run_child (const std::vector<std::string>& argv);
   void color_aliases (int idx);
-  void create_windows (int argc, const char *const *argv);
+  void create_windows(const std::vector<std::string>& argv);
   void get_colors ();
   void get_ourmods ();
   void set_icon (const char *file);
@@ -1432,7 +1436,7 @@ struct rxvt_term : rxvt_vars, rxvt_screen
 
   // xdefaults.C
   void rxvt_usage (int type);
-  const char **get_options (int argc, const char *const *argv);
+  std::vector<std::string> get_options(const std::vector<std::string>& argv);
   int parse_keysym (const char *str, unsigned int &state);
   int bind_action (const char *str, const char *arg);
   const char *x_resource (const char *name);

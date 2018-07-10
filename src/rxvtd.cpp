@@ -168,8 +168,8 @@ void server::read_cb(ev::io& w, int revents)
 
   if (!tok.compare("NEW"))
   {
-    stringvec* argv = new stringvec();
-    stringvec* envv = new stringvec();
+    std::vector<std::string> argv;
+    std::vector<std::string> envv;
     rxvt_term* term;
     bool success = true;
 
@@ -186,11 +186,11 @@ void server::read_cb(ev::io& w, int revents)
       }
       else if (!tok.compare("ENV") && recv(tok))
       {
-        envv->push_back(::strdup(tok.c_str()));
+        envv.push_back(tok);
       }
       else if (!tok.compare("ARG") && recv(tok))
       {
-        argv->push_back(::strdup(tok.c_str()));
+        argv.push_back(tok);
       } else {
         return err("protocol error: unexpected NEW token.\n");
       }

@@ -558,18 +558,16 @@ rxvt_term::rxvt_usage (int type)
 /*}}} */
 
 /*{{{ get command-line options before getting resources */
-const char **
-rxvt_term::get_options (int argc, const char *const *argv)
+std::vector<std::string>
+rxvt_term::get_options(const std::vector<std::string>& argv)
 {
-  int i, bad_option = 0;
+  int bad_option = 0;
 
-  for (i = 1; i < argc; i++)
+  for (std::size_t i = 1; i < argv.size(); ++i)
     {
       unsigned int entry, longopt = 0;
-      const char *opt;
+      const char *opt = argv[i].c_str();
       int flag;
-
-      opt = argv[i];
 
       if (*opt == '-')
         {
@@ -630,12 +628,12 @@ rxvt_term::get_options (int argc, const char *const *argv)
 
           if (setting.doff != -1)
           {
-            if (flag && i + 1 == argc)
+            if (flag && i + 1 == argv.size())
             {
-              rxvt_fatal("option '%s' requires an argument, aborting.\n", argv[i]);
+              rxvt_fatal("option '%s' requires an argument, aborting.\n", argv[i].c_str());
             }
 
-            set_setting(setting.doff, flag ? argv[++i] : nullptr);
+            set_setting(setting.doff, flag ? argv[++i].c_str() : nullptr);
           }
         } else {
           /* boolean value */
@@ -648,63 +646,69 @@ rxvt_term::get_options (int argc, const char *const *argv)
         }
       }
 #ifndef NO_RESOURCES
-      else if (!strcmp (opt, "xrm"))
+      else if (!std::strcmp(opt, "xrm"))
+      {
+        if (i + 1 < argv.size())
         {
-          if (i + 1 < argc)
-            XrmPutLineResource (&option_db, argv[++i]);
+          XrmPutLineResource(&option_db, argv[++i].c_str());
         }
+      }
 #endif
 #ifdef KEYSYM_RESOURCE
-      else if (!strncmp (opt, "keysym.", sizeof ("keysym.") - 1))
+      else if (!std::strncmp(opt, "keysym.", sizeof ("keysym.") - 1))
+      {
+        if (i + 1 < argv.size())
         {
-          if (i + 1 < argc)
-            {
-              char* res = rxvt_temp_buf<char>(std::strlen (opt) + std::strlen(argv[++i]) + 6);
+          const auto size = std::strlen(opt) + argv[++i].length() + 6;
+          auto res = rxvt_temp_buf<char>(size);
 
-              sprintf (res, "*.%s: %s\n", opt, argv[i]);
-              XrmPutLineResource (&option_db, res);
-            }
+          std::snprintf(res, size, "*.%s: %s\n", opt, argv[i].c_str());
+          XrmPutLineResource(&option_db, res);
         }
+      }
 #endif
-      else if (!strcmp (opt, "e"))
+      else if (!std::strcmp(opt, "e"))
+      {
+        if (i + 1 < argv.size())
         {
-          if (i + 1 < argc)
-            return (const char **)argv + i + 1;
+          return std::vector<std::string>(
+            argv.begin() + i + 1,
+            argv.end()
+          );
+        }
 
-          rxvt_warn ("option '-e' requires an argument, aborting.\n");
+        rxvt_warn ("option '-e' requires an argument, aborting.\n");
+        bad_option = 1;
+      } else {
+#if ENABLE_PERL
+        rxvt_perl.init (this);
+
+        if (int flags = rxvt_perl.parse_resource (this, opt, true, longopt, flag, argv[i + 1].c_str()))
+        {
+          if (flags & rxvt_perl.RESOURCE_ARG)
+          {
+            if (i + 1 == argv.size())
+            {
+              rxvt_warn("option '%s' requires an argument.\n", argv[i].c_str());
+              bad_option = 1;
+            } else {
+              ++i;
+            }
+          }
+        }
+        else
+#endif
+        {
+          rxvt_warn("\"%s\": unknown or malformed option.\n", opt);
           bad_option = 1;
         }
-      else
-        {
-#if ENABLE_PERL
-          rxvt_perl.init (this);
-
-          if (int flags = rxvt_perl.parse_resource (this, opt, true, longopt, flag, argv [i + 1]))
-            {
-              if (flags & rxvt_perl.RESOURCE_ARG)
-                {
-                  if (i + 1 == argc)
-                    {
-                      rxvt_warn ("option '%s' requires an argument.\n", argv [i]);
-                      bad_option = 1;
-                    }
-                  else
-                    ++i;
-                }
-            }
-          else
-#endif
-            {
-              rxvt_warn ("\"%s\": unknown or malformed option.\n", opt);
-              bad_option = 1;
-            }
-        }
+      }
     }
 
   if (bad_option)
     rxvt_usage (0);
 
-  return 0;
+  return std::vector<std::string>();
 }
 
 /*}}} */

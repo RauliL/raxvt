@@ -518,13 +518,15 @@ rxvt_perl_parse_resource (rxvt_term *term, const char *k, const char *v)
 #endif
 
 /*----------------------------------------------------------------------*/
-const char **
-rxvt_term::init_resources (int argc, const char *const *argv)
+std::vector<std::string>
+rxvt_term::init_resources(const std::vector<std::string>& argv)
 {
   int i;
-  const char **cmd_argv;
 
-  set_setting(Rs_name, rxvt_basename(argv[0]));
+  if (!argv.empty())
+  {
+    set_setting(Rs_name, rxvt_basename(argv[0].c_str()));
+  }
 
   /*
    * Open display, get options/resources and create the window
@@ -539,7 +541,7 @@ rxvt_term::init_resources (int argc, const char *const *argv)
     set_setting(Rs_display_name, display_name);
   }
 
-  cmd_argv = get_options (argc, argv);
+  auto cmd_argv = get_options(argv);
 
   if (!(display = raxvt::display::get(get_setting(Rs_display_name))))
   {
@@ -582,11 +584,11 @@ rxvt_term::init_resources (int argc, const char *const *argv)
   /*
    * set any defaults not already set
    */
-  if (cmd_argv && cmd_argv[0])
+  if (!cmd_argv.empty())
   {
     if (!get_setting(Rs_title))
     {
-      set_setting(Rs_title, rxvt_basename(cmd_argv[0]));
+      set_setting(Rs_title, rxvt_basename(cmd_argv[0].c_str()));
     }
 
     if (!get_setting(Rs_iconName))
@@ -731,42 +733,44 @@ rxvt_term::init_resources (int argc, const char *const *argv)
 
 /*----------------------------------------------------------------------*/
 void
-rxvt_term::init (stringvec *argv, stringvec *envv)
+rxvt_term::init(const std::vector<std::string>& argv,
+                const std::vector<std::string>& envv)
 {
-  argv->push_back (0);
-  envv->push_back (0);
-
   this->argv = argv;
   this->envv = envv;
 
-  env = new char *[this->envv->size ()];
-  for (int i = 0; i < this->envv->size (); i++)
-    env[i] = this->envv->at (i);
+  env = new char*[this->envv.size()];
+  for (std::size_t i = 0; i < this->envv.size(); ++i)
+  {
+    env[i] = strdup(this->envv[i].c_str());
+  }
 
-  init2 (argv->size () - 1, argv->begin ());
+  init2(argv);
 }
 
 void
-rxvt_term::init (int argc, const char *const *argv, const char *const *envv)
+rxvt_term::init(int argc, const char *const *argv, const char *const *envv)
 {
+  std::vector<std::string> term_argv;
+  std::vector<std::string> term_envv;
+
+  for (int i = 0; i < argc; ++i)
+  {
+    term_argv.push_back(argv[i]);
+  }
+  for (auto var = envv; *var; ++var)
+  {
+    term_envv.push_back(*var);
+  }
 #if ENABLE_PERL
-  // perl might want to access the stringvecs later, so we need to copy them
-  stringvec *args = new stringvec;
-  for (int i = 0; i < argc; i++)
-    args->push_back (strdup (argv [i]));
-
-  stringvec *envs = new stringvec;
-  for (const char *const *var = envv; *var; var++)
-    envs->push_back (strdup (*var));
-
-  init (args, envs);
+  init(term_argv, term_envv);
 #else
-  init2 (argc, argv);
+  init2(term_argv, term_envv);
 #endif
 }
 
 void
-rxvt_term::init2 (int argc, const char *const *argv)
+rxvt_term::init2(const std::vector<std::string>& argv)
 {
   SET_R (this);
   set_locale ("");
@@ -774,7 +778,7 @@ rxvt_term::init2 (int argc, const char *const *argv)
 
   init_vars ();
 
-  const char **cmd_argv = init_resources (argc, argv);
+  auto cmd_argv = init_resources(argv);
 
 #ifdef KEYSYM_RESOURCE
   keyboard->register_done ();
@@ -795,7 +799,7 @@ rxvt_term::init2 (int argc, const char *const *argv)
 
   pty = ptytty::create ();
 
-  create_windows (argc, argv);
+  create_windows(argv);
 
   init_xlocale ();
 
@@ -1004,7 +1008,7 @@ rxvt_term::init_xlocale ()
 
 /*----------------------------------------------------------------------*/
 void
-rxvt_term::init_command (const char *const *argv)
+rxvt_term::init_command(const std::vector<std::string>& argv)
 {
   /*
    * Initialize the command connection.
@@ -1267,7 +1271,7 @@ rxvt_term::set_icon (const char *file)
 /*----------------------------------------------------------------------*/
 /* Open and map the window */
 void
-rxvt_term::create_windows (int argc, const char *const *argv)
+rxvt_term::create_windows(const std::vector<std::string>& argv)
 {
   XClassHint classHint;
   XWMHints wmHint;
@@ -1350,8 +1354,31 @@ rxvt_term::create_windows (int argc, const char *const *argv)
                          : NormalState;
   wmHint.window_group  = top;
 
-  XmbSetWMProperties (dpy, top, NULL, NULL, (char **)argv, argc,
-                      &szHint, &wmHint, &classHint);
+  {
+    auto tmp = new char*[argv.size()];
+
+    for (std::size_t i = 0; i < argv.size(); ++i)
+    {
+      tmp[i] = strdup(argv[i].c_str());
+    }
+    XmbSetWMProperties(
+      dpy,
+      top,
+      nullptr,
+      nullptr,
+      tmp,
+      argv.size(),
+      &szHint,
+      &wmHint,
+      &classHint
+    );
+    for (std::size_t i = 0; i < argv.size(); ++i)
+    {
+      std::free(tmp[i]);
+    }
+    delete[] tmp;
+  }
+
 #if ENABLE_EWMH
   /*
    * set up icon hint
@@ -1466,7 +1493,7 @@ rxvt_term::create_windows (int argc, const char *const *argv)
  * the slave.
  */
 void
-rxvt_term::run_command (const char *const *argv)
+rxvt_term::run_command(const std::vector<std::string>& argv)
 {
 #if ENABLE_FRILLS
   if (get_setting(Rs_pty_fd))
@@ -1573,7 +1600,7 @@ rxvt_term::run_command (const char *const *argv)
  * returns are fatal
  */
 int
-rxvt_term::run_child (const char *const *argv)
+rxvt_term::run_child(const std::vector<std::string>& argv)
 {
   char *login;
 
@@ -1613,39 +1640,53 @@ rxvt_term::run_child (const char *const *argv)
 #endif /* SIGTSTP */
 
   /* command interpreter path */
-  if (argv)
+  if (!argv.empty())
+  {
+    auto exec_argv = new char*[argv.size()];
+
+    for (std::size_t i = 0; i < argv.size(); ++i)
     {
+      const auto& arg = argv[i];
+
 # ifdef DEBUG_CMD
-      int             i;
-
-      for (i = 0; argv[i]; i++)
-        fprintf (stderr, "argv [%d] = \"%s\"\n", i, argv[i]);
+      std::fprintf(
+        stderr,
+        "argv [%d] = \"%s\"\n",
+        i,
+        arg
+      );
 # endif
-
-      execvp (argv[0], (char *const *)argv);
-      /* no error message: STDERR is closed! */
+      if (i > 1)
+      {
+        exec_argv[i - 1] = strdup(arg.c_str());
+      }
     }
-  else
+    execvp(argv[0].c_str(), exec_argv);
+    for (std::size_t i = 0; i < argv.size(); ++i)
     {
-      const char *argv0, *shell;
-
-      if ((shell = getenv ("SHELL")) == NULL || *shell == '\0')
-        shell = "/bin/sh";
-
-      argv0 = rxvt_basename (shell);
-
-      if (get_option(Opt_loginShell))
-        {
-          login = rxvt_malloc<char>(std::strlen(argv0) + 2);
-
-          login[0] = '-';
-          std::strcpy(&login[1], argv0);
-          argv0 = login;
-        }
-
-      execlp (shell, argv0, (char *)0);
-      /* no error message: STDERR is closed! */
+      std::free(exec_argv[i]);
     }
+    delete[] exec_argv;
+  } else {
+    const char *argv0, *shell;
+
+    if ((shell = getenv ("SHELL")) == NULL || *shell == '\0')
+      shell = "/bin/sh";
+
+    argv0 = rxvt_basename (shell);
+
+    if (get_option(Opt_loginShell))
+      {
+        login = rxvt_malloc<char>(std::strlen(argv0) + 2);
+
+        login[0] = '-';
+        std::strcpy(&login[1], argv0);
+        argv0 = login;
+      }
+
+    execlp (shell, argv0, (char *)0);
+    /* no error message: STDERR is closed! */
+  }
 
   return -1;
 }

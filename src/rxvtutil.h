@@ -53,13 +53,4 @@ rxvt_temp_buf (int len)
 // for m >= -n, ensure remainder lies between 0..n-1
 #define MOD(m,n) (((m) + (n)) % (n))
 
-struct stringvec : simplevec<char *>
-{
-  ~stringvec ()
-  {
-    for (char **c = begin (); c != end (); c++)
-      free (*c);
-  }
-};
-
 #endif
