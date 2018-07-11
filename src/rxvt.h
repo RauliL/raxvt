@@ -1107,7 +1107,8 @@ struct rxvt_term : rxvt_vars, rxvt_screen
   unsigned int    v_buflen;           /* size of area to write */
   std::vector<std::string> argv;
   std::vector<std::string> envv;
-  char           **env;
+  char** env;
+  std::size_t env_size;
 
 #ifdef KEYSYM_RESOURCE
   keyboard_manager *keyboard;

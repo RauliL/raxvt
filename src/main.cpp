@@ -143,6 +143,8 @@ int rxvt_composite_vec::expand (unicode_t c, wchar_t *r)
 #endif
 
 rxvt_term::rxvt_term()
+  : env(nullptr)
+  , env_size(0)
 {
   using namespace std::placeholders;
 
@@ -202,7 +204,7 @@ rxvt_term::emergency_cleanup ()
   delete pty; pty = 0;
 }
 
-rxvt_term::~rxvt_term ()
+rxvt_term::~rxvt_term()
 {
   termlist.erase (find (termlist.begin (), termlist.end(), this));
 
@@ -267,7 +269,14 @@ rxvt_term::~rxvt_term ()
 
   delete selection_req;
 
-  delete [] env;
+  for (std::size_t i = 0; i < env_size; ++i)
+  {
+    if (env[i])
+    {
+      std::free(env[i]);
+    }
+  }
+  delete[] env;
 
 #ifdef KEYSYM_RESOURCE
   delete keyboard;
