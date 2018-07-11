@@ -26,7 +26,7 @@
 // This must be the first include, because the _GNU_SOURCE and
 // _XOPEN_SOURCE macros, used by emman.c, must be defined before
 // inclusion of any header.
-#include "emman.c"
+#include "./emman.c"
 
 #include <cstdlib>
 #include <cstring>

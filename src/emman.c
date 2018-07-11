@@ -1,6 +1,6 @@
 #include "emman.h"
 
-#include <ecb.h>
+#include <../deps/libptytty/src/ecb.h>
 
 #include <string.h>
 

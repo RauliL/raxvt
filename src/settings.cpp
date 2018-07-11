@@ -34,7 +34,7 @@
 #include <vector>
 
 #include <basedir.h>
-#include <toml/toml.h>
+#include <../deps/tinytoml/include/toml/toml.h>
 
 #ifdef KEYSYM_RESOURCE
 # include "keyboard.h"

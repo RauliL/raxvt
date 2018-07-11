@@ -22,21 +22,10 @@
  *----------------------------------------------------------------------*/
 
 #include "../config.h"
-#include <rxvt.h>
-#include <rxvttoolkit.h>
 
+#include "./rxvt.h"
+#include "./rxvttoolkit.h"
 #include "raxvt/display.hpp"
-
-#include <stdlib.h>
-
-#include <unistd.h>
-#include <fcntl.h>
-
-#include <sys/utsname.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-
-#include <X11/extensions/Xrender.h>
 
 /////////////////////////////////////////////////////////////////////////////
 

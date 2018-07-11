@@ -28,8 +28,9 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 
+#include <../deps/libptytty/src/libptytty.h>
+
 #include "raxvt/connection.hpp"
-#include "libptytty.h"
 
 extern char** environ;
 

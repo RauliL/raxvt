@@ -6,6 +6,6 @@
 #define PTYTTY_FATAL rxvt_fatal
 #define PTYTTY_WARN  rxvt_warn
 
-#include "logging.C"
-#include "proxy.C"
-#include "ptytty.C"
+#include "../deps/libptytty/src/logging.C"
+#include "../deps/libptytty/src/proxy.C"
+#include "../deps/libptytty/src/ptytty.C"

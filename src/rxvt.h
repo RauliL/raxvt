@@ -74,7 +74,9 @@ typedef std::int32_t tlen_t_; // specifically for use in the line_t structure
 # define HAVE_IMG 1
 #endif
 
-#include <ecb.h>
+#include <../deps/libptytty/src/ecb.h>
+#include <../deps/libptytty/src/libptytty.h>
+
 #include "encoding.h"
 #include "rxvtutil.h"
 #include "rxvtfont.h"
@@ -82,8 +84,6 @@ typedef std::int32_t tlen_t_; // specifically for use in the line_t structure
 #include "rxvtimg.h"
 #include "scrollbar.h"
 #include "ev_cpp.h"
-#include "libptytty.h"
-
 #include "rxvtperl.h"
 
 /*

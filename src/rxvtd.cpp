@@ -37,10 +37,11 @@
 # include <sys/mman.h>
 #endif
 
+#include <../deps/libptytty/src/libptytty.h>
+
 #include "rxvt.h"
 #include "raxvt/connection.hpp"
 #include "raxvt/display.hpp"
-#include "libptytty.h"
 
 struct server : raxvt::connection {
   log_callback log_cb;

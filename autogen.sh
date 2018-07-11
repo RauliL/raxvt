@@ -1,16 +1,21 @@
 #! /bin/sh
 
-if ! [ -e libev/ev++.h ]; then
-   cat <<EOF
+for filename in deps/libev/ev++.h \
+                deps/libptytty/src/libptytty.h \
+                deps/tinytoml/include/toml/toml.h
+do
+  if test ! -e "$filename"
+  then
+    cat <<EOF
 **
-** libev/ directory is missing
+** $filename is missing.
 **
-** you need a checkout of libev (http://software.schmorp.de/pkg/libev)
-** in the top-level build directory.
+** You need to initialize Git submodules.
 **
 EOF
-   exit 1
-fi
+    exit 1
+  fi
+done
 
 if autoheader && autoconf; then
 	rm -rf autom4te.cache
