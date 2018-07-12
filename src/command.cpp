@@ -136,30 +136,30 @@ static unsigned short iso14755_symtab[] = {
 };
 
 void ecb_cold
-rxvt_term::iso14755_54 (int x, int y)
+rxvt_term::iso14755_54(int x, int y)
 {
-  x = Pixel2Col (x);
-  y = Pixel2Row (y);
+  x = Pixel2Col(x);
+  y = Pixel2Row(y);
 
-  if (!IN_RANGE_EXC (x, 0, ncol)
-      || !IN_RANGE_EXC (y, 0, nrow))
+  if (!IN_RANGE_EXC (x, 0, ncol) || !IN_RANGE_EXC (y, 0, nrow))
+  {
     return;
+  }
 
   for (;;)
+  {
+    const auto& l = ROW(y + view_start);
+    const auto t = l.t[x];
+
+    if (t != NOCHAR || !x)
     {
-      const line_t &l = ROW(y + view_start);
-
-      text_t t = l.t[x];
-
-      if (t != NOCHAR || !x)
-        {
-          iso14755_51 (l.t[x], l.r[x], x, y, view_start);
-          iso14755buf = ISO_14755_54;
-          break;
-        }
-
-      x--;
+      iso14755_51(l.t[x], l.r[x], x, y, view_start);
+      iso14755buf = ISO_14755_54;
+      break;
     }
+
+    --x;
+  }
 }
 
 void ecb_cold
@@ -233,10 +233,6 @@ rxvt_term::iso14755_51 (unicode_t ch, rend_t r, int x, int y, int y2)
       sprintf (buf, "%8x", ch);
       scr_overlay_set (0, y + 1, buf);
       scr_overlay_set (9, y + 1, '=');
-# if !UNICODE_3
-      if (ch >= 0x10000)
-        ch = 0xfffd;
-# endif
       scr_overlay_set (11, y + 1, ch, r);
 
       if (WCWIDTH (ch) >= 2)

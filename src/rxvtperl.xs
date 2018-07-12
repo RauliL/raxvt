@@ -208,15 +208,15 @@ overlay::overlay (rxvt_term *THIS, int x_, int y_, int w_, int h_, rend_t rstyle
       h += 2;
     }
 
-  text = new text_t *[h];
+  text = new char32_t *[h];
   rend = new rend_t *[h];
 
   for (int y = 0; y < h; y++)
     {
-      text_t *tp = text[y] = new text_t[w];
+      char32_t *tp = text[y] = new char32_t[w];
       rend_t *rp = rend[y] = new rend_t[w];
 
-      text_t t0, t1, t2;
+      char32_t t0, t1, t2;
       rend_t r = rstyle;
 
       if (border == 2)
@@ -319,15 +319,15 @@ void overlay::swap ()
 
   for (int y = ov_h; y--; )
     {
-      text_t *t1 = text [y];
+      char32_t *t1 = text [y];
       rend_t *r1 = rend [y];
 
-      text_t *t2 = ROW(y + ov_y + THIS->view_start).t + ov_x;
+      char32_t *t2 = ROW(y + ov_y + THIS->view_start).t + ov_x;
       rend_t *r2 = ROW(y + ov_y + THIS->view_start).r + ov_x;
 
       for (int x = ov_w; x--; )
         {
-          text_t t = *t1; *t1++ = *t2; *t2++ = t;
+          char32_t t = *t1; *t1++ = *t2; *t2++ = t;
           rend_t r = *r1; *r1++ = *r2; *r2++ = SET_FONT (r, THIS->fontset [GET_STYLE (r)]->find_font (t));
         }
     }
@@ -1758,12 +1758,6 @@ rxvt_term::special_encode(SV* string)
 
       r[-1] = n;
     }
-#if !UNICODE_3
-    else if (*s >= 0x10000)
-    {
-      *r++ = rxvt_composite.compose (*s);
-    }
-#endif
     else
     {
       *r++ = *s;

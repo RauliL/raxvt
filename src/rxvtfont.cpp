@@ -152,7 +152,7 @@ static uint16_t extent_test_chars[] = {
 /////////////////////////////////////////////////////////////////////////////
 
 static const char *
-enc_char (const text_t *text, uint32_t len, codeset cs, bool &zero)
+enc_char (const char32_t* text, uint32_t len, codeset cs, bool &zero)
 {
   uint8_t *buf = rxvt_temp_buf<uint8_t> (len);
   uint8_t *res = buf;
@@ -174,7 +174,7 @@ enc_char (const text_t *text, uint32_t len, codeset cs, bool &zero)
 }
 
 static const XChar2b *
-enc_xchar2b (const text_t *text, uint32_t len, codeset cs, bool &zero)
+enc_xchar2b (const char32_t* text, uint32_t len, codeset cs, bool &zero)
 {
   XChar2b *buf = rxvt_temp_buf<XChar2b> (len);
   XChar2b *res = buf;
@@ -308,13 +308,13 @@ struct rxvt_font_default : rxvt_font {
   }
 
   void draw (rxvt_drawable &d, int x, int y,
-             const text_t *text, int len,
+             const char32_t* text, int len,
              int fg, int bg);
 };
 
 void
 rxvt_font_default::draw (rxvt_drawable &d, int x, int y,
-                         const text_t *text, int len,
+                         const char32_t* text, int len,
                          int fg, int bg)
 {
   dTermDisplay;
@@ -329,8 +329,8 @@ rxvt_font_default::draw (rxvt_drawable &d, int x, int y,
 #if ENABLE_COMBINING
       compose_char *cc;
 #endif
-      const text_t *tp = text;
-      text_t t  = *tp;
+      const char32_t* tp = text;
+      char32_t t = *tp;
 
       while (++text, --len && *text == NOCHAR)
         ;
@@ -427,7 +427,7 @@ rxvt_font_default::draw (rxvt_drawable &d, int x, int y,
         {
           min_it (width, 2); // we only support wcwidth up to 2
 
-          text_t chrs[2];
+          char32_t chrs[2];
           chrs [1] = NOCHAR;
 
           *chrs = cc->c1;
@@ -502,7 +502,7 @@ struct rxvt_font_overflow : rxvt_font {
   }
 
   void draw (rxvt_drawable &d, int x, int y,
-             const text_t *text, int len,
+             const char32_t* text, int len,
              int fg, int bg)
   {
     while (len)
@@ -533,7 +533,7 @@ struct rxvt_font_x11 : rxvt_font {
   bool has_char (unicode_t unicode, const rxvt_fontprop *prop, bool &careful) const;
 
   void draw (rxvt_drawable &d, int x, int y,
-             const text_t *text, int len,
+             const char32_t* text, int len,
              int fg, int bg);
 
   bool slow; // whether this is a proportional font or has other funny characteristics
@@ -1002,7 +1002,7 @@ rxvt_font_x11::has_char (unicode_t unicode, const rxvt_fontprop *prop, bool &car
 
 void
 rxvt_font_x11::draw (rxvt_drawable &d, int x, int y,
-                     const text_t *text, int len,
+                     const char32_t* text, int len,
                      int fg, int bg)
 {
   // this looks like a mess /.
@@ -1102,7 +1102,7 @@ struct rxvt_font_xft : rxvt_font {
   bool load (const rxvt_fontprop &prop, bool force_prop);
 
   void draw (rxvt_drawable &d, int x, int y,
-             const text_t *text, int len,
+             const char32_t* text, int len,
              int fg, int bg);
 
   bool has_char (unicode_t unicode, const rxvt_fontprop *prop, bool &careful) const;
@@ -1309,7 +1309,7 @@ rxvt_font_xft::has_char (unicode_t unicode, const rxvt_fontprop *prop, bool &car
 
 void
 rxvt_font_xft::draw (rxvt_drawable &d, int x, int y,
-                     const text_t *text, int len,
+                     const char32_t* text, int len,
                      int fg, int bg)
 {
   XGlyphInfo extents;

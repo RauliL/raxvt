@@ -32,7 +32,7 @@
 #include "raxvt/display.hpp"
 
 static inline void
-fill_text (text_t *start, text_t value, int len)
+fill_text (char32_t* start, char32_t value, int len)
 {
   while (len--)
     *start++ = value;
@@ -111,7 +111,7 @@ rxvt_term::scr_blank_line (line_t &l, unsigned int col, unsigned int width, rend
   efs &= ~RS_baseattrMask; // remove italic etc. fontstyles
   efs = SET_FONT (efs, FONTSET (efs)->find_font (' '));
 
-  text_t *et = l.t + col;
+  char32_t* et = l.t + col;
   rend_t *er = l.r + col;
 
   while (width--)
@@ -170,11 +170,11 @@ rxvt_term::scr_set_char_rend (line_t &l, int col, rend_t rend)
 void
 rxvt_term::scr_alloc () NOTHROW
 {
-  int tsize = sizeof (text_t) * ncol;
+  int tsize = sizeof (char32_t) * ncol;
   int rsize = sizeof (rend_t) * ncol;
 
   // we assume that rend_t size is a sufficient alignment
-  // factor for text_t and line_t values, and we only
+  // factor for char32_t and line_t values, and we only
   // need to adjust tsize.
   tsize = (tsize + sizeof (rend_t) - 1);
   tsize -= tsize % sizeof (rend_t);
@@ -190,7 +190,7 @@ rxvt_term::scr_alloc () NOTHROW
     {
       line_t &l = ((line_t *)chunk) [row];
 
-      l.t = (text_t *)base; base += tsize;
+      l.t = (char32_t*)base; base += tsize;
       l.r = (rend_t *)base; base += rsize;
       l.l = -1;
       l.f = 0;
@@ -206,7 +206,7 @@ rxvt_term::copy_line(line_t& dst, line_t& src)
 {
   scr_blank_screen_mem(dst, DEFAULT_RSTYLE);
   dst.l = min(src.l, ncol);
-  std::memcpy(dst.t, src.t, sizeof(text_t) * dst.l);
+  std::memcpy(dst.t, src.t, sizeof(char32_t) * dst.l);
   std::memcpy(dst.r, src.r, sizeof(rend_t) * dst.l);
   dst.f = src.f;
 }
@@ -296,7 +296,7 @@ rxvt_term::scr_reset ()
       for (int row = min (nrow, prev_nrow); row--; )
         {
           scr_blank_screen_mem (drawn_buf [row], DEFAULT_RSTYLE);
-          std::memcpy(drawn_buf [row].t, prev_drawn_buf [row].t, sizeof(text_t) * common_col);
+          std::memcpy(drawn_buf [row].t, prev_drawn_buf [row].t, sizeof(char32_t) * common_col);
           std::memcpy(drawn_buf [row].r, prev_drawn_buf [row].r, sizeof(rend_t) * common_col);
 
           copy_line (swap_buf [row], prev_swap_buf [row]);
@@ -374,7 +374,7 @@ rxvt_term::scr_reset ()
 
                       int len = min (min (prev_ncol - pcol, ncol - qcol), llen - lofs);
 
-                      std::memcpy(qline->t + qcol, pline.t + pcol, len * sizeof(text_t));
+                      std::memcpy(qline->t + qcol, pline.t + pcol, len * sizeof(char32_t));
                       std::memcpy(qline->r + qcol, pline.r + pcol, len * sizeof(rend_t));
 
                       lofs += len;
@@ -925,16 +925,6 @@ rxvt_term::scr_add_lines (const wchar_t *str, int len, int minlines) NOTHROW
 
       if (width != 0)
         {
-#if !UNICODE_3
-          // trim characters we can't store directly :(
-          if (c >= 0x10000)
-# if ENABLE_COMBINING
-            c = rxvt_composite.compose (c); // map to lower 16 bits
-# else
-            c = 0xfffd;
-# endif
-#endif
-
           rend_t rend = SET_FONT (rstyle, FONTSET (rstyle)->find_font (c));
 
           // if the character doesn't fit into the remaining columns...
@@ -1000,7 +990,7 @@ end_of_line:
               // this is arguably not correct, but also arguably not wrong.
               // we don't handle double-width characters nicely yet.
               line_t *linep;
-              text_t *tp;
+              char32_t* tp;
               rend_t *rp;
 
               if (screen.cur.col > 0)
@@ -1980,13 +1970,13 @@ rxvt_term::scr_printscreen (int fullhist) NOTHROW
 
   for (int r1 = row_start; r1 < row_start + nrows; r1++)
     {
-      text_t *tp = ROW(r1).t;
+      char32_t* tp = ROW(r1).t;
       int len    = ROW(r1).l;
 
       for (int i = len >= 0 ? len : ncol - 1; i--; ) //TODO//FIXME//LEN
         {
           char mb[MB_LEN_MAX];
-          text_t t = *tp++;
+          char32_t t = *tp++;
           if (t == NOCHAR)
             continue;
 
@@ -2205,9 +2195,9 @@ rxvt_term::scr_refresh () NOTHROW
    */
   for (row = 0; row < nrow; row++)
     {
-      text_t *stp = ROW(view_start + row).t;
+      char32_t* stp = ROW(view_start + row).t;
       rend_t *srp = ROW(view_start + row).r;
-      text_t *dtp = drawn_buf[row].t;
+      char32_t* dtp = drawn_buf[row].t;
       rend_t *drp = drawn_buf[row].r;
 
       /*
@@ -2228,7 +2218,7 @@ rxvt_term::scr_refresh () NOTHROW
             --col;
 
           rend_t rend = srp[col];     /* screen rendition (target rendition) */
-          text_t *text = stp + col;
+          char32_t* text = stp + col;
           int count = 1;
 
           dtp[col] = stp[col];
@@ -2568,7 +2558,7 @@ rxvt_term::scr_xor_rect (int beg_row, int beg_col, int end_row, int end_col, ren
 
   for (row = max (beg_row, view_start); row <= min (end_row, view_end); row++)
     {
-      text_t *stp = ROW(row).t;
+      char32_t* stp = ROW(row).t;
       rend_t *srp = ROW(row).r;
 
       for (col = beg_col; col < end_col; col++)
@@ -2753,7 +2743,7 @@ rxvt_term::selection_make (Time tm)
 {
   int size;
   wchar_t *new_selection_text;
-  text_t *t;
+  char32_t* t;
 
   switch (selection.op)
     {
@@ -2975,7 +2965,7 @@ rxvt_term::selection_delimit_word (enum page_dirn dirn, const row_col_t *mark, r
 {
   int col, row, dirnadd, tcol, trow, w1, w2;
   row_col_t bound;
-  text_t *stp;
+  char32_t* stp;
   rend_t *srp;
 
   if (dirn == UP)
@@ -3295,7 +3285,7 @@ void ecb_cold
 rxvt_term::selection_remove_trailing_spaces () NOTHROW
 {
   int32_t end_col, end_row;
-  text_t *stp;
+  char32_t* stp;
 
   end_col = selection.end.col;
   end_row = selection.end.row;
@@ -3531,15 +3521,15 @@ rxvt_term::scr_overlay_new (int x, int y, int w, int h) NOTHROW
   ov.x = x; ov.y = y;
   ov.w = w; ov.h = h;
 
-  ov.text = new text_t *[h];
+  ov.text = new char32_t*[h];
   ov.rend = new rend_t *[h];
 
   for (y = 0; y < h; y++)
     {
-      text_t *tp = ov.text[y] = new text_t[w];
+      char32_t* tp = ov.text[y] = new char32_t[w];
       rend_t *rp = ov.rend[y] = new rend_t[w];
 
-      text_t t0, t1, t2;
+      char32_t t0, t1, t2;
       rend_t r = OVERLAY_RSTYLE;
 
       if (y == 0)
@@ -3582,7 +3572,7 @@ rxvt_term::scr_overlay_off () NOTHROW
 }
 
 void
-rxvt_term::scr_overlay_set (int x, int y, text_t text, rend_t rend) NOTHROW
+rxvt_term::scr_overlay_set (int x, int y, char32_t text, rend_t rend) NOTHROW
 {
   if (!ov.text || x >= ov.w - 2 || y >= ov.h - 2)
     return;
@@ -3605,7 +3595,7 @@ rxvt_term::scr_overlay_set (int x, int y, const wchar_t *s) NOTHROW
 {
   while (*s)
     {
-      text_t t = *s++;
+      char32_t t = *s++;
       int width = WCWIDTH (t);
 
       while (width--)
@@ -3630,15 +3620,15 @@ rxvt_term::scr_swap_overlay () NOTHROW
   // swap screen mem with overlay
   for (int y = ov.h; y--; )
     {
-      text_t *t1 = ov.text[y];
+      char32_t *t1 = ov.text[y];
       rend_t *r1 = ov.rend[y];
 
-      text_t *t2 = ROW(y + ov.y + view_start).t + ov.x;
+      char32_t *t2 = ROW(y + ov.y + view_start).t + ov.x;
       rend_t *r2 = ROW(y + ov.y + view_start).r + ov.x;
 
       for (int x = ov.w; x--; )
         {
-          text_t t = *t1; *t1++ = *t2; *t2++ = t;
+          char32_t t = *t1; *t1++ = *t2; *t2++ = t;
           rend_t r = *r1; *r1++ = *r2; *r2++ = SET_FONT (r, FONTSET (r)->find_font (t));
         }
     }

@@ -55,7 +55,7 @@ struct rxvt_font
 
   virtual void draw (rxvt_drawable &d,
                      int x, int y,
-                     const text_t *text, int len,
+                     const char32_t* text, int len,
                      int fg, int bg) = 0;
 };
 

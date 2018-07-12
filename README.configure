@@ -43,33 +43,12 @@ CONFIGURE OPTIONS
         alternative input methods (e.g. kinput2) and will also correctly set
         up the input for people using dead keys or compose keys.
 
-    --enable-unicode3 (default: off)
-        Recommended to stay off unless you really need non-BMP characters.
-
-        Enable direct support for displaying unicode codepoints above 65535
-        (the basic multilingual page). This increases storage requirements
-        per character from 2 to 4 bytes. X11 fonts do not yet support these
-        extra characters, but Xft does.
-
-        Please note that rxvt-unicode can store unicode code points >65535
-        even without this flag, but the number of such characters is limited
-        to a few thousand (shared with combining characters, see next
-        switch), and right now rxvt-unicode cannot display them
-        (input/output and cut&paste still work, though).
-
     --enable-combining (default: on)
         Enable automatic composition of combining characters into composite
         characters. This is required for proper viewing of text where
         accents are encoded as separate unicode characters. This is done by
         using precomposed characters when available or creating new
         pseudo-characters when no precomposed form exists.
-
-        Without --enable-unicode3, the number of additional precomposed
-        characters is somewhat limited (the 6400 private use characters will
-        be (ab-)used). With --enable-unicode3, no practical limit exists.
-
-        This option will also enable storage (but not display) of characters
-        beyond plane 0 (>65535) when --enable-unicode3 was not specified.
 
         The combining table also contains entries for arabic presentation
         forms, but these are not currently used. Bug me if you want these to

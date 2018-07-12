@@ -327,9 +327,6 @@ static const char optionsstring[] = "options: "
 #if ISO_14755
                                     "iso14755,"
 #endif
-#if UNICODE_3
-                                    "unicode3,"
-#endif
                                     "encodings=eu+vn"
 #if ENCODING_JP
                                     "+jp"

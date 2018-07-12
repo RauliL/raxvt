@@ -29,11 +29,6 @@ extern "C" {
 #include <X11/Xresource.h>
 }
 
-#if UNICODE_3
-typedef std::uint32_t text_t;
-#else
-typedef std::uint16_t text_t; // saves lots of memory
-#endif
 typedef std::uint32_t rend_t;
 typedef std::int32_t tlen_t;  // was int16_t, but this results in smaller code and memory use
 typedef std::int32_t tlen_t_; // specifically for use in the line_t structure
@@ -675,7 +670,8 @@ using getfd_callback = std::function<int(int)>;
 
 struct line_t
 {
-   text_t *t; // terminal the text
+  /** The actual text. */
+  char32_t* t;
    rend_t *r; // rendition, uses RS_ flags
    tlen_t_ l; // length of each text line
    std::uint32_t f; // flags
@@ -741,20 +737,9 @@ struct mbstate
 
 #define UNICODE_MASK 0x1fffffUL
 
-#if UNICODE_3
-# define COMPOSE_LO 0x40000000UL
-# define COMPOSE_HI 0x400fffffUL
-# define IS_COMPOSE(n) ((int32_t)(n) >= COMPOSE_LO)
-#else
-# if ENABLE_PERL
-#  define COMPOSE_LO 0xe000UL // our _own_ functions don't like (illegal) surrogates
-#  define COMPOSE_HI 0xf8ffUL // in utf-8, so use private use area only
-# else
-#  define COMPOSE_LO 0xd800UL
-#  define COMPOSE_HI 0xf8ffUL
-# endif
-# define IS_COMPOSE(n) IN_RANGE_INC ((n), COMPOSE_LO, COMPOSE_HI)
-#endif
+#define COMPOSE_LO 0x40000000UL
+#define COMPOSE_HI 0x400fffffUL
+#define IS_COMPOSE(n) ((int32_t)(n) >= COMPOSE_LO)
 
 #if ENABLE_COMBINING
 // compose chars are used to represent composite characters
@@ -773,9 +758,9 @@ class rxvt_composite_vec
 {
   vector<compose_char> v;
 public:
-  text_t compose (unicode_t c1, unicode_t c2 = NOCHAR);
+  char32_t compose (unicode_t c1, unicode_t c2 = NOCHAR);
   int expand (unicode_t c, wchar_t *r);
-  compose_char *operator [](text_t c)
+  compose_char *operator [](char32_t c)
   {
     return c >= COMPOSE_LO && c < COMPOSE_LO + v.size ()
            ? &v[c - COMPOSE_LO]
@@ -803,7 +788,7 @@ extern rxvt_t rxvt_current_term;
 struct overlay_base
 {
   int x, y, w, h; // overlay dimensions
-  text_t **text;
+  char32_t** text;
   rend_t **rend;
 
   // while tempting to add swap() etc. here, it effectively only increases code size
@@ -1092,7 +1077,7 @@ struct rxvt_term : rxvt_vars, rxvt_screen
   void scr_overlay_new (int x, int y, int w, int h) NOTHROW;
   void scr_overlay_off () NOTHROW;
   void scr_overlay_set (int x, int y,
-                        text_t text,
+                        char32_t text,
                         rend_t rend = OVERLAY_RSTYLE) NOTHROW;
   void scr_overlay_set (int x, int y, const char *s) NOTHROW;
   void scr_overlay_set (int x, int y, const wchar_t *s) NOTHROW;
@@ -1123,7 +1108,7 @@ struct rxvt_term : rxvt_vars, rxvt_screen
 
   ptytty         *pty;
 
-  // chunk contains all line_t's as well as rend_t and text_t buffers
+  // chunk contains all line_t's as well as rend_t and char32_t buffers
   // for drawn_buf, swap_buf and row_buf, in this order
   void           *chunk;
   size_t          chunk_size;

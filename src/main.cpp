@@ -83,7 +83,7 @@ rxvt_pop_locale() noexcept
 #if ENABLE_COMBINING
 class rxvt_composite_vec rxvt_composite;
 
-text_t rxvt_composite_vec::compose (unicode_t c1, unicode_t c2)
+char32_t rxvt_composite_vec::compose(unicode_t c1, unicode_t c2)
 {
   compose_char *cc;
 

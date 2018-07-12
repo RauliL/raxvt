@@ -7747,11 +7747,6 @@ if test x$support_text_blink = xyes; then
 $as_echo "#define TEXT_BLINK 1" >>confdefs.h
 
 fi
-if test x$support_unicode3 = xyes; then
-
-$as_echo "#define UNICODE_3 1" >>confdefs.h
-
-fi
 if test x$support_combining = xyes; then
 
 $as_echo "#define ENABLE_COMBINING 1" >>confdefs.h

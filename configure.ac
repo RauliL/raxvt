@@ -648,9 +648,6 @@ fi
 if test x$support_text_blink = xyes; then
   AC_DEFINE(TEXT_BLINK, 1, Define if you want blinking text support)
 fi
-if test x$support_unicode3 = xyes; then
-  AC_DEFINE(UNICODE_3, 1, Define if you want to represent unicode characters outside plane 0)
-fi
 if test x$support_combining = xyes; then
   AC_DEFINE(ENABLE_COMBINING, 1, Define if you want to automatically compose combining characters)
 fi
