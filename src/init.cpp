@@ -740,11 +740,12 @@ rxvt_term::init(const std::vector<std::string>& argv,
   this->envv = envv;
 
   env_size = this->envv.size();
-  env = new char*[env_size];
+  env = new char*[env_size + 1];
   for (std::size_t i = 0; i < env_size; ++i)
   {
     env[i] = strdup(this->envv[i].c_str());
   }
+  env[env_size] = nullptr;
 
   init2(argv);
 }
