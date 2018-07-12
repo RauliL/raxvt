@@ -1251,18 +1251,18 @@ rxvt_term::im_send_spot ()
 }
 
 void
-rxvt_term::im_destroy ()
+rxvt_term::im_destroy()
 {
   if (input_method)
+  {
+    if (Input_Context && input_method->xim())
     {
-      if (Input_Context && input_method->xim)
-        XDestroyIC (Input_Context);
-
-      display->put_xim (input_method);
-      input_method = 0;
+      XDestroyIC(Input_Context);
     }
-
-  Input_Context = 0;
+    display->put_xim(input_method);
+    input_method.reset();
+  }
+  Input_Context = nullptr;
 }
 
 #ifdef ENABLE_XIM_ONTHESPOT
@@ -1355,7 +1355,7 @@ rxvt_term::im_get_ic (const char *modifiers)
     return false;
   }
 
-  xim = input_method->xim;
+  xim = input_method->xim();
   spot.x = spot.y = -1;
 
   xim_styles = NULL;

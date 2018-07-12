@@ -27,60 +27,26 @@
 #include "./rxvttoolkit.h"
 #include "raxvt/display.hpp"
 
-/////////////////////////////////////////////////////////////////////////////
-
-refcounted::refcounted(const std::string& id)
-{
-  this->id = id;
-}
-
-refcounted::~refcounted() {}
-
-/////////////////////////////////////////////////////////////////////////////
-
 #if USE_XIM
+rxvt_xim::rxvt_xim(const std::string& id,
+                   raxvt::display* display,
+                   XIM xim)
+  : m_id(id)
+  , m_display(display)
+  , m_xim(xim) {}
 
-static void
-#if XIMCB_PROTO_BROKEN
-im_destroy_cb (XIC unused1, XPointer client_data, XPointer unused3)
-#else
-im_destroy_cb (XIM unused1, XPointer client_data, XPointer unused3)
-#endif
+rxvt_xim::~rxvt_xim()
 {
-  rxvt_xim *xim = (rxvt_xim *)client_data;
-  raxvt::display* display = xim->display;
-
-  xim->xim = 0;
-
-  display->remove_xim(xim);
-  display->im_change_cb();
+  if (m_xim)
+  {
+    XCloseIM(m_xim);
+  }
 }
 
-bool
-rxvt_xim::ref_init ()
+void rxvt_xim::reset()
 {
-  display = GET_R->display; //HACK: TODO
-
-  xim = XOpenIM(display->dpy(), 0, 0, 0);
-
-  if (!xim)
-    return false;
-
-  XIMCallback ximcallback;
-  ximcallback.client_data = (XPointer)this;
-  ximcallback.callback = im_destroy_cb;
-
-  XSetIMValues (xim, XNDestroyCallback, &ximcallback, (char *)0);
-
-  return true;
+  m_xim = nullptr;
 }
-
-rxvt_xim::~rxvt_xim ()
-{
-  if (xim)
-    XCloseIM (xim);
-}
-
 #endif
 
 /////////////////////////////////////////////////////////////////////////////

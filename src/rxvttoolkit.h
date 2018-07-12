@@ -111,79 +111,6 @@ struct rxvt_watcher
   rxvt_watcher () : active (0) { }
 };
 
-struct refcounted
-{
-  int referenced;
-  std::string id;
-
-  refcounted(const std::string& id);
-  ~refcounted();
-
-  virtual bool ref_init()
-  {
-    return false;
-  }
-};
-
-template<class T>
-struct refcache : vector<T*>
-{
-public:
-  ~refcache()
-  {
-    clear();
-  }
-
-  T* get(const std::string& id)
-  {
-    const auto end = this->end();
-    T* obj;
-
-    for (auto i = this->begin(); i < end; ++i)
-    {
-      if (!id.compare((*i)->id))
-      {
-        ++(*i)->referenced;
-
-        return *i;
-      }
-    }
-    obj = new T(id);
-    if (obj && obj->ref_init())
-    {
-      obj->referenced = 1;
-      this->push_back(obj);
-
-      return obj;
-    }
-
-    delete obj;
-
-    return nullptr;
-  }
-
-  void put(T* obj)
-  {
-    if (!obj)
-    {
-      return;
-    }
-    if (!--obj->referenced)
-    {
-      this->erase(find(this->begin(), this->end(), obj));
-      delete obj;
-    }
-  }
-
-  void clear()
-  {
-    while (this->size())
-    {
-      put(*this->begin());
-    }
-  }
-};
-
 /////////////////////////////////////////////////////////////////////////////
 
 struct rxvt_screen;
@@ -208,17 +135,35 @@ struct rxvt_drawable
 /////////////////////////////////////////////////////////////////////////////
 
 #if USE_XIM
-struct rxvt_xim : refcounted
+class rxvt_xim
 {
-  raxvt::display* display;
-  XIM xim;
-
-  rxvt_xim(const std::string& id)
-    : refcounted(id) {}
+public:
+  explicit rxvt_xim(const std::string& id, raxvt::display* display, XIM xim);
   ~rxvt_xim();
+  rxvt_xim(const rxvt_xim&) = delete;
+  void operator=(const rxvt_xim&) = delete;
 
-  bool ref_init();
-  void destroy();
+  inline const std::string& id() const
+  {
+    return m_id;
+  }
+
+  inline raxvt::display* display() const
+  {
+    return m_display;
+  }
+
+  inline const XIM xim() const
+  {
+    return m_xim;
+  }
+
+  void reset();
+
+private:
+  const std::string m_id;
+  raxvt::display* m_display;
+  XIM m_xim;
 };
 #endif
 

@@ -580,19 +580,66 @@ namespace raxvt
     }
   }
 
-  rxvt_xim*
+  static void
+#if XIMCB_PROTO_BROKEN
+  im_destroy_cb(XIC, XPointer client_data, XPointer)
+#else
+  im_destroy_cb(XIM, XPointer client_data, XPointer)
+#endif
+  {
+    auto xim = reinterpret_cast<rxvt_xim*>(client_data);
+    auto display = xim->display();
+
+    xim->reset();
+    display->remove_xim(xim->id());
+    display->im_change_cb();
+  }
+
+  std::shared_ptr<rxvt_xim>
   display::get_xim(const std::string& locale,
                    const std::string& modifiers)
   {
-    return m_xims.get(locale + '\n' + modifiers);
+    const auto id = locale + '\n' + modifiers;
+    const auto entry = m_xims.find(id);
+
+    if (entry == std::end(m_xims))
+    {
+      auto xim = ::XOpenIM(m_dpy, 0, nullptr, nullptr);
+      XIMCallback callback;
+      std::shared_ptr<rxvt_xim> instance;
+
+      if (xim)
+      {
+        XIMCallback callback;
+
+        instance = std::make_shared<rxvt_xim>(id, this, xim);
+        m_xims[id] = instance;
+        callback.client_data = reinterpret_cast<XPointer>(instance.get());
+        callback.callback = im_destroy_cb;
+        ::XSetIMValues(xim, XNDestroyCallback, &callback, nullptr);
+      }
+
+      return instance;
+    }
+
+    return entry->second;
   }
 
   void
-  display::put_xim(rxvt_xim* xim)
+  display::put_xim(const std::shared_ptr<rxvt_xim>& xim)
   {
 # if defined(XLIB_IS_RACEFREE)
-    xims.put(xim);
+    if (xim)
+    {
+      m_xims[xim->id()] = xim;
+    }
 # endif
+  }
+
+  void
+  display::remove_xim(const std::string& id)
+  {
+    m_xims.erase(id);
   }
 #endif
 

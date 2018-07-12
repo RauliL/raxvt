@@ -11,6 +11,7 @@
 #include <cassert>
 
 #include <functional>
+#include <memory>
 #include <string>
 #include <unordered_map>
 
@@ -1214,7 +1215,7 @@ struct rxvt_term : rxvt_vars, rxvt_screen
   }
 
 #if USE_XIM
-  rxvt_xim *input_method;
+  std::shared_ptr<rxvt_xim> input_method;
   XIC      Input_Context;
   XIMStyle input_style;
   XPoint   spot; // most recently sent spot position

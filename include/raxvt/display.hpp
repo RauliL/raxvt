@@ -96,11 +96,6 @@ namespace raxvt
 #if defined(USE_XIM)
     void im_change_cb();
     void im_change_check();
-
-    inline void remove_xim(rxvt_xim* xim)
-    {
-      m_xims.erase(find(m_xims.begin(), m_xims.end(), xim));
-    }
 #endif
 
     bool ref_init();
@@ -119,11 +114,12 @@ namespace raxvt
     void reg(im_watcher* w);
     void unreg(im_watcher* w);
 
-    rxvt_xim* get_xim(
+    std::shared_ptr<rxvt_xim> get_xim(
       const std::string& locale,
       const std::string& modifiers
     );
-    void put_xim(rxvt_xim* xim);
+    void put_xim(const std::shared_ptr<rxvt_xim>& xim);
+    void remove_xim(const std::string& id);
 #endif
 
   private:
@@ -146,7 +142,7 @@ namespace raxvt
     ::Cursor m_blank_cursor;
 #endif
 #if defined(USE_XIM)
-    refcache<rxvt_xim> m_xims;
+    std::unordered_map<std::string, std::shared_ptr<rxvt_xim>> m_xims;
 #endif
     int m_screen;
     ::Window m_root;
