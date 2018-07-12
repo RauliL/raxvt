@@ -29,15 +29,12 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-refcounted::refcounted (const char *id)
+refcounted::refcounted(const std::string& id)
 {
-  this->id = strdup (id);
+  this->id = id;
 }
 
-refcounted::~refcounted ()
-{
-  free (id);
-}
+refcounted::~refcounted() {}
 
 /////////////////////////////////////////////////////////////////////////////
 

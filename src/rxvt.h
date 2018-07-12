@@ -1101,7 +1101,6 @@ struct rxvt_term : rxvt_vars, rxvt_screen
 
   int            parent_x, parent_y; // parent window position relative to root, only updated on demand
 
-  char           *locale;
   char            charsets[4];
   char           *v_buffer;           /* pointer to physical buffer */
   unsigned int    v_buflen;           /* size of area to write */
@@ -1204,11 +1203,14 @@ struct rxvt_term : rxvt_vars, rxvt_screen
   void tt_write_user_input (const char *data, unsigned int len);
   void pty_write ();
 
-  void make_current () const // make this the "currently active" urxvt instance
+  /**
+   * Makes this terminal the "currently active" instance.
+   */
+  void make_current() const
   {
-    SET_R (this);
-    set_environ (env);
-    rxvt_set_locale (locale);
+    SET_R(this);
+    set_environ(env);
+    rxvt_set_locale(m_locale);
   }
 
 #if USE_XIM
@@ -1281,7 +1283,14 @@ struct rxvt_term : rxvt_vars, rxvt_screen
   void init_vars ();
   std::vector<std::string> init_resources(const std::vector<std::string>& argv);
   void init_env ();
-  void set_locale (const char *locale);
+
+  inline const std::string& locale() const
+  {
+    return m_locale;
+  }
+
+  void set_locale(const std::string& locale);
+
   void init_xlocale ();
   void init_command(const std::vector<std::string>& argv);
   void run_command (const std::vector<std::string>& argv);
@@ -1455,6 +1464,7 @@ struct rxvt_term : rxvt_vars, rxvt_screen
 private:
   std::unordered_map<int, std::string> m_settings;
   std::unordered_map<int, bool> m_options;
+  std::string m_locale;
 };
 
 #endif /* _RXVT_H_ */

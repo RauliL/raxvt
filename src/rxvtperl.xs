@@ -1334,61 +1334,65 @@ rxvt_term::XKeycodeToKeysym (int code, int index)
 	OUTPUT: RETVAL
 
 int
-rxvt_term::strwidth (SV *str)
+rxvt_term::strwidth(SV* str)
 	CODE:
 {
-        wchar_t *wstr = sv2wcs (str);
+  auto wstr = sv2wcs(str);
 
-	rxvt_push_locale (THIS->locale);
-        RETVAL = 0;
-        for (wchar_t *wc = wstr; *wc; wc++)
-          {
-            int w = WCWIDTH (*wc);
+	rxvt_push_locale(THIS->locale());
+  RETVAL = 0;
+  for (auto wc = wstr; *wc; ++wc)
+  {
+    const auto w = WCWIDTH(*wc);
 
-            if (w)
-              RETVAL += max (w, 1);
-          }
-        rxvt_pop_locale ();
+    if (w)
+    {
+      RETVAL += std::max(w, 1);
+    }
+  }
+  rxvt_pop_locale();
 
-        free (wstr);
+  std::free(wstr);
+}
+	OUTPUT:
+    RETVAL
+
+SV*
+rxvt_term::locale_encode (SV* str)
+	CODE:
+{
+  auto wstr = sv2wcs(str);
+  char* mbstr;
+
+	rxvt_push_locale(THIS->locale());
+  mbstr = rxvt_wcstombs(wstr);
+  rxvt_pop_locale();
+
+  std::free(wstr);
+
+  RETVAL = newSVpv(mbstr, 0);
+  std::free(mbstr);
 }
 	OUTPUT:
         RETVAL
 
-SV *
-rxvt_term::locale_encode (SV *str)
-	CODE:
-{
-        wchar_t *wstr = sv2wcs (str);
-
-	rxvt_push_locale (THIS->locale);
-        char *mbstr = rxvt_wcstombs (wstr);
-        rxvt_pop_locale ();
-
-        free (wstr);
-
-        RETVAL = newSVpv (mbstr, 0);
-        free (mbstr);
-}
-	OUTPUT:
-        RETVAL
-
-SV *
-rxvt_term::locale_decode (SV *octets)
+SV*
+rxvt_term::locale_decode(SV* octets)
 	CODE:
 {
 	STRLEN len;
-        char *data = SvPVbyte (octets, len);
+  auto data = SvPVbyte(octets, len);
+  wchar_t* wstr;
 
-	rxvt_push_locale (THIS->locale);
-        wchar_t *wstr = rxvt_mbstowcs (data, len);
-        rxvt_pop_locale ();
+	rxvt_push_locale(THIS->locale());
+  wstr = rxvt_mbstowcs(data, len);
+  rxvt_pop_locale();
 
-        RETVAL = wcs2sv (wstr);
-        free (wstr);
+  RETVAL = wcs2sv(wstr);
+  std::free(wstr);
 }
 	OUTPUT:
-        RETVAL
+    RETVAL
 
 #define TERM_OFFSET(sym) offsetof (TermWin_t, sym)
 
@@ -1470,7 +1474,7 @@ rxvt_term::display_id ()
         switch (ix)
           {
             case 0: RETVAL = THIS->display->id().c_str(); break;
-            case 1: RETVAL = THIS->locale;      break;
+            case 1: RETVAL = THIS->locale().c_str();      break;
           }
         OUTPUT:
         RETVAL
@@ -1722,51 +1726,63 @@ rxvt_term::ROW_is_longer (int row_number, int new_is_longer = -1)
         OUTPUT:
         RETVAL
 
-SV *
-rxvt_term::special_encode (SV *string)
+SV*
+rxvt_term::special_encode(SV* string)
 	CODE:
 {
-        wchar_t *wstr = sv2wcs (string);
-        int wlen = wcslen (wstr);
-        wchar_t *rstr = rxvt_temp_buf<wchar_t> (wlen * 2); // cannot become longer
+  auto wstr = sv2wcs(string);
+  auto wlen = wcslen(wstr);
+  auto rstr = rxvt_temp_buf<wchar_t>(wlen * 2);
+  auto r = rstr;
 
-	rxvt_push_locale (THIS->locale);
+  rxvt_push_locale(THIS->locale());
 
-        wchar_t *r = rstr;
-        for (wchar_t *s = wstr; *s; s++)
-          {
-            int w = WCWIDTH (*s);
+  for (auto s = wstr; *s; ++s)
+  {
+    const auto w = WCWIDTH(*s);
 
-            if (w == 0)
-              {
-                if (r == rstr)
-                  croak ("leading combining character unencodable");
+    if (w == 0)
+    {
+      unicode_t n;
 
-                unicode_t n = rxvt_compose (r[-1], *s);
-                if (n == NOCHAR)
-                  n = rxvt_composite.compose (r[-1], *s);
+      if (r == rstr)
+      {
+        croak("leading combining character unencodable");
+      }
 
-                r[-1] = n;
-              }
+      n = rxvt_compose (r[-1], *s);
+      if (n == NOCHAR)
+      {
+        n = rxvt_composite.compose(r[-1], *s);
+      }
+
+      r[-1] = n;
+    }
 #if !UNICODE_3
-            else if (*s >= 0x10000)
-              *r++ = rxvt_composite.compose (*s);
+    else if (*s >= 0x10000)
+    {
+      *r++ = rxvt_composite.compose (*s);
+    }
 #endif
-            else
-              *r++ = *s;
+    else
+    {
+      *r++ = *s;
+    }
 
-            // the *2 above only allows wcwidth <= 2
-            if (w > 1)
-              *r++ = NOCHAR;
-          }
+    // the *2 above only allows wcwidth <= 2
+    if (w > 1)
+    {
+      *r++ = NOCHAR;
+    }
+  }
 
-	rxvt_pop_locale ();
+	rxvt_pop_locale();
 
-        free (wstr);
-        RETVAL = wcs2sv (rstr, r - rstr);
+  std::free(wstr);
+  RETVAL = wcs2sv(rstr, r - rstr);
 }
 	OUTPUT:
-        RETVAL
+    RETVAL
 
 SV *
 rxvt_term::special_decode (SV *text)
@@ -2073,24 +2089,23 @@ rxvt_term::tt_paste (SV *octets)
         str, len
 
 void
-rxvt_term::cmd_parse (SV *octets)
+rxvt_term::cmd_parse(SV* octets)
 	CODE:
 {
 	STRLEN len;
-        char *str = SvPVbyte (octets, len);
+  auto str = SvPVbyte(octets, len);
+  auto old_cmdbuf_ptr = THIS->cmdbuf_ptr;
+  auto old_cmdbuf_endp = THIS->cmdbuf_endp;
 
-        char *old_cmdbuf_ptr  = THIS->cmdbuf_ptr;
-        char *old_cmdbuf_endp = THIS->cmdbuf_endp;
+  THIS->cmdbuf_ptr = str;
+  THIS->cmdbuf_endp = str + len;
 
-        THIS->cmdbuf_ptr  = str;
-        THIS->cmdbuf_endp = str + len;
+	rxvt_push_locale(THIS->locale());
+  THIS->cmd_parse();
+	rxvt_pop_locale();
 
-	rxvt_push_locale (THIS->locale);
-        THIS->cmd_parse ();
-	rxvt_pop_locale ();
-
-        THIS->cmdbuf_ptr  = old_cmdbuf_ptr;
-        THIS->cmdbuf_endp = old_cmdbuf_endp;
+  THIS->cmdbuf_ptr = old_cmdbuf_ptr;
+  THIS->cmdbuf_endp = old_cmdbuf_endp;
 }
 
 SV *

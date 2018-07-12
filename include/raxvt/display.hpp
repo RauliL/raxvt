@@ -119,7 +119,10 @@ namespace raxvt
     void reg(im_watcher* w);
     void unreg(im_watcher* w);
 
-    rxvt_xim* get_xim(const char* locale, const char* modifiers);
+    rxvt_xim* get_xim(
+      const std::string& locale,
+      const std::string& modifiers
+    );
     void put_xim(rxvt_xim* xim);
 #endif
 

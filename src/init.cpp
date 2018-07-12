@@ -945,33 +945,39 @@ rxvt_term::init_env ()
 
 /*----------------------------------------------------------------------*/
 void
-rxvt_term::set_locale (const char *locale)
+rxvt_term::set_locale(const std::string& locale)
 {
-  set_environ (env);
+  const char* returned_locale;
+#if HAVE_NL_LANGINFO
+  char* codeset;
+#endif
 
-  free (this->locale);
-  this->locale = setlocale (LC_CTYPE, locale);
-
-  if (!this->locale)
+  set_environ(env);
+  returned_locale = std::setlocale(LC_CTYPE, locale.c_str());
+  if (!returned_locale)
+  {
+    if (!locale.empty())
     {
-      if (*locale)
-        {
-          rxvt_warn ("unable to set locale \"%s\", using C locale instead.\n", locale);
-          setlocale (LC_CTYPE, "C");
-        }
-      else
-        rxvt_warn ("default locale unavailable, check LC_* and LANG variables. Continuing.\n");
-
-      this->locale = "C";
+      rxvt_warn(
+        "unable to set locale \"%s\", using C locale instead.\n",
+        locale.c_str()
+      );
+      std::setlocale(LC_CTYPE, "C");
+    } else {
+      rxvt_warn(
+        "default locale unavailable, check LC_* and LANG variables. "
+        "Continuing.\n"
+      );
     }
+    returned_locale = "C";
+  }
 
-
-  this->locale = strdup (this->locale);
-  rxvt_set_locale(this->locale);
-  mbstate.reset ();
+  m_locale = returned_locale;
+  rxvt_set_locale(m_locale);
+  mbstate.reset();
 
 #if HAVE_NL_LANGINFO
-  char *codeset = nl_langinfo (CODESET);
+  codeset = nl_langinfo (CODESET);
   // /^UTF.?8/i
   enc_utf8 = (codeset[0] == 'U' || codeset[0] == 'u')
           && (codeset[1] == 'T' || codeset[1] == 't')
@@ -983,28 +989,31 @@ rxvt_term::set_locale (const char *locale)
 }
 
 void
-rxvt_term::init_xlocale ()
+rxvt_term::init_xlocale()
 {
-  set_environ (env);
+  set_environ(env);
 
 #if USE_XIM
-  if (!locale)
+  if (m_locale.empty())
+  {
     rxvt_warn ("setting locale failed, continuing without locale support.\n");
-  else
+  } else {
+    set_string_property(xa[XA_WM_LOCALE_NAME], m_locale.c_str());
+
+    if (!XSupportsLocale())
     {
-      set_string_property (xa[XA_WM_LOCALE_NAME], locale);
-
-      if (!XSupportsLocale ())
-        {
-          rxvt_warn ("the locale is not supported by Xlib, continuing without locale support.\n");
-          return;
-        }
-
-      im_ev.start (display);
-
-      /* see if we can connect already */
-      im_cb ();
+      rxvt_warn(
+        "the locale is not supported by Xlib, continuing without locale "
+        "support.\n"
+      );
+      return;
     }
+
+    im_ev.start(display);
+
+    // See if we can connect already.
+    im_cb();
+  }
 #endif
 }
 

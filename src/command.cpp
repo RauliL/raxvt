@@ -454,7 +454,7 @@ rxvt_term::key_press (XKeyEvent &ev)
 
           if (get_setting(Rs_imLocale))
           {
-            rxvt_set_locale(locale);
+            rxvt_set_locale(m_locale);
           }
 
           if (status_return == XLookupChars
@@ -3577,13 +3577,18 @@ rxvt_term::process_xterm_seq (int op, char *str, char resp)
 #if !ENABLE_MINIMAL
       case URxvt_locale:
         if (query)
-          tt_printf ("\33]%d;%-.250s%c", op, get_option(Opt_insecure) ? locale : "", resp);
-        else
-          {
-            set_locale (str);
-            pty->set_utf8_mode (enc_utf8);
-            init_xlocale ();
-          }
+        {
+          tt_printf(
+            "\33]%d;%-.250s%c",
+            op,
+            get_option(Opt_insecure) ? m_locale.c_str() : "",
+            resp
+          );
+        } else {
+          set_locale(str);
+          pty->set_utf8_mode(enc_utf8);
+          init_xlocale();
+        }
         break;
 
       case URxvt_view_up:

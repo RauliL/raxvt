@@ -581,24 +581,10 @@ namespace raxvt
   }
 
   rxvt_xim*
-  display::get_xim(const char* locale, const char* modifiers)
+  display::get_xim(const std::string& locale,
+                   const std::string& modifiers)
   {
-    char* id;
-    const std::size_t l = std::strlen(locale);
-    const std::size_t m = std::strlen(modifiers);
-
-    if (!(id = rxvt_temp_buf<char> (l + m + 2)))
-    {
-      return nullptr;
-    }
-
-    std::memcpy(id, locale, l);
-    id[l] = '\n';
-
-    std::memcpy(id + l + 1, modifiers, m);
-    id[l + m + 1] = 0;
-
-    return m_xims.get(id);
+    return m_xims.get(locale + '\n' + modifiers);
   }
 
   void

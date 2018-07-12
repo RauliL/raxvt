@@ -264,7 +264,6 @@ rxvt_term::~rxvt_term()
 
   free (selection.text);
   free (selection.clip_text);
-  free (locale);
   free (v_buffer);
 
   delete selection_req;
@@ -1307,7 +1306,7 @@ xim_preedit_draw (XIC ic, XPointer client_data, XIMPreeditDrawCallbackStruct *ca
 
           if (term->get_setting(Rs_imLocale))
           {
-            rxvt_set_locale(term->locale);
+            rxvt_set_locale(term->locale());
           }
         }
       else
@@ -1351,9 +1350,10 @@ rxvt_term::im_get_ic (const char *modifiers)
   if (!((p = XSetLocaleModifiers (modifiers)) && *p))
     return false;
 
-  input_method = display->get_xim (locale, modifiers);
-  if (input_method == NULL)
+  if (!(input_method = display->get_xim(m_locale, modifiers)))
+  {
     return false;
+  }
 
   xim = input_method->xim;
   spot.x = spot.y = -1;
@@ -1594,7 +1594,7 @@ rxvt_term::im_cb ()
 done:
   if (get_setting(Rs_imLocale))
   {
-    rxvt_set_locale(locale);
+    rxvt_set_locale(m_locale);
   }
 }
 

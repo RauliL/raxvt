@@ -114,12 +114,15 @@ struct rxvt_watcher
 struct refcounted
 {
   int referenced;
-  char *id;
+  std::string id;
 
-  refcounted (const char *id);
-  bool ref_init () { return false; }
-  void ref_next () { }
-  ~refcounted ();
+  refcounted(const std::string& id);
+  ~refcounted();
+
+  virtual bool ref_init()
+  {
+    return false;
+  }
 };
 
 template<class T>
@@ -131,21 +134,21 @@ public:
     clear();
   }
 
-  T* get(const char* id)
+  T* get(const std::string& id)
   {
-    for (T** i = this->begin(); i < this->end(); ++i)
+    const auto end = this->end();
+    T* obj;
+
+    for (auto i = this->begin(); i < end; ++i)
     {
-      if (!std::strcmp(id, (*i)->id))
+      if (!id.compare((*i)->id))
       {
         ++(*i)->referenced;
-        (*i)->ref_next();
 
         return *i;
       }
     }
-
-    T* obj = new T(id);
-
+    obj = new T(id);
     if (obj && obj->ref_init())
     {
       obj->referenced = 1;
@@ -207,15 +210,15 @@ struct rxvt_drawable
 #if USE_XIM
 struct rxvt_xim : refcounted
 {
-  void destroy ();
   raxvt::display* display;
-
-//public
   XIM xim;
 
-  rxvt_xim (const char *id) : refcounted (id) { }
-  bool ref_init ();
-  ~rxvt_xim ();
+  rxvt_xim(const std::string& id)
+    : refcounted(id) {}
+  ~rxvt_xim();
+
+  bool ref_init();
+  void destroy();
 };
 #endif
 
