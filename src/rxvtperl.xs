@@ -120,14 +120,14 @@ sv2wcs (SV *sv)
   return rxvt_utf8towcs (str, len);
 }
 
-static SV *
-wcs2sv (wchar_t *wstr, int len = -1)
+static SV*
+wcs2sv(const wchar_t* wstr, int len = -1)
 {
-  char *str = rxvt_wcstoutf8 (wstr, len);
+  auto str = rxvt_wcstoutf8(wstr, len);
+  auto sv = newSVpv(str, 0);
 
-  SV *sv = newSVpv (str, 0);
-  SvUTF8_on (sv);
-  free (str);
+  SvUTF8_on(sv);
+  std::free(str);
 
   return sv;
 }
@@ -2007,24 +2007,28 @@ int
 rxvt_term::selection_grab (Time eventtime, bool clipboard = false)
 
 void
-rxvt_term::selection (SV *newtext = 0, bool clipboard = false)
-        PPCODE:
+rxvt_term::selection(SV* newtext = nullptr, bool clipboard = false)
+  PPCODE:
 {
-        wchar_t * &text   = clipboard ? THIS->selection.clip_text : THIS->selection.text;
-        unsigned int &len = clipboard ? THIS->selection.clip_len  : THIS->selection.len;
+  auto& text = (
+    clipboard ?
+    THIS->selection.clip_text :
+    THIS->selection.text
+  );
 
-        if (GIMME_V != G_VOID)
-          XPUSHs (text
-                  ? sv_2mortal (wcs2sv (text, len))
-                  : &PL_sv_undef);
+  if (GIMME_V != G_VOID)
+  {
+    XPUSHs(
+      !text.empty() ?
+      sv_2mortal(wcs2sv(text.c_str(), text.length())) :
+      &PL_sv_undef
+    );
+  }
 
-        if (newtext)
-          {
-            free (text);
-
-            text = sv2wcs (newtext);
-            len = wcslen (text);
-          }
+  if (newtext)
+  {
+    text = sv2wcs(newtext);
+  }
 }
 
 char
