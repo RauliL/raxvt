@@ -19,4 +19,4 @@
 # define NDEBUG
 #endif
 
-#include "ev++.h"
+#include <../deps/libev/ev++.h>
