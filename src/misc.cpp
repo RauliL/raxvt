@@ -198,14 +198,6 @@ rxvt_utf8towcs(const char* str, int len)
   return r;
 }
 
-const char *
-rxvt_basename (const char *str) NOTHROW
-{
-  const char *base = strrchr (str, '/');
-
-  return base ? base + 1 : str;
-}
-
 /*
  * Print an error message
  */

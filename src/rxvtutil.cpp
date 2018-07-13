@@ -33,6 +33,7 @@
 #include <cinttypes>
 
 #include "rxvtutil.h"
+#include "raxvt/utils.hpp"
 
 static void *temp_buf;
 static uint32_t temp_len;
@@ -48,4 +49,18 @@ rxvt_temp_buf (int len)
     }
 
   return temp_buf;
+}
+
+namespace raxvt
+{
+  namespace utils
+  {
+    std::string
+    basename(const std::string& input)
+    {
+      auto index = input.find_last_of('/');
+
+      return index == std::string::npos ? input : input.substr(index + 1);
+    }
+  }
 }

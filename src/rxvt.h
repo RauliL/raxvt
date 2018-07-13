@@ -125,7 +125,7 @@ wchar_t *        rxvt_mbstowcs                    (const char *str, int len = -1
 char *           rxvt_wcstoutf8                   (const wchar_t *str, int len = -1);
 wchar_t *        rxvt_utf8towcs                   (const char *str, int len = -1);
 
-const char *     rxvt_basename                    (const char *str) NOTHROW;
+std::string rxvt_basename(const std::string&);
 void             rxvt_vlog                        (const char *fmt, va_list arg_ptr) NOTHROW;
 void             rxvt_log                         (const char *fmt,...) NOTHROW;
 void             rxvt_warn                        (const char *fmt,...) NOTHROW;
@@ -1431,6 +1431,7 @@ struct rxvt_term : rxvt_vars, rxvt_screen
   // settings.cpp
   const char* get_setting(int) const;
   void set_setting(int, const char*);
+  void set_setting(int, const std::string&);
   bool get_option(int) const;
   void set_option(int, bool);
   void load_settings();

@@ -39,10 +39,10 @@
 #include "keyboard.h"
 
 #include "raxvt/display.hpp"
+#include "raxvt/utils.hpp"
 
+#include <csignal>
 #include <limits>
-
-#include <signal.h>
 
 #include <fcntl.h>
 
@@ -525,7 +525,7 @@ rxvt_term::init_resources(const std::vector<std::string>& argv)
 
   if (!argv.empty())
   {
-    set_setting(Rs_name, rxvt_basename(argv[0].c_str()));
+    set_setting(Rs_name, raxvt::utils::basename(argv[0]));
   }
 
   /*
@@ -588,7 +588,7 @@ rxvt_term::init_resources(const std::vector<std::string>& argv)
   {
     if (!get_setting(Rs_title))
     {
-      set_setting(Rs_title, rxvt_basename(cmd_argv[0].c_str()));
+      set_setting(Rs_title, raxvt::utils::basename(cmd_argv[0]));
     }
 
     if (!get_setting(Rs_iconName))
@@ -1625,19 +1625,19 @@ rxvt_term::run_child(const std::vector<std::string>& argv)
     }
 
   /* reset signals and spin off the command interpreter */
-  signal (SIGINT,  SIG_DFL);
-  signal (SIGQUIT, SIG_DFL);
-  signal (SIGCHLD, SIG_DFL);
-  signal (SIGHUP,  SIG_DFL);
-  signal (SIGPIPE, SIG_DFL);
+  std::signal(SIGINT,  SIG_DFL);
+  std::signal(SIGQUIT, SIG_DFL);
+  std::signal(SIGCHLD, SIG_DFL);
+  std::signal(SIGHUP,  SIG_DFL);
+  std::signal(SIGPIPE, SIG_DFL);
   /*
    * mimic login's behavior by disabling the job control signals
    * a shell that wants them can turn them back on
    */
 #ifdef SIGTSTP
-  signal (SIGTSTP, SIG_IGN);
-  signal (SIGTTIN, SIG_IGN);
-  signal (SIGTTOU, SIG_IGN);
+  std::signal(SIGTSTP, SIG_IGN);
+  std::signal(SIGTTIN, SIG_IGN);
+  std::signal(SIGTTOU, SIG_IGN);
 #endif /* SIGTSTP */
 
   /* command interpreter path */
@@ -1669,23 +1669,22 @@ rxvt_term::run_child(const std::vector<std::string>& argv)
     }
     delete[] exec_argv;
   } else {
-    const char *argv0, *shell;
+    std::string argv0;
+    const char* shell = std::getenv("SHELL");
 
-    if ((shell = getenv ("SHELL")) == NULL || *shell == '\0')
+    if (!shell || !*shell)
+    {
       shell = "/bin/sh";
+    }
 
-    argv0 = rxvt_basename (shell);
+    argv0 = raxvt::utils::basename(shell);
 
     if (get_option(Opt_loginShell))
-      {
-        login = rxvt_malloc<char>(std::strlen(argv0) + 2);
+    {
+      argv0 = '-' + argv0;
+    }
 
-        login[0] = '-';
-        std::strcpy(&login[1], argv0);
-        argv0 = login;
-      }
-
-    execlp (shell, argv0, (char *)0);
+    execlp(shell, argv0.c_str(), nullptr);
     /* no error message: STDERR is closed! */
   }
 

@@ -436,6 +436,12 @@ rxvt_term::set_setting(int index, const char* value)
   m_settings[index] = std::string(value);
 }
 
+void
+rxvt_term::set_setting(int index, const std::string& value)
+{
+  m_settings[index] = value;
+}
+
 bool
 rxvt_term::get_option(int index) const
 {
