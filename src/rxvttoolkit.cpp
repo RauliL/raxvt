@@ -462,8 +462,8 @@ rxvt_selection::run ()
   {
     /* internal selection */
     auto str = rxvt_wcstombs(
-      display->selection_owner()->selection.text,
-      display->selection_owner()->selection.len
+      display->selection_owner()->selection.text.c_str(),
+      display->selection_owner()->selection.text.length()
     );
 
     finish(str, std::strlen(str));

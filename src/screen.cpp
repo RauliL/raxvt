@@ -277,13 +277,11 @@ rxvt_term::scr_reset ()
       current_screen = PRIMARY;
 #endif
 
-      selection.text = NULL;
-      selection.len = 0;
+      selection.text.clear();
       selection.op = SELECTION_CLEAR;
       selection.screen = PRIMARY;
       selection.clicks = 0;
-      selection.clip_text = NULL;
-      selection.clip_len = 0;
+      selection.clip_text.clear();
     }
   else
     {
@@ -2710,9 +2708,7 @@ rxvt_term::selection_clear(bool clipboard) NOTHROW
   if (!clipboard)
   {
     want_refresh = 1;
-    std::free(selection.text);
-    selection.text = nullptr;
-    selection.len = 0;
+    selection.text.clear();
     CLEAR_SELECTION ();
 
     if (display->selection_owner() == this)
@@ -2722,9 +2718,7 @@ rxvt_term::selection_clear(bool clipboard) NOTHROW
   }
   else
   {
-    std::free(selection.clip_text);
-    selection.clip_text = nullptr;
-    selection.clip_len = 0;
+    selection.clip_text.clear();
 
     if (display->clipboard_owner() == this)
     {
@@ -2848,11 +2842,7 @@ rxvt_term::selection_make (Time tm)
       return;
     }
 
-  free (selection.text);
-
-  // we usually allocate much more than necessary, so realloc it smaller again
-  selection.len = ofs;
-  selection.text = (wchar_t *)rxvt_realloc (new_selection_text, (ofs + 1) * sizeof (wchar_t));
+  selection.text.assign(new_selection_text, ofs);
 
   if (HOOK_INVOKE ((this, HOOK_SEL_GRAB, DT_LONG, (long)tm, DT_END)))
     return;
@@ -3380,13 +3370,13 @@ rxvt_term::selection_send (const XSelectionRequestEvent &rq) NOTHROW
       /* TODO: Handle MULTIPLE */
     }
 #endif
-  else if (rq.target == xa[XA_TIMESTAMP] && rq.selection == XA_PRIMARY && selection.text)
+  else if (rq.target == xa[XA_TIMESTAMP] && rq.selection == XA_PRIMARY && !selection.text.empty())
     {
       XChangeProperty (dpy, rq.requestor, property, rq.target,
                        32, PropModeReplace, (unsigned char *)&selection_time, 1);
       ev.property = property;
     }
-  else if (rq.target == xa[XA_TIMESTAMP] && rq.selection == xa[XA_CLIPBOARD] && selection.clip_text)
+  else if (rq.target == xa[XA_TIMESTAMP] && rq.selection == xa[XA_CLIPBOARD] && !selection.clip_text.empty())
     {
       XChangeProperty (dpy, rq.requestor, property, rq.target,
                        32, PropModeReplace, (unsigned char *)&clipboard_time, 1);
@@ -3401,8 +3391,8 @@ rxvt_term::selection_send (const XSelectionRequestEvent &rq) NOTHROW
       XTextProperty ct;
       Atom target = rq.target;
       short freect = 0;
-      int selectlen;
-      wchar_t *cl;
+      std::wstring::size_type selectlen;
+      const wchar_t* cl;
       enum {
         enc_string        = XStringStyle,
         enc_text          = XStdICCTextStyle,
@@ -3432,15 +3422,15 @@ rxvt_term::selection_send (const XSelectionRequestEvent &rq) NOTHROW
           style = enc_compound_text;
         }
 
-      if (rq.selection == XA_PRIMARY && selection.text)
+      if (rq.selection == XA_PRIMARY && !selection.text.empty())
         {
-          cl = selection.text;
-          selectlen = selection.len;
+          cl = selection.text.c_str();
+          selectlen = selection.text.length();
         }
-      else if (rq.selection == xa[XA_CLIPBOARD] && selection.clip_text)
+      else if (rq.selection == xa[XA_CLIPBOARD] && !selection.clip_text.empty())
         {
-          cl = selection.clip_text;
-          selectlen = selection.clip_len;
+          cl = selection.clip_text.c_str();
+          selectlen = selection.clip_text.length();
         }
       else
         {
@@ -3461,15 +3451,24 @@ rxvt_term::selection_send (const XSelectionRequestEvent &rq) NOTHROW
         }
       else
 #endif
-      if (XwcTextListToTextProperty (dpy, &cl, 1, (XICCEncodingStyle) style, &ct) >= 0)
-        freect = 1;
-      else
+      {
+        auto copy = wcsdup(cl);
+
+        if (XwcTextListToTextProperty(dpy,
+                                      &copy,
+                                      1,
+                                      (XICCEncodingStyle) style,
+                                      &ct) >= 0)
         {
+          freect = 1;
+          std::free(copy);
+        } else {
           /* if we failed to convert then send it raw */
-          ct.value = (unsigned char *)cl;
+          ct.value = (unsigned char *) copy;
           ct.nitems = selectlen;
           ct.encoding = target;
         }
+      }
 
       XChangeProperty (dpy, rq.requestor, property,
                        ct.encoding, 8, PropModeReplace,

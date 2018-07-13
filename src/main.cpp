@@ -262,8 +262,6 @@ rxvt_term::~rxvt_term()
   for (int i = 0; i < allocated.size (); i++)
     free (allocated [i]);
 
-  free (selection.text);
-  free (selection.clip_text);
   free (v_buffer);
 
   delete selection_req;

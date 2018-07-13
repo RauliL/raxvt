@@ -908,8 +908,8 @@ enum selection_op_t
 
 struct selection_t
 {
-  wchar_t          *text;       /* selected text                             */
-  unsigned int      len;        /* length of selected text                   */
+  /** Selected text. */
+  std::wstring text;
   unsigned int      screen;     /* screen being used                         */
   unsigned int      clicks;     /* number of clicks                          */
   selection_op_t    op;         /* current operation                         */
@@ -917,8 +917,8 @@ struct selection_t
   row_col_t         beg;        /* beginning of selection   <= mark          */
   row_col_t         mark;       /* point of initial click   <= end           */
   row_col_t         end;        /* one character past end point              */
-  wchar_t          *clip_text;  /* text copied to the clipboard              */
-  unsigned int      clip_len;   /* length of clipboard text                  */
+  /** Text copied to the clipboard. */
+  std::wstring clip_text;
 };
 
 /* ------------------------------------------------------------------------- */
