@@ -81,6 +81,7 @@ typedef std::int32_t tlen_t_; // specifically for use in the line_t structure
 #include "scrollbar.h"
 #include "ev_cpp.h"
 #include "rxvtperl.h"
+#include "raxvt/selection.hpp"
 
 /*
  *****************************************************************************
@@ -785,12 +786,6 @@ struct overlay_base
 
 /* ------------------------------------------------------------------------- */
 
-typedef struct
-{
-  int row;
-  int col;
-} row_col_t;
-
 /*
  * terminal limits:
  *
@@ -876,39 +871,15 @@ struct TermWin_t
  */
 struct screen_t
 {
-  row_col_t       cur;          /* cursor position on the screen             */
+  raxvt::coordinates cur;          /* cursor position on the screen             */
   int             tscroll;      /* top of settable scroll region             */
   int             bscroll;      /* bottom of settable scroll region          */
   unsigned int    charset;      /* character set number [0..3]               */
   unsigned int    flags;        /* see below                                 */
-  row_col_t       s_cur;        /* saved cursor position                     */
+  raxvt::coordinates s_cur;        /* saved cursor position                     */
   unsigned int    s_charset;    /* saved character set number [0..3]         */
   char            s_charset_char;
   rend_t          s_rstyle;     /* saved rendition style                     */
-};
-
-enum selection_op_t
-{
-  SELECTION_CLEAR = 0,  /* nothing selected                          */
-  SELECTION_INIT,       /* marked a point                            */
-  SELECTION_BEGIN,      /* started a selection                       */
-  SELECTION_CONT,       /* continued selection                       */
-  SELECTION_DONE        /* selection put in CUT_BUFFER0              */
-};
-
-struct selection_t
-{
-  /** Selected text. */
-  std::wstring text;
-  unsigned int      screen;     /* screen being used                         */
-  unsigned int      clicks;     /* number of clicks                          */
-  selection_op_t    op;         /* current operation                         */
-  bool              rect;       /* rectangular selection?                    */
-  row_col_t         beg;        /* beginning of selection   <= mark          */
-  row_col_t         mark;       /* point of initial click   <= end           */
-  row_col_t         end;        /* one character past end point              */
-  /** Text copied to the clipboard. */
-  std::wstring clip_text;
 };
 
 /* ------------------------------------------------------------------------- */
@@ -947,7 +918,7 @@ struct rxvt_vars : TermWin_t
   char           *tabs;         /* per location: 1 == tab-stop               */
   screen_t        screen;
   screen_t        swap;
-  selection_t     selection;
+  raxvt::selection selection;
   rxvt_color      pix_colors_focused[TOTAL_COLORS];
 #ifdef OFF_FOCUS_FADING
   rxvt_color      pix_colors_unfocused[TOTAL_COLORS];
@@ -1046,7 +1017,7 @@ struct rxvt_term : rxvt_vars, rxvt_screen
   struct mouse_event MEvent;
   XComposeStatus  compose;
   static struct termios def_tio;
-  row_col_t       oldcursor;
+  raxvt::coordinates oldcursor;
 
 #ifdef HAVE_IMG
   enum {
@@ -1404,7 +1375,7 @@ struct rxvt_term : rxvt_vars, rxvt_screen
   void selection_make (Time tm);
   bool selection_grab (Time tm, bool clipboard = false) NOTHROW;
   void selection_start_colrow (int col, int row) NOTHROW;
-  void selection_delimit_word (enum page_dirn dirn, const row_col_t *mark, row_col_t *ret) NOTHROW;
+  void selection_delimit_word (enum page_dirn dirn, const raxvt::coordinates* mark, raxvt::coordinates* ret) NOTHROW;
   void selection_extend_colrow (int32_t col, int32_t row, int button3, int buttonpress, int clickchange) NOTHROW;
   void selection_remove_trailing_spaces () NOTHROW;
   void selection_send (const XSelectionRequestEvent &rq) NOTHROW;

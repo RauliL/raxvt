@@ -794,7 +794,7 @@ rxvt_term::key_press (XKeyEvent &ev)
         }
         else if (!selection.text.empty())
         {
-          selection.clip_text = selection.text;
+          selection.copied_text = selection.text;
           selection_grab(CurrentTime, true);
         }
 
@@ -1940,9 +1940,9 @@ rxvt_term::button_press (XButtonEvent &ev)
                 /* allow meta + click to select rectangular areas */
                 /* should be done in screen.C */
 #if ENABLE_FRILLS
-                selection.rect = !!(ev.state & ModMetaMask);
+                selection.rectangular = !!(ev.state & ModMetaMask);
 #else
-                selection.rect = false;
+                selection.rectangular = false;
 #endif
 
                 /* allow shift+left click to extend selection */

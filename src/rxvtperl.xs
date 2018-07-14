@@ -1935,8 +1935,8 @@ rxvt_term::screen_cur (...)
            selection_mark = 3
         PPCODE:
 {
-        row_col_t &rc = ix == 0 ? THIS->screen.cur
-                      : ix == 1 ? THIS->selection.beg
+        auto& rc = ix == 0 ? THIS->screen.cur
+                      : ix == 1 ? THIS->selection.beginning
                       : ix == 2 ? THIS->selection.end
                       :           THIS->selection.mark;
 
@@ -1997,11 +1997,11 @@ void
 rxvt_term::selection_clear (bool clipboard = false)
 
 void
-rxvt_term::selection_make (Time eventtime, bool rect = false)
+rxvt_term::selection_make(Time eventtime, bool rect = false)
 	CODE:
-        THIS->selection.op = SELECTION_CONT;
-        THIS->selection.rect = rect;
-        THIS->selection_make (eventtime);
+    THIS->selection.op = raxvt::selection::operation::cont;
+    THIS->selection.rectangular = rect;
+    THIS->selection_make(eventtime);
 
 int
 rxvt_term::selection_grab (Time eventtime, bool clipboard = false)
@@ -2012,7 +2012,7 @@ rxvt_term::selection(SV* newtext = nullptr, bool clipboard = false)
 {
   auto& text = (
     clipboard ?
-    THIS->selection.clip_text :
+    THIS->selection.copied_text :
     THIS->selection.text
   );
 

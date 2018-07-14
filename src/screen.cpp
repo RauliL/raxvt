@@ -47,13 +47,6 @@ fill_text (char32_t* start, char32_t value, int len)
 #define ZERO_SCROLLBACK()                                              \
     if (get_option(Opt_scrollTtyOutput))                                  \
         view_start = 0
-#define CLEAR_SELECTION()                                              \
-    selection.beg.row = selection.beg.col                              \
-        = selection.end.row = selection.end.col = 0
-#define CLEAR_ALL_SELECTION()                                          \
-    selection.beg.row = selection.beg.col                              \
-        = selection.mark.row = selection.mark.col                      \
-        = selection.end.row = selection.end.col = 0
 
 #define ROW_AND_COL_IS_AFTER(A, B, C, D)                               \
     (((A) > (C)) || (((A) == (C)) && ((B) > (D))))
@@ -68,7 +61,7 @@ fill_text (char32_t* start, char32_t value, int len)
 #define ROW_AND_COL_IN_ROW_AT_OR_BEFORE(A, B, C, D)                    \
     (((A) == (C)) && ((B) <= (D)))
 
-/* these must be row_col_t */
+/* these must be raxvt::coordinates */
 #define ROWCOL_IS_AFTER(X, Y)                                          \
     ROW_AND_COL_IS_AFTER ((X).row, (X).col, (Y).row, (Y).col)
 #define ROWCOL_IS_BEFORE(X, Y)                                         \
@@ -90,6 +83,19 @@ fill_text (char32_t* start, char32_t value, int len)
         XClearArea (dpy, vt, x, y,                                     \
                     (unsigned int)Width2Pixel (num),                   \
                     (unsigned int)Height2Pixel (1), False)
+
+static void clear_selection(raxvt::selection& selection, bool all = false)
+{
+  selection.beginning.row = 0;
+  selection.beginning.col = 0;
+  selection.end.row = 0;
+  selection.end.col = 0;
+  if (all)
+  {
+    selection.mark.row = 0;
+    selection.mark.col = 0;
+  }
+}
 
 /* ------------------------------------------------------------------------- *
  *                        SCREEN `COMMON' ROUTINES                           *
@@ -278,10 +284,10 @@ rxvt_term::scr_reset ()
 #endif
 
       selection.text.clear();
-      selection.op = SELECTION_CLEAR;
+      selection.op = raxvt::selection::operation::clear;
       selection.screen = PRIMARY;
       selection.clicks = 0;
-      selection.clip_text.clear();
+      selection.copied_text.clear();
     }
   else
     {
@@ -289,9 +295,9 @@ rxvt_term::scr_reset ()
        * add or delete rows as appropriate
        */
 
-      int common_col = min (prev_ncol, ncol);
+      int common_col = std::min (prev_ncol, ncol);
 
-      for (int row = min (nrow, prev_nrow); row--; )
+      for (int row = std::min (nrow, prev_nrow); row--; )
         {
           scr_blank_screen_mem (drawn_buf [row], DEFAULT_RSTYLE);
           std::memcpy(drawn_buf [row].t, prev_drawn_buf [row].t, sizeof(char32_t) * common_col);
@@ -310,7 +316,7 @@ rxvt_term::scr_reset ()
           // to come up with a lean and mean algorithm.
           // TODO: maybe optimise when width didn't change
 
-          row_col_t ocur = screen.cur;
+          auto ocur = screen.cur;
           ocur.row = MOD (term_start + ocur.row, prev_total_rows);
 
           do
@@ -430,7 +436,7 @@ rxvt_term::scr_reset ()
   for (int col = ncol; col--; )
     tabs [col] = col % TABSIZE == 0;
 
-  CLEAR_ALL_SELECTION ();
+  clear_selection(selection, true);
 
   prev_nrow = nrow;
   prev_ncol = ncol;
@@ -558,36 +564,41 @@ void
 rxvt_term::scr_change_screen (int scrn)
 {
   if (scrn == current_screen)
+  {
     return;
+  }
 
   want_refresh = 1;
   view_start = 0;
 
   /* check for boundary cross */
-  row_col_t pos;
+  raxvt::coordinates pos;
   pos.row = pos.col = 0;
-  if (ROWCOL_IS_BEFORE (selection.beg, pos)
-      && ROWCOL_IS_AFTER (selection.end, pos))
-    CLEAR_SELECTION ();
+  if (selection.beginning < pos && selection.end > pos)
+  {
+    clear_selection(selection);
+  }
 
   current_screen = scrn;
 
 #if NSCREENS
   if (get_option(Opt_secondaryScreen))
-    {
-      num_scr = 0;
+  {
+    num_scr = 0;
 
-      scr_swap_screen ();
+    scr_swap_screen();
 
-      ::swap (screen.charset, swap.charset);
-      ::swap (screen.flags,   swap.flags);
-      screen.flags |= Screen_VisibleCursor;
-      swap.flags   |= Screen_VisibleCursor;
-    }
+    std::swap(screen.charset, swap.charset);
+    std::swap(screen.flags, swap.flags);
+    screen.flags |= Screen_VisibleCursor;
+    swap.flags |= Screen_VisibleCursor;
+  }
   else
 #endif
-    if (get_option(Opt_secondaryScroll))
-      scr_scroll_text (0, prev_nrow - 1, prev_nrow);
+  if (get_option(Opt_secondaryScroll))
+  {
+    scr_scroll_text(0, prev_nrow - 1, prev_nrow);
+  }
 }
 
 // clear WrapNext indicator, solidifying position on next line
@@ -701,10 +712,11 @@ rxvt_term::scr_scroll_text (int row1, int row2, int count) NOTHROW
         }
 
       // move and/or clear selection, if any
-      if (selection.op && current_screen == selection.screen
-          && selection.beg.row <= row2)
+      if (selection.op != raxvt::selection::operation::clear
+          && current_screen == selection.screen
+          && selection.beginning.row <= row2)
         {
-          selection.beg.row  -= count;
+          selection.beginning.row  -= count;
           selection.end.row  -= count;
           selection.mark.row -= count;
 
@@ -722,22 +734,23 @@ rxvt_term::scr_scroll_text (int row1, int row2, int count) NOTHROW
     }
   else
     {
-      if (selection.op && current_screen == selection.screen)
+      if (selection.op != raxvt::selection::operation::clear
+          && current_screen == selection.screen)
         {
-          if ((selection.beg.row < row1 && selection.end.row > row1)
-              || (selection.beg.row < row2 && selection.end.row > row2)
-              || (selection.beg.row - count < row1 && selection.beg.row >= row1)
-              || (selection.beg.row - count > row2 && selection.beg.row <= row2)
+          if ((selection.beginning.row < row1 && selection.end.row > row1)
+              || (selection.beginning.row < row2 && selection.end.row > row2)
+              || (selection.beginning.row - count < row1 && selection.beginning.row >= row1)
+              || (selection.beginning.row - count > row2 && selection.beginning.row <= row2)
               || (selection.end.row - count < row1 && selection.end.row >= row1)
               || (selection.end.row - count > row2 && selection.end.row <= row2))
             {
-              CLEAR_ALL_SELECTION ();
-              selection.op = SELECTION_CLEAR;
+              clear_selection(selection, true);
+              selection.op = raxvt::selection::operation::clear;
             }
           else if (selection.end.row >= row1 && selection.end.row <= row2)
             {
               /* move selected region too */
-              selection.beg.row  -= count;
+              selection.beginning.row  -= count;
               selection.end.row  -= count;
               selection.mark.row -= count;
 
@@ -822,7 +835,10 @@ rxvt_term::scr_add_lines (const wchar_t *str, int len, int minlines) NOTHROW
           && screen.cur.row >= top_row);
   int row = screen.cur.row;
 
-  checksel = selection.op && current_screen == selection.screen ? 1 : 0;
+  checksel = (
+    selection.op != raxvt::selection::operation::clear
+    && current_screen == selection.screen
+  ) ? 1 : 0;
 
   line_t *line = &ROW(row);
 
@@ -861,8 +877,8 @@ rxvt_term::scr_add_lines (const wchar_t *str, int len, int minlines) NOTHROW
 
       if (ecb_unlikely (
             checksel            /* see if we're writing within selection */
-            && !ROWCOL_IS_BEFORE (screen.cur, selection.beg)
-            && ROWCOL_IS_BEFORE (screen.cur, selection.end)
+            && screen.cur >= selection.beginning
+            && screen.cur < selection.end
          ))
         {
           checksel = 0;
@@ -871,7 +887,7 @@ rxvt_term::scr_add_lines (const wchar_t *str, int len, int minlines) NOTHROW
            * XXX: should we kill the mark too?  Possibly, but maybe that
            *      should be a similar check.
            */
-          CLEAR_SELECTION ();
+          clear_selection(selection);
         }
 
       if (ecb_unlikely (screen.flags & Screen_WrapNext))
@@ -1281,27 +1297,27 @@ rxvt_term::scr_erase_line (int mode) NOTHROW
         num = ncol - col;
         min_it (line.l, col);
 
-        if (ROWCOL_IN_ROW_AT_OR_AFTER (selection.beg, screen.cur)
+        if (ROWCOL_IN_ROW_AT_OR_AFTER (selection.beginning, screen.cur)
             || ROWCOL_IN_ROW_AT_OR_AFTER (selection.end, screen.cur))
-          CLEAR_SELECTION ();
+          clear_selection(selection);
         break;
 
       case 1:                     /* erase to beginning of line */
         col = 0;
         num = screen.cur.col + 1;
 
-        if (ROWCOL_IN_ROW_AT_OR_BEFORE (selection.beg, screen.cur)
+        if (ROWCOL_IN_ROW_AT_OR_BEFORE (selection.beginning, screen.cur)
             || ROWCOL_IN_ROW_AT_OR_BEFORE (selection.end, screen.cur))
-          CLEAR_SELECTION ();
+          clear_selection(selection);
         break;
 
       case 2:                     /* erase whole line */
         col = 0;
         num = ncol;
         line.l = 0;
-        if (selection.beg.row <= screen.cur.row
+        if (selection.beginning.row <= screen.cur.row
             && selection.end.row >= screen.cur.row)
-          CLEAR_SELECTION ();
+          clear_selection(selection);
         break;
       default:
         return;
@@ -1348,11 +1364,12 @@ rxvt_term::scr_erase_screen (int mode) NOTHROW
         return;
     }
 
-  if (selection.op && current_screen == selection.screen
-      && ((selection.beg.row >= row && selection.beg.row <= row + num)
+  if (selection.op != raxvt::selection::operation::clear
+      && current_screen == selection.screen
+      && ((selection.beginning.row >= row && selection.beginning.row <= row + num)
           || (selection.end.row >= row
               && selection.end.row <= row + num)))
-    CLEAR_SELECTION ();
+    clear_selection(selection);
 
   if (row >= nrow) /* Out Of Bounds */
     return;
@@ -1422,10 +1439,12 @@ rxvt_term::scr_E () NOTHROW
 
   num_scr_allow = 0;
 
-  row_col_t pos;
+  raxvt::coordinates pos;
   pos.row = pos.col = 0;
-  if (ROWCOL_IS_AFTER (selection.end, pos))
-    CLEAR_SELECTION ();
+  if (selection.end > pos)
+  {
+    clear_selection(selection);
+  }
 
   fs = SET_FONT (rstyle, FONTSET (rstyle)->find_font ('E'));
   for (int row = nrow; row--; )
@@ -1516,16 +1535,17 @@ rxvt_term::scr_insdel_chars (int count, int insdel) NOTHROW
             line->r[col] = line->r[col - count];
           }
 
-        if (selection.op && current_screen == selection.screen
-            && ROWCOL_IN_ROW_AT_OR_AFTER (selection.beg, screen.cur))
+        if (selection.op != raxvt::selection::operation::clear
+            && current_screen == selection.screen
+            && ROWCOL_IN_ROW_AT_OR_AFTER (selection.beginning, screen.cur))
           {
             if (selection.end.row != screen.cur.row
                 || (selection.end.col + count >= ncol))
-              CLEAR_SELECTION ();
+              clear_selection(selection);
             else
               {
                 /* shift selection */
-                selection.beg.col  += count;
+                selection.beginning.col  += count;
                 selection.mark.col += count; /* XXX: yes? */
                 selection.end.col  += count;
               }
@@ -1561,17 +1581,18 @@ rxvt_term::scr_insdel_chars (int count, int insdel) NOTHROW
 
         scr_blank_line (*line, ncol - count, count, rstyle);
 
-        if (selection.op && current_screen == selection.screen
-            && ROWCOL_IN_ROW_AT_OR_AFTER (selection.beg, screen.cur))
+        if (selection.op != raxvt::selection::operation::clear
+            && current_screen == selection.screen
+            && ROWCOL_IN_ROW_AT_OR_AFTER(selection.beginning, screen.cur))
           {
             if (selection.end.row != screen.cur.row
-                || (screen.cur.col >= selection.beg.col - count)
+                || (screen.cur.col >= selection.beginning.col - count)
                 || selection.end.col >= ncol)
-              CLEAR_SELECTION ();
+              clear_selection(selection);
             else
               {
                 /* shift selection */
-                selection.beg.col  -= count;
+                selection.beginning.col  -= count;
                 selection.mark.col -= count; /* XXX: yes? */
                 selection.end.col  -= count;
               }
@@ -1814,7 +1835,7 @@ void ecb_hot
 rxvt_term::scr_expose (int x, int y, int ewidth, int eheight, bool refresh) NOTHROW
 {
   int i;
-  row_col_t rc[RC_COUNT];
+  raxvt::coordinates rc[RC_COUNT];
 
   if (!drawn_buf)  /* sanity check */
     return;
@@ -2600,18 +2621,18 @@ rxvt_term::scr_xor_span (int beg_row, int beg_col, int end_row, int end_col, ren
 void ecb_hot
 rxvt_term::scr_reverse_selection () NOTHROW
 {
-  if (selection.op
+  if (selection.op != raxvt::selection::operation::clear
       && current_screen == selection.screen
       && selection.end.row >= view_start)
     {
 #if !ENABLE_MINIMAL
-      if (selection.rect)
-        scr_xor_rect (selection.beg.row, selection.beg.col,
+      if (selection.rectangular)
+        scr_xor_rect (selection.beginning.row, selection.beginning.col,
                       selection.end.row, selection.end.col,
                       RS_Sel | RS_RVid, RS_Sel | RS_RVid | RS_Uline);
       else
 #endif
-        scr_xor_span (selection.beg.row, selection.beg.col,
+        scr_xor_span (selection.beginning.row, selection.beginning.col,
                       selection.end.row, selection.end.col,
                       RS_Sel | RS_RVid);
     }
@@ -2621,27 +2642,31 @@ rxvt_term::scr_reverse_selection () NOTHROW
  *                           CHARACTER SELECTION                             *
  * ------------------------------------------------------------------------- */
 void
-rxvt_term::selection_check (int check_more) NOTHROW
+rxvt_term::selection_check(int check_more) NOTHROW
 {
-  if (!selection.op)
+  if (selection.op == raxvt::selection::operation::clear)
+  {
     return;
+  }
 
-  if (!IN_RANGE_EXC (selection.beg.row, top_row, nrow)
-      || !IN_RANGE_EXC (selection.mark.row, top_row, nrow)
-      || !IN_RANGE_EXC (selection.end.row, top_row, nrow)
+  if (!IN_RANGE_EXC(selection.beginning.row, top_row, nrow)
+      || !IN_RANGE_EXC(selection.mark.row, top_row, nrow)
+      || !IN_RANGE_EXC(selection.end.row, top_row, nrow)
       || (check_more == 1
           && current_screen == selection.screen
-          && !ROWCOL_IS_BEFORE (screen.cur, selection.beg)
-          && ROWCOL_IS_BEFORE (screen.cur, selection.end)))
-    CLEAR_ALL_SELECTION ();
+          && screen.cur >= selection.beginning
+          && screen.cur < selection.end))
+  {
+    clear_selection(selection, true);
+  }
 }
 
 void
 rxvt_term::selection_changed () NOTHROW
 {
-  line_t &r1 = ROW (selection.beg.row);
-  while (selection.beg.col < r1.l && r1.t [selection.beg.col] == NOCHAR)
-    ++selection.beg.col;
+  line_t &r1 = ROW (selection.beginning.row);
+  while (selection.beginning.col < r1.l && r1.t [selection.beginning.col] == NOCHAR)
+    ++selection.beginning.col;
 
   line_t &r2 = ROW (selection.end.row);
   while (selection.end.col < r2.l && r2.t [selection.end.col] == NOCHAR)
@@ -2709,16 +2734,14 @@ rxvt_term::selection_clear(bool clipboard) NOTHROW
   {
     want_refresh = 1;
     selection.text.clear();
-    CLEAR_SELECTION ();
+    clear_selection(selection);
 
     if (display->selection_owner() == this)
     {
       display->reset_selection_owner();
     }
-  }
-  else
-  {
-    selection.clip_text.clear();
+  } else {
+    selection.copied_text.clear();
 
     if (display->clipboard_owner() == this)
     {
@@ -2740,20 +2763,23 @@ rxvt_term::selection_make (Time tm)
   char32_t* t;
 
   switch (selection.op)
-    {
-      case SELECTION_CONT:
-        break;
-      case SELECTION_INIT:
-        CLEAR_SELECTION ();
-        /* FALLTHROUGH */
-      case SELECTION_BEGIN:
-        selection.op = SELECTION_DONE;
-        /* FALLTHROUGH */
-      default:
-        return;
-    }
+  {
+    case raxvt::selection::operation::cont:
+      break;
 
-  selection.op = SELECTION_DONE;
+    case raxvt::selection::operation::init:
+      clear_selection(selection);
+      /* FALLTHROUGH */
+
+    case raxvt::selection::operation::begin:
+      selection.op = raxvt::selection::operation::done;
+      /* FALLTHROUGH */
+
+    default:
+      return;
+  }
+
+  selection.op = raxvt::selection::operation::done;
 
   if (selection.clicks == 4)
     return;                 /* nothing selected, go away */
@@ -2761,23 +2787,23 @@ rxvt_term::selection_make (Time tm)
   if (HOOK_INVOKE ((this, HOOK_SEL_MAKE, DT_LONG, (long)tm, DT_END)))
     return;
 
-  size = (selection.end.row - selection.beg.row + 1) * (ncol + 1);
+  size = (selection.end.row - selection.beginning.row + 1) * (ncol + 1);
   new_selection_text = rxvt_malloc<wchar_t>((size + 4) * sizeof(wchar_t));
 
   int ofs = 0;
   int extra = 0;
 
-  int col = selection.beg.col;
-  int row = selection.beg.row;
+  int col = selection.beginning.col;
+  int row = selection.beginning.row;
 
   int end_col;
 
   for (; row <= selection.end.row; row++, col = 0)
     {
 #if !ENABLE_MINIMAL
-      if (selection.rect)
+      if (selection.rectangular)
         {
-          col = selection.beg.col;
+          col = selection.beginning.col;
           end_col = selection.end.col;
         }
       else
@@ -2817,7 +2843,7 @@ rxvt_term::selection_make (Time tm)
         }
 
 #if !ENABLE_MINIMAL
-      if (selection.rect)
+      if (selection.rectangular)
         {
           while (ofs
                  && new_selection_text[ofs - 1] != C0_LF
@@ -2828,9 +2854,9 @@ rxvt_term::selection_make (Time tm)
         }
       else
 #endif
-        if (!ROW(row).is_longer ()
+        if (!ROW(row).is_longer()
             && (row != selection.end.row || end_col != selection.end.col)
-            && (row != selection.beg.row || selection.beg.col < ncol))
+            && (row != selection.beginning.row || selection.beginning.col < ncol))
           new_selection_text[ofs++] = C0_LF;
     }
 
@@ -2885,28 +2911,37 @@ rxvt_term::selection_grab (Time tm, bool clipboard) NOTHROW
  * EXT: button 1 press
  */
 void ecb_cold
-rxvt_term::selection_click (int clicks, int x, int y) NOTHROW
+rxvt_term::selection_click(int clicks, int x, int y) NOTHROW
 {
   clicks = ((clicks - 1) % 3) + 1;
-  selection.clicks = clicks;       /* save clicks so extend will work */
+  // Save clicks so extend will work.
+  selection.clicks = clicks;
 
-  if (clicks == 2 && !selection.rect
-      && HOOK_INVOKE ((this, HOOK_SEL_EXTEND, DT_END)))
-    {
-      MEvent.clicks = 1; // what a mess
-      selection.screen = current_screen;
-      selection.op = SELECTION_CONT;
-      return;
-    }
+  if (clicks == 2
+      && !selection.rectangular
+      && HOOK_INVOKE((this, HOOK_SEL_EXTEND, DT_END)))
+  {
+    MEvent.clicks = 1; // what a mess
+    selection.screen = current_screen;
+    selection.op = raxvt::selection::operation::cont;
+    return;
+  }
 
-  selection_start_colrow (Pixel2Col (x), Pixel2Row (y));
+  selection_start_colrow(Pixel2Col(x), Pixel2Row(y));
 
   if (clicks == 2 || clicks == 3)
-    selection_extend_colrow (selection.mark.col,
-                             selection.mark.row - view_start,
-                             0, /* button 3     */
-                             1, /* button press */
-                             0);        /* click change */
+  {
+    selection_extend_colrow(
+      selection.mark.col,
+      selection.mark.row - view_start,
+      // Button 3.
+      0,
+      // Button press.
+      1,
+      // Click change.
+      0
+    );
+  }
 }
 
 /* ------------------------------------------------------------------------- */
@@ -2916,26 +2951,32 @@ rxvt_term::selection_click (int clicks, int x, int y) NOTHROW
 void ecb_cold
 rxvt_term::selection_start_colrow (int col, int row) NOTHROW
 {
+  auto& mark = selection.mark;
+
   want_refresh = 1;
 
-  selection.mark.row = row + view_start;
-  selection.mark.col = col;
+  mark.row = row + view_start;
+  mark.col = col;
 
-  selection.mark.row = clamp (selection.mark.row, top_row, nrow - 1);
-  selection.mark.col = clamp (selection.mark.col,       0, ncol - 1);
+  mark.row = clamp(mark.row, top_row, nrow - 1);
+  mark.col = clamp(mark.col, 0, ncol - 1);
 
-  while (selection.mark.col > 0
-         && ROW(selection.mark.row).t[selection.mark.col] == NOCHAR)
-    --selection.mark.col;
+  while (mark.col > 0 && ROW(mark.row).t[mark.col] == NOCHAR)
+  {
+    --mark.col;
+  }
 
-  if (selection.op)
-    {
-      /* clear the old selection */
-      selection.beg.row = selection.end.row = selection.mark.row;
-      selection.beg.col = selection.end.col = selection.mark.col;
-    }
+  if (selection.op != raxvt::selection::operation::clear)
+  {
+    auto& beg = selection.beginning;
+    auto& end = selection.end;
 
-  selection.op = SELECTION_INIT;
+    /* clear the old selection */
+    beg.row = end.row = mark.row;
+    beg.col = end.col = mark.col;
+  }
+
+  selection.op = raxvt::selection::operation::init;
   selection.screen = current_screen;
 }
 
@@ -2951,10 +2992,10 @@ rxvt_term::selection_start_colrow (int col, int row) NOTHROW
 #define DELIMIT_REND(x)        1
 
 void ecb_cold
-rxvt_term::selection_delimit_word (enum page_dirn dirn, const row_col_t *mark, row_col_t *ret) NOTHROW
+rxvt_term::selection_delimit_word (enum page_dirn dirn, const raxvt::coordinates *mark, raxvt::coordinates *ret) NOTHROW
 {
   int col, row, dirnadd, tcol, trow, w1, w2;
-  row_col_t bound;
+  raxvt::coordinates bound;
   char32_t* stp;
   rend_t *srp;
 
@@ -3035,10 +3076,10 @@ rxvt_term::selection_delimit_word (enum page_dirn dirn, const row_col_t *mark, r
  * flag == 2 ==> button 3 motion
  */
 void ecb_cold
-rxvt_term::selection_extend (int x, int y, int flag) NOTHROW
+rxvt_term::selection_extend(int x, int y, int flag) NOTHROW
 {
-  int col = clamp (Pixel2Col (x), 0, ncol);
-  int row = clamp (Pixel2Row (y), 0, nrow - 1);
+  const int col = clamp(Pixel2Col(x), 0, ncol);
+  const int row = clamp(Pixel2Row(y), 0, nrow - 1);
 
   /*
   * If we're selecting characters (single click) then we must check first
@@ -3049,17 +3090,18 @@ rxvt_term::selection_extend (int x, int y, int flag) NOTHROW
   if (((selection.clicks % 3) == 1) && !flag
       && (col == selection.mark.col
           && (row == selection.mark.row - view_start)))
-    {
-      /* select nothing */
-      selection.beg.row = selection.end.row = 0;
-      selection.beg.col = selection.end.col = 0;
-      selection.clicks = 4;
-      want_refresh = 1;
-      return;
-    }
+  {
+    /* select nothing */
+    clear_selection(selection);
+    selection.clicks = 4;
+    want_refresh = 1;
+    return;
+  }
 
   if (selection.clicks == 4)
+  {
     selection.clicks = 1;
+  }
 
   selection_extend_colrow (col, row, !!flag,  /* ? button 3      */
                            flag == 1 ? 1 : 0,     /* ? button press  */
@@ -3073,42 +3115,51 @@ rxvt_term::selection_extend (int x, int y, int flag) NOTHROW
 void ecb_cold
 rxvt_term::selection_extend_colrow (int32_t col, int32_t row, int button3, int buttonpress, int clickchange) NOTHROW
 {
-  row_col_t pos;
+  auto& beg = selection.beginning;
+  auto& end = selection.end;
+  auto& mark = selection.mark;
+  raxvt::coordinates pos;
   enum {
     LEFT, RIGHT
   } closeto = RIGHT;
 
   switch (selection.op)
-    {
-      case SELECTION_INIT:
-        CLEAR_SELECTION ();
-        selection.op = SELECTION_BEGIN;
-        /* FALLTHROUGH */
-      case SELECTION_BEGIN:
-        if (row != selection.mark.row || col != selection.mark.col
-            || (!button3 && buttonpress))
-          selection.op = SELECTION_CONT;
-        break;
-      case SELECTION_DONE:
-        selection.op = SELECTION_CONT;
-        /* FALLTHROUGH */
-      case SELECTION_CONT:
-        break;
-      case SELECTION_CLEAR:
-        selection_start_colrow (col, row);
-        /* FALLTHROUGH */
-      default:
-        return;
-    }
+  {
+    case raxvt::selection::operation::init:
+      clear_selection(selection);
+      selection.op = raxvt::selection::operation::begin;
+      /* FALLTHROUGH */
 
-  if (selection.beg.col == selection.end.col
-      && selection.beg.col != selection.mark.col
-      && selection.beg.row == selection.end.row
-      && selection.beg.row != selection.mark.row)
-    {
-      selection.beg.col = selection.end.col = selection.mark.col;
-      selection.beg.row = selection.end.row = selection.mark.row;
-    }
+    case raxvt::selection::operation::begin:
+      if (row != mark.row || col != mark.col || (!button3 && buttonpress))
+      {
+        selection.op = raxvt::selection::operation::cont;
+      }
+      break;
+
+    case raxvt::selection::operation::done:
+      selection.op = raxvt::selection::operation::cont;
+      /* FALLTHROUGH */
+
+    case raxvt::selection::operation::cont:
+      break;
+
+    case raxvt::selection::operation::clear:
+      selection_start_colrow(col, row);
+      /* FALLTHROUGH */
+
+    default:
+      return;
+  }
+
+  if (beg.col == end.col
+      && beg.col != mark.col
+      && beg.row == end.row
+      && beg.row != mark.row)
+  {
+    beg.col = end.col = mark.col;
+    beg.row = end.row = mark.row;
+  }
 
   pos.col = col;
   pos.row = view_start + row;
@@ -3127,190 +3178,202 @@ rxvt_term::selection_extend_colrow (int32_t col, int32_t row, int button3, int b
    *     time of the most recent button3 press
    */
   if (button3 && buttonpress)
+  {
+    /* button3 press */
+    /*
+     * first determine which edge of the selection we are closest to
+     */
+    if (pos < selection.beginning
+        || (pos <= selection.end
+            && (((pos.col - selection.beginning.col)
+                 + ((pos.row - selection.beginning.row) * ncol))
+                < ((selection.end.col - pos.col)
+                   + ((selection.end.row - pos.row) * ncol)))))
     {
-      /* button3 press */
-      /*
-       * first determine which edge of the selection we are closest to
-       */
-      if (ROWCOL_IS_BEFORE (pos, selection.beg)
-          || (!ROWCOL_IS_AFTER (pos, selection.end)
-              && (((pos.col - selection.beg.col)
-                   + ((pos.row - selection.beg.row) * ncol))
-                  < ((selection.end.col - pos.col)
-                     + ((selection.end.row - pos.row) * ncol)))))
-        closeto = LEFT;
-
-      if (closeto == LEFT)
-        {
-          selection.beg.row = pos.row;
-          selection.beg.col = pos.col;
-          selection.mark.row = selection.end.row;
-          selection.mark.col = selection.end.col - (selection.clicks == 2);
-        }
-      else
-        {
-          selection.end.row = pos.row;
-          selection.end.col = pos.col;
-          selection.mark.row = selection.beg.row;
-          selection.mark.col = selection.beg.col;
-        }
+      closeto = LEFT;
     }
-  else
+
+    if (closeto == LEFT)
     {
-      /* button1 drag or button3 drag */
-      if (ROWCOL_IS_AFTER (selection.mark, pos))
-        {
-          if (selection.mark.row == selection.end.row
-              && selection.mark.col == selection.end.col
-              && clickchange
-              && selection.clicks == 2)
-            selection.mark.col--;
-
-          selection.beg.row = pos.row;
-          selection.beg.col = pos.col;
-          selection.end.row = selection.mark.row;
-          selection.end.col = selection.mark.col + (selection.clicks == 2);
-        }
-      else
-        {
-          selection.beg.row = selection.mark.row;
-          selection.beg.col = selection.mark.col;
-          selection.end.row = pos.row;
-          selection.end.col = pos.col;
-        }
+      beg.row = pos.row;
+      beg.col = pos.col;
+      mark.row = end.row;
+      mark.col = end.col - (selection.clicks == 2);
+    } else {
+      end.row = pos.row;
+      end.col = pos.col;
+      mark.row = beg.row;
+      mark.col = beg.col;
     }
+  } else {
+    /* button1 drag or button3 drag */
+    if (mark > pos)
+    {
+      if (mark.row == end.row
+          && mark.col == end.col
+          && clickchange
+          && selection.clicks == 2)
+      {
+        --mark.col;
+      }
+      beg.row = pos.row;
+      beg.col = pos.col;
+      end.row = mark.row;
+      end.col = mark.col + (selection.clicks == 2);
+    } else {
+      beg.row = mark.row;
+      beg.col = mark.col;
+      end.row = pos.row;
+      end.col = pos.col;
+    }
+  }
 
   if (selection.clicks == 1)
+  {
+    if (beg.col > ROW(beg.row).l //TODO//FIXME//LEN
+        && !ROW(beg.row).is_longer()
+#if !ENABLE_MINIMAL
+        && !selection.rectangular
+#endif
+       )
     {
-      if (selection.beg.col > ROW(selection.beg.row).l //TODO//FIXME//LEN
-          && !ROW(selection.beg.row).is_longer ()
-#if !ENABLE_MINIMAL
-          && !selection.rect
-#endif
-         )
-        selection.beg.col = ncol;
-
-      if (
-          selection.end.col > ROW(selection.end.row).l //TODO//FIXME//LEN
-          && !ROW(selection.end.row).is_longer ()
-#if !ENABLE_MINIMAL
-          && !selection.rect
-#endif
-         )
-        selection.end.col = ncol;
+      beg.col = ncol;
     }
+
+    if (
+        end.col > ROW(end.row).l //TODO//FIXME//LEN
+        && !ROW(end.row).is_longer()
+#if !ENABLE_MINIMAL
+        && !selection.rectangular
+#endif
+       )
+    {
+      end.col = ncol;
+    }
+  }
   else if (selection.clicks == 2)
+  {
+    if (end > beg)
     {
-      if (ROWCOL_IS_AFTER (selection.end, selection.beg))
-        selection.end.col--;
-
-      selection_delimit_word (UP, &selection.beg, &selection.beg);
-      selection_delimit_word (DN, &selection.end, &selection.end);
+      --end.col;
     }
+
+    selection_delimit_word(UP, &beg, &beg);
+    selection_delimit_word(DN, &end, &end);
+  }
   else if (selection.clicks == 3)
-    {
+  {
 #if ENABLE_FRILLS
-      if (get_option(Opt_tripleclickwords))
-        {
-          selection_delimit_word (UP, &selection.beg, &selection.beg);
+    if (get_option(Opt_tripleclickwords))
+    {
+      selection_delimit_word(UP, &beg, &beg);
 
-          for (int end_row = selection.mark.row; end_row < nrow; end_row++)
-            {
-              if (!ROW(end_row).is_longer ())
-                {
-                  selection.end.row = end_row;
-                  selection.end.col = ROW(end_row).l;
+      for (int end_row = mark.row; end_row < nrow; ++end_row)
+      {
+        if (!ROW(end_row).is_longer())
+        {
+          end.row = end_row;
+          end.col = ROW(end_row).l;
 # if !ENABLE_MINIMAL
-                  selection_remove_trailing_spaces ();
+          selection_remove_trailing_spaces();
 # endif
-                  break;
-                }
-            }
+          break;
         }
-      else
-#endif
-        {
-          if (ROWCOL_IS_AFTER (selection.mark, selection.beg))
-            selection.mark.col++;
-
-          selection.beg.col = 0;
-          selection.end.col = ncol;
-
-          // select a complete logical line
-          while (selection.beg.row > -saveLines
-                 && ROW(selection.beg.row - 1).is_longer ())
-            selection.beg.row--;
-
-          while (selection.end.row < nrow
-                 && ROW(selection.end.row).is_longer ())
-            selection.end.row++;
-        }
+      }
     }
+    else
+#endif
+    {
+      if (mark > beg)
+      {
+        ++mark.col;
+      }
+
+      beg.col = 0;
+      end.col = ncol;
+
+      // select a complete logical line
+      while (beg.row > -saveLines && ROW(beg.row - 1).is_longer())
+      {
+        --beg.row;
+      }
+
+      while (end.row < nrow && ROW(end.row).is_longer())
+      {
+        ++end.row;
+      }
+    }
+  }
 
   if (button3 && buttonpress)
+  {
+    /* mark may need to be changed */
+    if (closeto == LEFT)
     {
-      /* mark may need to be changed */
-      if (closeto == LEFT)
-        {
-          selection.mark.row = selection.end.row;
-          selection.mark.col = selection.end.col - (selection.clicks == 2);
-        }
-      else
-        {
-          selection.mark.row = selection.beg.row;
-          selection.mark.col = selection.beg.col;
-        }
+      mark.row = end.row;
+      mark.col = end.col - (selection.clicks == 2);
+    } else {
+      mark.row = beg.row;
+      mark.col = beg.col;
     }
+  }
 
 #if !ENABLE_MINIMAL
-  if (selection.rect && selection.beg.col > selection.end.col)
-    ::swap (selection.beg.col, selection.end.col);
+  if (selection.rectangular && beg.col > end.col)
+  {
+    std::swap(beg.col, end.col);
+  }
 #endif
 
-  selection_changed ();
+  selection_changed();
 }
 
 #if !ENABLE_MINIMAL
 void ecb_cold
 rxvt_term::selection_remove_trailing_spaces () NOTHROW
 {
-  int32_t end_col, end_row;
+  auto& beg = selection.beginning;
+  auto& end = selection.end;
+  auto& mark = selection.mark;
+  int end_col;
+  int end_row;
   char32_t* stp;
 
-  end_col = selection.end.col;
-  end_row = selection.end.row;
+  end_col = end.col;
+  end_row = end.row;
 
-  for (; end_row >= selection.beg.row; )
+  for (; end_row >= beg.row;)
+  {
+    stp = ROW(end_row).t;
+
+    while (--end_col >= 0)
     {
-      stp = ROW(end_row).t;
-
-      while (--end_col >= 0)
-        {
-          if (stp[end_col] != NOCHAR
-              && !unicode::is_space (stp[end_col]))
-            break;
-        }
-
-      if (end_col >= 0
-          || !ROW(end_row - 1).is_longer ())
-        {
-          selection.end.col = end_col + 1;
-          selection.end.row = end_row;
-          break;
-        }
-
-      end_row--;
-      end_col = ncol;
+      if (stp[end_col] != NOCHAR && !unicode::is_space(stp[end_col]))
+      {
+        break;
+      }
     }
 
-  if (selection.mark.row > selection.end.row)
+    if (end_col >= 0 || !ROW(end_row - 1).is_longer())
     {
-      selection.mark.row = selection.end.row;
-      selection.mark.col = selection.end.col;
+      end.col = end_col + 1;
+      end.row = end_row;
+      break;
     }
-  else if (selection.mark.row == selection.end.row
-           && selection.mark.col > selection.end.col)
-    selection.mark.col = selection.end.col;
+
+    end_row--;
+    end_col = ncol;
+  }
+
+  if (mark.row > end.row)
+  {
+    mark.row = end.row;
+    mark.col = end.col;
+  }
+  else if (mark.row == end.row && mark.col > end.col)
+  {
+    mark.col = end.col;
+  }
 }
 #endif
 
@@ -3320,10 +3383,10 @@ rxvt_term::selection_remove_trailing_spaces () NOTHROW
  * EXT: button 3 double click
  */
 void ecb_cold
-rxvt_term::selection_rotate (int x, int y) NOTHROW
+rxvt_term::selection_rotate(int x, int y) NOTHROW
 {
   selection.clicks = selection.clicks % 3 + 1;
-  selection_extend_colrow (Pixel2Col (x), Pixel2Row (y), 1, 0, 1);
+  selection_extend_colrow(Pixel2Col(x), Pixel2Row(y), 1, 0, 1);
 }
 
 /* ------------------------------------------------------------------------- */
@@ -3376,7 +3439,7 @@ rxvt_term::selection_send (const XSelectionRequestEvent &rq) NOTHROW
                        32, PropModeReplace, (unsigned char *)&selection_time, 1);
       ev.property = property;
     }
-  else if (rq.target == xa[XA_TIMESTAMP] && rq.selection == xa[XA_CLIPBOARD] && !selection.clip_text.empty())
+  else if (rq.target == xa[XA_TIMESTAMP] && rq.selection == xa[XA_CLIPBOARD] && !selection.copied_text.empty())
     {
       XChangeProperty (dpy, rq.requestor, property, rq.target,
                        32, PropModeReplace, (unsigned char *)&clipboard_time, 1);
@@ -3423,20 +3486,18 @@ rxvt_term::selection_send (const XSelectionRequestEvent &rq) NOTHROW
         }
 
       if (rq.selection == XA_PRIMARY && !selection.text.empty())
-        {
-          cl = selection.text.c_str();
-          selectlen = selection.text.length();
-        }
-      else if (rq.selection == xa[XA_CLIPBOARD] && !selection.clip_text.empty())
-        {
-          cl = selection.clip_text.c_str();
-          selectlen = selection.clip_text.length();
-        }
-      else
-        {
-          cl = L"";
-          selectlen = 0;
-        }
+      {
+        cl = selection.text.c_str();
+        selectlen = selection.text.length();
+      }
+      else if (rq.selection == xa[XA_CLIPBOARD] && !selection.copied_text.empty())
+      {
+        cl = selection.copied_text.c_str();
+        selectlen = selection.copied_text.length();
+      } else {
+        cl = L"";
+        selectlen = 0;
+      }
 
 #if !ENABLE_MINIMAL
       // xlib is horribly broken with respect to UTF8_STRING, and nobody cares to fix it
