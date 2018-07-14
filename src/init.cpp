@@ -41,6 +41,7 @@
 #include "raxvt/display.hpp"
 #include "raxvt/utils.hpp"
 
+#include <clocale>
 #include <csignal>
 #include <limits>
 
@@ -53,8 +54,6 @@
 #ifdef HAVE_XSETLOCALE
 # define X_LOCALE
 # include <X11/Xlocale.h>
-#else
-# include <locale.h>
 #endif
 
 #ifdef HAVE_NL_LANGINFO
