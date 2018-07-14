@@ -260,66 +260,6 @@ rxvt_exit_failure () THROW ((class rxvt_failure_exception))
   throw (rxvt_failure_exception);
 }
 
-/*
- * remove leading/trailing space in place.
- */
-char *
-rxvt_strtrim (char *str) NOTHROW
-{
-  char *r, *s;
-
-  if (!str || !*str)		/* shortcut */
-    return str;
-
-  /* skip leading spaces */
-  for (s = str; *s && isspace (*s); s++) ;
-
-  /* goto end of string */
-  r = s + std::strlen(s) - 1;
-
-  /* dump return and other trailing whitespace */
-  while (r > s && isspace (*r))
-    r--;
-
-  std::memmove(str, s, r + 1 - s);
-  str[r + 1 - s] = 0;
-
-  return str;
-}
-
-/*
- * Split a string into an array based on the given delimiter, stripping leading and
- * trailing spaces from each entry.  Empty strings are properly returned
- */
-char **
-rxvt_strsplit (char delim, const char *str) NOTHROW
-{
-  int l, n;
-  char *s, *t;
-  char **ret;
-
-  s = strdup (str ? str : "");
-
-  for (n = 1, t = s; *t; t++)
-    if (*t == delim)
-      n++;
-
-  ret = static_cast<char**>(std::malloc((n + 1) * sizeof(char*)));
-  ret[n] = NULL;
-
-  for (l = 0, t = s; l < n; l++)
-    {
-      for (; *t && *t != delim; t++)
-        ;
-      *t = '\0';
-      ret[l] = s;
-      rxvt_strtrim (ret[l]);
-      s = ++t;
-    }
-
-  return ret;
-}
-
 void *
 rxvt_calloc (size_t number, size_t size)
 {

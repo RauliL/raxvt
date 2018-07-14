@@ -38,6 +38,7 @@
 #include "rxvtperl.h"
 
 #include "raxvt/display.hpp"
+#include "raxvt/utils.hpp"
 
 #include <limits>
 #include <csignal>
@@ -1336,14 +1337,13 @@ xim_preedit_draw (XIC ic, XPointer client_data, XIMPreeditDrawCallbackStruct *ca
 bool
 rxvt_term::im_get_ic (const char *modifiers)
 {
-  int i, j, found;
   XIM xim;
   XPoint spot;
   XRectangle rect, status_rect, needed_rect;
   unsigned long fg, bg;
-  const char *p;
-  char **s;
   XIMStyles *xim_styles;
+  const char* p;
+  bool found = false;
 
   set_environ (env);
 
@@ -1368,45 +1368,51 @@ rxvt_term::im_get_ic (const char *modifiers)
 
   const char *pet[] = { get_setting(Rs_preeditType), "OverTheSpot,OffTheSpot,Root,None" };
 
-  for (int pi = 0; pi < 2; pi++)
+  for (int pi = 0; pi < 2; ++pi)
+  {
+    if (!(p = pet[pi]))
     {
-      p = pet[pi];
-
-      if (!p)
-        continue;
-
-      s = rxvt_strsplit (',', p);
-
-      for (i = found = 0; !found && s[i]; i++)
-        {
-          if (!strcmp (s[i], "OverTheSpot"))
-            input_style = XIMPreeditPosition | XIMStatusNothing;
-          else if (!strcmp (s[i], "OffTheSpot"))
-            input_style = XIMPreeditArea | XIMStatusArea;
-          else if (!strcmp (s[i], "Root"))
-            input_style = XIMPreeditNothing | XIMStatusNothing;
-          else if (!strcmp (s[i], "None"))
-            input_style = XIMPreeditNone | XIMStatusNone;
-#ifdef ENABLE_XIM_ONTHESPOT
-          else if (SHOULD_INVOKE (HOOK_XIM_PREEDIT_START) && !strcmp (s[i], "OnTheSpot"))
-            input_style = XIMPreeditCallbacks | XIMStatusNothing;
-#endif
-          else
-            input_style = XIMPreeditNothing | XIMStatusNothing;
-
-          for (j = 0; j < xim_styles->count_styles; j++)
-            if (input_style == xim_styles->supported_styles[j])
-              {
-                rxvt_free_strsplit (s);
-
-                found = 1;
-                goto foundpet;
-              }
-
-        }
-
-      rxvt_free_strsplit (s);
+      continue;
     }
+    for (const auto& part : raxvt::utils::split(p, ','))
+    {
+      if (!part.compare("OverTheSpot"))
+      {
+        input_style = XIMPreeditPosition | XIMStatusNothing;
+      }
+      else if (!part.compare("OffTheSpot"))
+      {
+        input_style = XIMPreeditArea | XIMStatusArea;
+      }
+      else if (!part.compare("Root"))
+      {
+        input_style = XIMPreeditNothing | XIMStatusNothing;
+      }
+      else if (!part.compare("None"))
+      {
+        input_style = XIMPreeditNone | XIMStatusNone;
+      }
+#ifdef ENABLE_XIM_ONTHESPOT
+      else if (SHOULD_INVOKE(HOOK_XIM_PREEDIT_START)
+                && !part.compare("OnTheSpot"))
+      {
+        input_style = XIMPreeditCallbacks | XIMStatusNothing;
+      }
+#endif
+      else
+      {
+        input_style = XIMPreeditNothing | XIMStatusNothing;
+      }
+      for (int i = 0; i < xim_styles->count_styles; ++i)
+      {
+        if (input_style == xim_styles->supported_styles[i])
+        {
+          found = true;
+          goto foundpet;
+        }
+      }
+    }
+  }
 
 foundpet:
 
@@ -1542,7 +1548,6 @@ rxvt_term::im_cb ()
   int i;
   const char *p;
   char **s;
-  char buf[IMBUFSIZ];
 
   make_current ();
 
@@ -1558,30 +1563,27 @@ rxvt_term::im_cb ()
 
   p = get_setting(Rs_inputMethod);
   if (p && *p)
+  {
+    bool found = false;
+    std::string buffer;
+
+    for (const auto& part : raxvt::utils::split(p, ','))
     {
-      bool found = false;
-
-      s = rxvt_strsplit (',', p);
-
-      for (i = 0; s[i]; i++)
+      if (!part.empty())
+      {
+        buffer = "@im=" + part;
+        if (im_get_ic(buffer.c_str()))
         {
-          if (*s[i])
-            {
-              std::strcpy(buf, "@im=");
-              std::strncat(buf, s[i], IMBUFSIZ - 5);
-              if (im_get_ic (buf))
-                {
-                  found = true;
-                  break;
-                }
-            }
+          found = true;
+          break;
         }
-
-      rxvt_free_strsplit (s);
-
-      if (found)
-        goto done;
+      }
     }
+    if (found)
+    {
+      goto done;
+    }
+  }
 
   /* try with XMODIFIERS env. var. */
   if (im_get_ic (""))

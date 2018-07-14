@@ -62,5 +62,65 @@ namespace raxvt
 
       return index == std::string::npos ? input : input.substr(index + 1);
     }
+
+    std::string
+    trim(const std::string& input)
+    {
+      const auto length = input.length();
+      std::string::size_type i;
+      std::string::size_type j;
+
+      for (i = 0; i < length; ++i)
+      {
+        if (!std::isspace(input[i]))
+        {
+          break;
+        }
+      }
+      for (j = length; j != 0; --j)
+      {
+        if (!std::isspace(input[j - 1]))
+        {
+          break;
+        }
+      }
+      if (i != 0 || j != length)
+      {
+        return input.substr(i, j - i);
+      }
+
+      return input;
+    }
+
+    std::vector<std::string>
+    split(const std::string& input, char delimiter)
+    {
+      const auto length = input.length();
+      std::string::size_type begin = 0;
+      std::string::size_type end = 0;
+      std::vector<std::string> result;
+
+      for (std::string::size_type i = 0; i < length; ++i)
+      {
+        if (input[i] == delimiter)
+        {
+          if (end - begin > 0)
+          {
+            result.push_back(trim(input.substr(begin, end - begin)));
+          } else {
+            result.push_back(std::string());
+          }
+          begin = end = i + 1;
+        } else {
+          ++end;
+        }
+      }
+      if (end - begin > 0)
+      {
+        result.push_back(trim(input.substr(begin, end - begin)));
+      }
+
+      return result;
+    }
   }
 }

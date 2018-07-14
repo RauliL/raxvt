@@ -146,16 +146,6 @@ rxvt_malloc(std::size_t size)
 void *           rxvt_calloc                      (size_t number, size_t size);
 void *           rxvt_realloc                     (void *ptr, size_t size);
 
-char *           rxvt_strtrim                     (char *str) NOTHROW;
-char **          rxvt_strsplit                    (char delim, const char *str) NOTHROW;
-
-static inline void
-rxvt_free_strsplit (char **ptr) NOTHROW
-{
-  free (ptr[0]);
-  free (ptr);
-}
-
 KeySym rxvt_XKeycodeToKeysym (Display *dpy, KeyCode keycode, int index);
 
 /////////////////////////////////////////////////////////////////////////////
