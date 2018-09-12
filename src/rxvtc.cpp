@@ -28,7 +28,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 
-#include <../deps/libptytty/src/libptytty.h>
+#include "./libptytty.h"
 
 #include "raxvt/connection.hpp"
 

@@ -37,7 +37,7 @@
 # include <sys/mman.h>
 #endif
 
-#include <../deps/libptytty/src/libptytty.h>
+#include "./libptytty.h"
 
 #include "rxvt.h"
 #include "raxvt/connection.hpp"
