@@ -19,16 +19,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *---------------------------------------------------------------------*/
-
 #include "config.h"
-
 #include "ptytty.h"
-
 #include "estl.h"
+#include "rxvt.h"
 
-#include <stdio.h>
-#include <string.h>
-#include <signal.h>
+#include <csignal>
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -69,19 +65,9 @@ struct ptytty_proxy : ptytty
   void login (int cmd_pid, bool login_shell, const char *hostname);
 };
 
-#if PTYTTY_REENTRANT
-# define NEED_TOKEN do { char ch; read  (lock_fd, &ch     , 1); } while (0)
-# define GIVE_TOKEN               write (lock_fd, &lock_fd, 1)
-#else
-# define NEED_TOKEN (void)0
-# define GIVE_TOKEN (void)0
-#endif
-
 bool
 ptytty_proxy::get ()
 {
-  NEED_TOKEN;
-
   command cmd;
 
   cmd.type = command::get;
@@ -89,27 +75,23 @@ ptytty_proxy::get ()
   write (sock_fd, &cmd, sizeof (cmd));
 
   if (read (sock_fd, &id, sizeof (id)) != sizeof (id))
-    PTYTTY_FATAL ("protocol error while creating pty using helper process, aborting.\n");
+    rxvt_fatal("protocol error while creating pty using helper process, aborting.\n");
 
   if (!id)
     {
-      GIVE_TOKEN;
       return false;
     }
 
   if ((pty = recv_fd (sock_fd)) < 0
       || (tty = recv_fd (sock_fd)) < 0)
-    PTYTTY_FATAL ("protocol error while reading pty/tty fds from helper process, aborting.\n");
+    rxvt_fatal("protocol error while reading pty/tty fds from helper process, aborting.\n");
 
-  GIVE_TOKEN;
   return true;
 }
 
 void
 ptytty_proxy::login (int cmd_pid, bool login_shell, const char *hostname)
 {
-  NEED_TOKEN;
-
   command cmd;
 
   cmd.type = command::login;
@@ -119,8 +101,6 @@ ptytty_proxy::login (int cmd_pid, bool login_shell, const char *hostname)
   strncpy (cmd.hostname, hostname, sizeof (cmd.hostname));
 
   write (sock_fd, &cmd, sizeof (cmd));
-
-  GIVE_TOKEN;
 }
 
 ptytty_proxy::~ptytty_proxy ()
@@ -132,16 +112,12 @@ ptytty_proxy::~ptytty_proxy ()
       if (pty >= 0)
         close (pty);
 
-      NEED_TOKEN;
-
       command cmd;
 
       cmd.type = command::destroy;
       cmd.id = id;
 
       write (sock_fd, &cmd, sizeof (cmd));
-
-      GIVE_TOKEN;
     }
 }
 
@@ -153,8 +129,6 @@ void serve ()
 
   for (;;)
     {
-      GIVE_TOKEN;
-
       if (read (sock_fd, &cmd, sizeof (command)) != sizeof (command))
         break;
 
@@ -202,8 +176,6 @@ void serve ()
         }
       else
         break;
-
-      NEED_TOKEN;
     }
 
   // destroy all ptys
@@ -220,19 +192,12 @@ ptytty::use_helper ()
   int sv[2];
 
   if (socketpair (AF_UNIX, SOCK_STREAM, 0, sv))
-    PTYTTY_FATAL ("could not create socket to communicate with pty/sessiondb helper, aborting.\n");
-
-#if PTYTTY_REENTRANT
-  int lv[2];
-
-  if (socketpair (AF_UNIX, SOCK_STREAM, 0, lv))
-    PTYTTY_FATAL ("could not create socket to communicate with pty/sessiondb helper, aborting.\n");
-#endif
+    rxvt_fatal("could not create socket to communicate with pty/sessiondb helper, aborting.\n");
 
   helper_pid = fork ();
 
   if (helper_pid < 0)
-    PTYTTY_FATAL ("could not create pty/sessiondb helper process, aborting.\n");
+    rxvt_fatal("could not create pty/sessiondb helper process, aborting.\n");
 
   if (helper_pid)
     {
@@ -240,19 +205,11 @@ ptytty::use_helper ()
       sock_fd = sv[0];
       close (sv[1]);
       fcntl (sock_fd, F_SETFD, FD_CLOEXEC);
-#if PTYTTY_REENTRANT
-      lock_fd = lv[0];
-      close (lv[1]);
-      fcntl (lock_fd, F_SETFD, FD_CLOEXEC);
-#endif
     }
   else
     {
       // server, pty-helper
       sock_fd = sv[1];
-#if PTYTTY_REENTRANT
-      lock_fd = lv[1];
-#endif
 
       chdir ("/");
 
@@ -297,7 +254,7 @@ ptytty::sanitise_stdfd ()
           fd2 = open ("/dev/null", fd ? O_WRONLY : O_RDONLY);
 
         if (fd2 != fd)
-          PTYTTY_FATAL ("unable to sanitise fds, aborting.\n");
+          rxvt_fatal("unable to sanitise fds, aborting.\n");
       }
 }
 
@@ -317,7 +274,7 @@ ptytty::init ()
 #if PTYTTY_HELPER
       use_helper ();
 #else
-      PTYTTY_WARN ("running setuid/setgid without pty helper compiled in, continuing unprivileged.\n");
+      rxvt_warn("running setuid/setgid without pty helper compiled in, continuing unprivileged.\n");
 #endif
 
       drop_privileges ();
@@ -346,6 +303,6 @@ ptytty::drop_privileges ()
 
   if (uid != geteuid ()
       || gid != getegid ())
-    PTYTTY_FATAL ("unable to drop privileges, aborting.\n");
+    rxvt_fatal("unable to drop privileges, aborting.\n");
 }
 

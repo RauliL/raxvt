@@ -20,26 +20,3 @@
 #ifndef PTYTTY_HELPER
 # define PTYTTY_HELPER 1
 #endif
-
-/*
- * Define if you want to use a single helper process from multiple
- * threads OR forked processes. Without it, the user is responsible for
- * serialising all calls to libptytty functions. Having it disabled
- * avoids some syscalls and reduces codesize, but unless you are really
- * short on cpu or memory, it's not worth disabling.
- */
-#ifndef PTYTTY_REENTRANT
-# define PTYTTY_REENTRANT 1
-#endif
-
-/*
- * printf-like functions to be called on fatal conditions
- * (must exit), or warning conditions (only print message)
- */
-#ifndef PTYTTY_FATAL
-#define PTYTTY_FATAL(msg) do { PTYTTY_WARN (msg); _exit (1); } while (0)
-#endif
-#ifndef PTYTTY_WARN
-#define PTYTTY_WARN(msg) fputs (msg, stderr)
-#endif
-

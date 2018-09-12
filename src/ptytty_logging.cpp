@@ -31,10 +31,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *----------------------------------------------------------------------*/
-
 #include "config.h"
-
 #include "ptytty.h"
+#include "rxvt.h"
 
 #include <sys/types.h>
 
@@ -357,7 +356,7 @@ ptytty_unix::log_session (bool login, const char *hostname)
         if (pwent)
           update_lastlog (pty, hostname);
         else
-          PTYTTY_WARN ("no entry in password file, not updating lastlog.\n");
+          rxvt_warn("no entry in password file, not updating lastlog.\n");
       }
 #endif
 }
