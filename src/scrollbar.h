@@ -98,10 +98,12 @@ struct scrollBar_t
   {
     return style == SB_STYLE_NEXT ? SB_THUMB_MIN_HEIGHT : 10;
   }
-  int size ()
+
+  inline int size() const
   {
-    return max (end - beg, 0);
+    return std::max(end - beg, 0);
   }
+
   int total_width ()
   {
     return width + shadow * 2;

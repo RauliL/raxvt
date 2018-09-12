@@ -110,8 +110,8 @@ scrollBar_t::show (int refresh)
     {
       int sb_top = term->view_start - term->top_row;
       int sb_bot = sb_top + (term->nrow - 1);
-      int sb_len = max (term->nrow - 1 - term->top_row, 1);
-      int n = min (min_height (), size ());
+      int sb_len = std::max(term->nrow - 1 - term->top_row, 1);
+      int n = std::min(min_height(), size());
 
       top = beg + (sb_top * (size () - n)) / sb_len;
       bot = top + ecb_div_ru ((sb_bot - sb_top) * (size () - n), sb_len) + n;
@@ -184,7 +184,7 @@ scrollBar_t::setup (rxvt_term *term)
 
   if (style != SB_STYLE_NEXT)	/* dishonour request - for now */
     if (thickness && (i = atoi (thickness)) >= SB_WIDTH_MINIMUM)
-      width = min (i, SB_WIDTH_MAXIMUM);
+      width = std::min(i, SB_WIDTH_MAXIMUM);
 
 # ifdef RXVT_SCROLLBAR
   if (! term->get_option(Opt_scrollBar_floating) && style == SB_STYLE_RXVT)

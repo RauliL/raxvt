@@ -1,6 +1,3 @@
-[submodule "libptytty"]
-	path = deps/libptytty
-	url = git@github.com:yusiwen/libptytty.git
 [submodule "libev"]
 	path = deps/libev
 	url = git@github.com:enki/libev.git

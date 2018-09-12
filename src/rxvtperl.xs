@@ -306,11 +306,11 @@ overlay::hide ()
 
 void overlay::swap ()
 {
-  int ov_x = max (0, min (MOD (x, THIS->ncol), THIS->ncol - w));
-  int ov_y = max (0, min (MOD (y, THIS->nrow), THIS->nrow - h));
+  int ov_x = std::max(0, std::min(MOD(x, THIS->ncol), THIS->ncol - w));
+  int ov_y = std::max(0, std::min(MOD(y, THIS->nrow), THIS->nrow - h));
 
-  int ov_w = min (w, THIS->ncol - ov_x);
-  int ov_h = min (h, THIS->nrow - ov_y);
+  int ov_w = std::min(w, THIS->ncol - ov_x);
+  int ov_h = std::min(h, THIS->nrow - ov_y);
 
   // hide cursor if it is within the overlay area
   if (IN_RANGE_EXC (THIS->screen.cur.col - ov_x, 0, ov_w)
@@ -344,7 +344,7 @@ void overlay::set (int x, int y, SV *text, SV *rend)
 
   wchar_t *wtext = sv2wcs (text);
 
-  for (int col = min (wcslen (wtext), w - x - border); col--; )
+  for (int col = std::min<int>(wcslen(wtext), w - x - border); col--; )
     this->text [y][x + col] = wtext [col];
 
   free (wtext);
@@ -356,7 +356,7 @@ void overlay::set (int x, int y, SV *text, SV *rend)
 
       AV *av = (AV *)SvRV (rend);
 
-      for (int col = min (AvFILL (av) + 1, w - x - border); col--; )
+      for (int col = std::min<int>(AvFILL(av) + 1, w - x - border); col--; )
         this->rend [y][x + col] = SvIV (*av_fetch (av, col, 1));
     }
 
@@ -1564,7 +1564,7 @@ rxvt_term::view_start (int newval = 1)
         RETVAL = THIS->view_start;
 
         if (newval <= 0)
-          THIS->scr_changeview (max (newval, THIS->top_row));
+          THIS->scr_changeview(std::max(newval, THIS->top_row));
 }
         OUTPUT:
 	RETVAL
@@ -1636,7 +1636,7 @@ rxvt_term::ROW_t (int row_number, SV *new_text = 0, int start_col = 0, int start
           {
             wchar_t *wstr = sv2wcs (new_text);
 
-            int len = min (wcslen (wstr) - start_ofs, max_len);
+            int len = std::min<int>(wcslen(wstr) - start_ofs, max_len);
 
             if (start_col < 0 || start_col + len > THIS->ncol)
               {
@@ -1680,7 +1680,7 @@ rxvt_term::ROW_r (int row_number, SV *new_rend = 0, int start_col = 0, int start
               croak ("new_rend must be arrayref");
 
             AV *av = (AV *)SvRV (new_rend);
-            int len = min (AvFILL (av) + 1 - start_ofs, max_len);
+            int len = std::min<int>(AvFILL(av) + 1 - start_ofs, max_len);
 
             if (start_col < 0 || start_col + len > THIS->ncol)
               croak ("new_rend array extends beyond horizontal margins");

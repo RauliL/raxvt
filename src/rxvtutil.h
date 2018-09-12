@@ -4,8 +4,8 @@
 #include <cstdlib>
 #include <cstring>
 
-#include <../deps/libptytty/src/ecb.h>
-#include <../deps/libptytty/src/estl.h>
+#include "./ecb.h"
+#include "./estl.h"
 
 #include "emman.h"
 

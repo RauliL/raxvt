@@ -1,7 +1,5 @@
 #include "emman.h"
 
-#include <../deps/libptytty/src/ecb.h>
-
 #include <string.h>
 
 #ifndef _WIN32

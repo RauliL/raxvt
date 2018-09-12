@@ -519,8 +519,8 @@ rxvt_img::add_alpha ()
 
   rxvt_img *img = cc;
 
-  ::swap (img->ref, ref);
-  ::swap (img->pm , pm );
+  std::swap(img->ref, ref);
+  std::swap(img->pm , pm );
 
   delete img;
 }
@@ -587,7 +587,7 @@ rxvt_img::blur (int rh, int rv)
 
       size = rv * 2 + 1;
       get_gaussian_kernel (rv, size, kernel, params);
-      ::swap (params[0], params[1]);
+      std::swap(params[0], params[1]);
 
       XRenderSetPictureFilter (dpy, tmp, FilterConvolution, params, size+2);
       XRenderComposite (dpy,
@@ -750,8 +750,8 @@ rxvt_img::contrast (int32_t r, int32_t g, int32_t b, int32_t a)
         }
     }
 
-  ::swap (img->ref, ref);
-  ::swap (img->pm , pm );
+  std::swap(img->ref, ref);
+  std::swap(img->pm , pm );
 
   delete img;
 }
