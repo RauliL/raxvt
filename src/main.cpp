@@ -782,7 +782,7 @@ rxvt_term::set_fonts ()
   fontset[0] = fs;
 
   prop = (*fs)[rxvt_fontset::firstFont]->properties ();
-  prop.width = max (prop.width + letterSpace, 1);
+  prop.width = std::max(prop.width + letterSpace, 1);
 
   fs->set_prop (prop, false);
 

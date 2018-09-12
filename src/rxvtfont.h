@@ -85,10 +85,10 @@ struct rxvt_fontset
     return fonts[id >> 1];
   }
 
-  int
-  find_font (unicode_t unicode)
+  inline int
+  find_font(unicode_t unicode)
   {
-    return min<int> ((fontCount << 1) | 1, find_font_idx (unicode));
+    return std::min<int>((fontCount << 1) | 1, find_font_idx(unicode));
   }
 
 private:

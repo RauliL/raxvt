@@ -211,7 +211,7 @@ void
 rxvt_term::copy_line(line_t& dst, line_t& src)
 {
   scr_blank_screen_mem(dst, DEFAULT_RSTYLE);
-  dst.l = min(src.l, ncol);
+  dst.l = std::min(src.l, ncol);
   std::memcpy(dst.t, src.t, sizeof(char32_t) * dst.l);
   std::memcpy(dst.r, src.r, sizeof(rend_t) * dst.l);
   dst.f = src.f;
@@ -334,7 +334,7 @@ rxvt_term::scr_reset ()
                   llen += prev_ncol;
                 }
 
-              int qlines = max (0, (llen - 1) / ncol) + 1;
+              int qlines = std::max(0, (llen - 1) / ncol) + 1;
 
               // drop partial lines completely
               if (q < qlines)
@@ -376,7 +376,7 @@ rxvt_term::scr_reset ()
 
                       line_t &pline = prev_row_buf [prow];
 
-                      int len = min (min (prev_ncol - pcol, ncol - qcol), llen - lofs);
+                      int len = std::min(std::min(prev_ncol - pcol, ncol - qcol), llen - lofs);
 
                       std::memcpy(qline->t + qcol, pline.t + pcol, len * sizeof(char32_t));
                       std::memcpy(qline->r + qcol, pline.r + pcol, len * sizeof(rend_t));
@@ -403,7 +403,7 @@ rxvt_term::scr_reset ()
         {
           // if no scrollback exists (yet), wing, instead of wrap
 
-          for (int row = min (nrow, prev_nrow); row--; )
+          for (int row = std::min(nrow, prev_nrow); row--; )
             {
               line_t &src = prev_row_buf [MOD (term_start + row, prev_total_rows)];
               line_t &dst = row_buf [row];
@@ -546,9 +546,9 @@ rxvt_term::scr_swap_screen () NOTHROW
     return;
 
   for (int i = prev_nrow; i--; )
-    ::swap (ROW(i), swap_buf [i]);
+    std::swap(ROW(i), swap_buf [i]);
 
-  ::swap (screen.cur, swap.cur);
+  std::swap(screen.cur, swap.cur);
 
   screen.cur.row = clamp (screen.cur.row, 0, prev_nrow - 1);
   screen.cur.col = clamp (screen.cur.col, 0, prev_ncol - 1);
@@ -670,7 +670,7 @@ rxvt_term::scr_scroll_text (int row1, int row2, int count) NOTHROW
     {
       min_it (count, total_rows - (nrow - (row2 + 1)));
 
-      top_row = max (top_row - count, -saveLines);
+      top_row = std::max(top_row - count, -saveLines);
 
       // sever bottommost line
       {
@@ -690,7 +690,7 @@ rxvt_term::scr_scroll_text (int row1, int row2, int count) NOTHROW
           line_t &l1 = ROW(i - count);
           line_t &l2 = ROW(i);
 
-          ::swap (l1, l2);
+          std::swap(l1, l2);
           l2.touch ();
         }
 
@@ -1524,7 +1524,7 @@ rxvt_term::scr_insdel_chars (int count, int insdel) NOTHROW
   switch (insdel)
     {
       case INSERT:
-        line->l = min (line->l + count, ncol);
+        line->l = std::min(line->l + count, ncol);
 
         if (line->t[screen.cur.col] == NOCHAR)
           scr_kill_char (*line, screen.cur.col);
@@ -1567,7 +1567,7 @@ rxvt_term::scr_insdel_chars (int count, int insdel) NOTHROW
         break;
 
       case DELETE:
-        line->l = max (line->l - count, 0);
+        line->l = std::max(line->l - count, 0);
 
         // nuke wide char spanning the end
         if (screen.cur.col + count < ncol && line->t[screen.cur.col + count] == NOCHAR)
@@ -1731,12 +1731,12 @@ rxvt_term::scr_rvideo_mode (bool on) NOTHROW
 #if OFF_FOCUS_FADING
       if (get_setting(Rs_fade))
         {
-          ::swap (pix_colors_focused[Color_fg], pix_colors_focused[Color_bg]);
-          ::swap (pix_colors_unfocused[Color_fg], pix_colors_unfocused[Color_bg]);
+          std::swap(pix_colors_focused[Color_fg], pix_colors_focused[Color_bg]);
+          std::swap(pix_colors_unfocused[Color_fg], pix_colors_unfocused[Color_bg]);
         }
       else
 #endif
-      ::swap (pix_colors[Color_fg], pix_colors[Color_bg]);
+      std::swap(pix_colors[Color_fg], pix_colors[Color_bg]);
 #ifdef HAVE_IMG
       if (bg_img == 0)
 #endif
@@ -2191,7 +2191,7 @@ rxvt_term::scr_refresh () NOTHROW
             {
               /* also comes here at end if needed because of >= above */
               if (wlen < len)
-                ::swap (wlen, len);
+                std::swap(wlen, len);
 
               XGCValues gcv;
 
@@ -2342,7 +2342,7 @@ rxvt_term::scr_refresh () NOTHROW
 
               if (invert)
                 {
-                    ::swap (fore, back);
+                    std::swap(fore, back);
 
 #ifndef NO_BOLD_UNDERLINE_REVERSE
                   if (fore == back)
@@ -2575,7 +2575,7 @@ rxvt_term::scr_xor_rect (int beg_row, int beg_col, int end_row, int end_col, ren
   int view_end = view_start + nrow;
   int row, col;
 
-  for (row = max (beg_row, view_start); row <= min (end_row, view_end); row++)
+  for (row = std::max(beg_row, view_start); row <= std::min(end_row, view_end); row++)
     {
       char32_t* stp = ROW(row).t;
       rend_t *srp = ROW(row).r;
@@ -2608,7 +2608,7 @@ rxvt_term::scr_xor_span (int beg_row, int beg_col, int end_row, int end_col, ren
       row = view_start;
     }
 
-  for (; row < min (end_row, view_end); row++, col = 0)
+  for (; row < std::min(end_row, view_end); row++, col = 0)
     for (rend_t *srp = ROW(row).r; col < ncol; col++)
       srp[col] ^= rstyle;
 
@@ -2810,7 +2810,7 @@ rxvt_term::selection_make (Time tm)
 #endif
         end_col = ROW(row).l;
 
-      col = max (col, 0);
+      col = std::max(col, 0);
 
       if (row == selection.end.row)
         min_it (end_col, selection.end.col);
@@ -3013,7 +3013,7 @@ rxvt_term::selection_delimit_word (enum page_dirn dirn, const raxvt::coordinates
     }
 
   row = mark->row;
-  col = max (mark->col, 0);
+  col = std::max(mark->col, 0);
 
   /* find the edge of a word */
   stp = ROW(row).t + col; w1 = DELIMIT_TEXT (*stp);

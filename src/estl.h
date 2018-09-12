@@ -6,11 +6,6 @@
 
 #include "ecb.h"
 
-template<typename T, typename U> static inline T min (T a, U b) { return a < (T)b ? a : (T)b; }
-template<typename T, typename U> static inline T max (T a, U b) { return a > (T)b ? a : (T)b; }
-
-template<typename T, typename U> static inline void swap (T& a, U& b) { T t = a; a = (T)b; b = (U)t; }
-
 template <typename I, typename T>
 I find (I first, I last, const T& value)
 {
@@ -21,83 +16,7 @@ I find (I first, I last, const T& value)
 }
 
 #include <new>
-
-#if ECB_CPP11
-  #include <type_traits>
-#endif
-
-namespace estl
-{
-#if ESTL_LARGE_MEMORY_MODEL
-  // should use size_t/ssize_t, but that's not portable enough for us
-  typedef unsigned long size_type;
-  typedef          long difference_type;
-#else
-  typedef uint32_t size_type;
-  typedef  int32_t difference_type;
-#endif
-
-  template<typename T>
-  struct scoped_ptr
-  {
-    T *p;
-
-    scoped_ptr ()     : p (0) { }
-
-    explicit
-    scoped_ptr (T *a) : p (a) { }
-
-    ~scoped_ptr ()
-    {
-      delete p;
-    }
-
-    void reset (T *a)
-    {
-      delete p;
-      p = a;
-    }
-
-    T *operator ->() const { return p; }
-    T &operator *() const { return *p; }
-
-    operator T *()  { return p; }
-    T *get () const { return p; }
-
-  private:
-    scoped_ptr (const scoped_ptr &);
-    scoped_ptr &operator =(const scoped_ptr &);
-  };
-
-  template<typename T>
-  struct scoped_array
-  {
-    T *p;
-
-    scoped_array ()     : p (0) { }
-
-    explicit
-    scoped_array (T *a) : p (a) { }
-
-    ~scoped_array ()
-    {
-      delete [] p;
-    }
-
-    void reset (T *a)
-    {
-      delete [] p;
-      p = a;
-    }
-
-    operator T *()  { return p; }
-    T *get () const { return p; }
-
-  private:
-    scoped_array (const scoped_array &);
-    scoped_array &operator =(const scoped_array &);
-  };
-}
+#include <type_traits>
 
 // original version taken from MICO, but this has been completely rewritten
 // known limitations w.r.t. std::vector
@@ -111,15 +30,14 @@ namespace estl
 template<class T>
 struct simplevec
 {
-  typedef estl::size_type size_type;
-
-  typedef       T  value_type;
-  typedef       T *iterator;
-  typedef const T *const_iterator;
-  typedef       T *pointer;
-  typedef const T *const_pointer;
-  typedef       T &reference;
-  typedef const T &const_reference;
+  using size_type = std::size_t;
+  using value_type = T;
+  using iterator = T*;
+  using const_iterator = const T*;
+  using pointer = T*;
+  using const_pointer = const T*;
+  using reference = T&;
+  using const_reference = const T&;
   // missing: allocator_type
   // missing: reverse iterator
 
@@ -131,19 +49,10 @@ private:
   // "not simple enough" will use the slow path.
   static bool is_simple_enough ()
   {
-    #if ECB_CPP11
-      return std::is_trivially_assignable<T, T>::value
-          && std::is_trivially_constructible<T>::value
-          && std::is_trivially_copyable<T>::value
-          && std::is_trivially_destructible<T>::value;
-    #elif ECB_GCC_VERSION(4,4) || ECB_CLANG_VERSION(2,8)
-      return __has_trivial_assign (T)
-          && __has_trivial_constructor (T)
-          && __has_trivial_copy (T)
-          && __has_trivial_destructor (T);
-    #else
-      return 0;
-    #endif
+    return std::is_trivially_assignable<T, T>::value
+        && std::is_trivially_constructible<T>::value
+        && std::is_trivially_copyable<T>::value
+        && std::is_trivially_destructible<T>::value;
   }
 
   static void construct (iterator a, size_type n = 1)
@@ -306,9 +215,9 @@ public:
 
   void swap (simplevec<T> &t)
   {
-    ::swap (sze, t.sze);
-    ::swap (res, t.res);
-    ::swap (buf, t.buf);
+    std::swap(sze, t.sze);
+    std::swap(res, t.res);
+    std::swap(buf, t.buf);
   }
 
   void clear ()

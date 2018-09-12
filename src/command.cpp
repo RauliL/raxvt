@@ -2264,7 +2264,7 @@ rxvt_term::cmd_parse ()
           bool refreshnow = false;
           int nlines = 0;
           wchar_t *str = buf;
-          wchar_t *eol = str + min (ncol, UBUFSIZ);
+          auto eol = str + std::min(ncol, UBUFSIZ);
 
           for (;;)
             {
@@ -2301,7 +2301,7 @@ rxvt_term::cmd_parse ()
 
                       nlines = 0;
                       str = buf;
-                      eol = str + min (ncol, UBUFSIZ);
+                      eol = str + std::min(ncol, UBUFSIZ);
                     }
 
                   if (str >= eol)
@@ -2312,7 +2312,7 @@ rxvt_term::cmd_parse ()
                           break;
                         }
                       else
-                        eol = min (eol + ncol, buf + UBUFSIZ);
+                        eol = std::min(eol + ncol, buf + UBUFSIZ);
                     }
 
                 }
@@ -4102,9 +4102,9 @@ rxvt_term::tt_write_ (const char *data, unsigned int len)
 
   if (v_buflen == 0)
     {
-      ssize_t written = write (pty->pty, data, min (len, MAX_PTY_WRITE));
+      auto written = write(pty->pty, data, std::min(len, MAX_PTY_WRITE));
 
-      max_it (written, 0);
+      max_it(written, 0);
 
       if (written == len)
         return;
@@ -4123,7 +4123,7 @@ rxvt_term::tt_write_ (const char *data, unsigned int len)
 
 void rxvt_term::pty_write ()
 {
-  int written = write (pty->pty, v_buffer, min (v_buflen, MAX_PTY_WRITE));
+  auto written = write(pty->pty, v_buffer, std::min(v_buflen, MAX_PTY_WRITE));
 
   if (written > 0)
     {

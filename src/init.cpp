@@ -607,17 +607,17 @@ rxvt_term::init_resources(const std::vector<std::string>& argv)
   }
 
   if (get_setting(Rs_saveLines) && (i = atoi (get_setting(Rs_saveLines))) >= 0)
-    saveLines = min (i, MAX_SAVELINES);
+    saveLines = std::min(i, MAX_SAVELINES);
 
 #if ENABLE_FRILLS
   if (get_setting(Rs_int_bwidth) && (i = atoi (get_setting(Rs_int_bwidth))) >= 0)
-    int_bwidth = min (i, std::numeric_limits<int16_t>::max ());
+    int_bwidth = std::min<int>(i, std::numeric_limits<int16_t>::max());
 
   if (get_setting(Rs_ext_bwidth) && (i = atoi (get_setting(Rs_ext_bwidth))) >= 0)
-    ext_bwidth = min (i, std::numeric_limits<int16_t>::max ());
+    ext_bwidth = std::min<int>(i, std::numeric_limits<int16_t>::max());
 
   if (get_setting(Rs_lineSpace) && (i = atoi (get_setting(Rs_lineSpace))) >= 0)
-    lineSpace = min (i, std::numeric_limits<int16_t>::max ());
+    lineSpace = std::min<int>(i, std::numeric_limits<int16_t>::max());
 
   if (get_setting(Rs_letterSpace))
     letterSpace = atoi (get_setting(Rs_letterSpace));
@@ -1090,9 +1090,9 @@ rxvt_term::get_colors ()
   /* topShadowColor */
   if (!pix_colors[Color_topShadow].set (this,
                    rgba (
-                     min ((int)rgba::MAX_CC, max (cscroll.r / 5, cscroll.r) * 7 / 5),
-                     min ((int)rgba::MAX_CC, max (cscroll.g / 5, cscroll.g) * 7 / 5),
-                     min ((int)rgba::MAX_CC, max (cscroll.b / 5, cscroll.b) * 7 / 5),
+                     std::min((int)rgba::MAX_CC, std::max<int>(cscroll.r / 5, cscroll.r) * 7 / 5),
+                     std::min((int)rgba::MAX_CC, std::max<int>(cscroll.g / 5, cscroll.g) * 7 / 5),
+                     std::min((int)rgba::MAX_CC, std::max<int>(cscroll.b / 5, cscroll.b) * 7 / 5),
                      cscroll.a)
                    ))
     alias_color (Color_topShadow, Color_White);

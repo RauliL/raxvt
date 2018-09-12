@@ -990,7 +990,7 @@ rxvt_font_x11::has_char (unicode_t unicode, const rxvt_fontprop *prop, bool &car
 
   // check whether character overlaps previous/next character
   int w = xcs->rbearing - xcs->lbearing;
-  int wcw = max (WCWIDTH (unicode), 1);
+  const auto wcw = std::max(WCWIDTH(unicode), 1);
 
   careful = xcs->lbearing < 0 || xcs->rbearing > prop->width * wcw;
 
@@ -1201,7 +1201,7 @@ rxvt_font_xft::load (const rxvt_fontprop &prop, bool force_prop)
 
       ascent  = (face->size->metrics.ascender + 63) >> 6;
       descent = (-face->size->metrics.descender + 63) >> 6;
-      height  = max (ascent + descent, (face->size->metrics.height + 63) >> 6);
+      height = std::max<int>(ascent + descent, (face->size->metrics.height + 63) >> 6);
       width   = 0;
 
       bool scalable = face->face_flags & FT_FACE_FLAG_SCALABLE;
@@ -1293,7 +1293,7 @@ rxvt_font_xft::has_char (unicode_t unicode, const rxvt_fontprop *prop, bool &car
   XftTextExtents32 (term->dpy, f, &ch, 1, &g);
 
   int w = g.width - g.x;
-  int wcw = max (WCWIDTH (unicode), 1);
+  const auto wcw = std::max(WCWIDTH(unicode), 1);
 
   careful = g.x > 0 || w > prop->width * wcw;
 
@@ -1550,8 +1550,8 @@ rxvt_fontset::add_fonts (const char *desc)
                   break;
                 }
 
-              std::memcpy(spec, extra, min (desc - extra, 255));
-              spec[min (desc - extra, 255)] = 0;
+              std::memcpy(spec, extra, std::min<std::size_t>(desc - extra, 255));
+              spec[std::min<std::size_t>(desc - extra, 255)] = 0;
 
               if (!std::strncmp(extra, "codeset=", sizeof ("codeset=") - 1))
                 cs = codeset_from_name (spec + sizeof ("codeset=") - 1);
