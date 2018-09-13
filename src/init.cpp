@@ -1570,11 +1570,17 @@ rxvt_term::run_command(const std::vector<std::string>& argv)
             dup2 (pty->tty, STDERR_FILENO);
 
             // close all our file handles that we do no longer need
-            for (rxvt_term **t = termlist.begin (); t < termlist.end (); t++)
+            for (const auto& terminal : termlist)
+            {
+              if (terminal->pty->pty > 2)
               {
-                if ((*t)->pty->pty > 2) close ((*t)->pty->pty);
-                if ((*t)->pty->tty > 2) close ((*t)->pty->tty);
+                ::close(terminal->pty->pty);
               }
+              if (terminal->pty->tty > 2)
+              {
+                ::close(terminal->pty->tty);
+              }
+            }
 
             run_child (argv);
             fprintf (stderr, "%s: unable to exec child.", RESNAME);

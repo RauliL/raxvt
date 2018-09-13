@@ -1043,7 +1043,7 @@ struct rxvt_term : rxvt_vars, rxvt_screen
   void scr_overlay_set (int x, int y, const wchar_t *s) NOTHROW;
 #endif
 
-  vector<void *> allocated;           // free these memory blocks with free()
+  std::vector<void*> allocated;           // free these memory blocks with free()
 
   int            parent_x, parent_y; // parent window position relative to root, only updated on demand
 
@@ -1077,7 +1077,8 @@ struct rxvt_term : rxvt_vars, rxvt_screen
   std::uint16_t        rgb24_seqno[RGB24_CUBE_SIZE];   // which one is older?
   std::uint16_t        rgb24_sequence;
 
-  static vector<rxvt_term *> termlist; // a vector of all running rxvt_term's
+  /** Vector containing all running terminals. */
+  static std::vector<rxvt_term*> termlist;
 
 #if ENABLE_FRILLS || ISO_14755
   // ISO 14755 entry support

@@ -1135,15 +1135,19 @@ SET_CUSTOM (int rend, int new_value)
 	OUTPUT:
         RETVAL
 
-void
-termlist ()
+static void
+termlist()
 	PPCODE:
 {
-        EXTEND (SP, rxvt_term::termlist.size ());
+  EXTEND(SP, rxvt_term::termlist.size());
 
-        for (rxvt_term **t = rxvt_term::termlist.begin (); t < rxvt_term::termlist.end (); t++)
-          if ((*t)->perl.self)
-            PUSHs (sv_2mortal (newSVterm (*t)));
+  for (const auto& terminal : rxvt_term::termlist)
+  {
+    if (terminal->perl.self)
+    {
+      PUSHs(sv_2mortal(newSVterm(terminal)));
+    }
+  }
 }
 
 IV

@@ -47,7 +47,7 @@
 #include <clocale>
 
 struct termios rxvt_term::def_tio;
-vector<rxvt_term *> rxvt_term::termlist;
+std::vector<rxvt_term*> rxvt_term::termlist;
 
 // used to tell global functions which terminal instance is "active"
 rxvt_t rxvt_current_term;
@@ -365,10 +365,12 @@ rxvt_term::destroy_cb (ev::idle &w, int revents)
 static XErrorHandler old_xerror_handler;
 
 static void
-rxvt_emergency_cleanup ()
+rxvt_emergency_cleanup()
 {
-  for (rxvt_term **t = rxvt_term::termlist.begin (); t < rxvt_term::termlist.end (); t++)
-    (*t)->emergency_cleanup ();
+  for (auto& terminal : rxvt_term::termlist)
+  {
+    terminal->emergency_cleanup();
+  }
 }
 
 #if !ENABLE_MINIMAL
