@@ -6,15 +6,6 @@
 
 #include "ecb.h"
 
-template <typename I, typename T>
-I find (I first, I last, const T& value)
-{
-  while (first != last && *first != value)
-    ++first;
-
-  return first;
-}
-
 #include <new>
 #include <type_traits>
 

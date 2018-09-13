@@ -24,13 +24,14 @@
 #include "estl.h"
 #include "rxvt.h"
 
+#include <algorithm>
+#include <cerrno>
 #include <csignal>
 
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <errno.h>
 
 // helper/proxy support
 
@@ -125,62 +126,63 @@ static
 void serve ()
 {
   command cmd;
-  vector<ptytty *> ptys;
+  std::vector<ptytty*> ptys;
 
   for (;;)
+  {
+    if (read(sock_fd, &cmd, sizeof(command)) != sizeof(command))
     {
-      if (read (sock_fd, &cmd, sizeof (command)) != sizeof (command))
-        break;
-
-      if (cmd.type == command::get)
-        {
-          // -> id ptyfd ttyfd
-          cmd.id = new ptytty_unix;
-
-          if (cmd.id->get ())
-            {
-              write (sock_fd, &cmd.id, sizeof (cmd.id));
-              ptys.push_back (cmd.id);
-
-              ptytty::send_fd (sock_fd, cmd.id->pty);
-              ptytty::send_fd (sock_fd, cmd.id->tty);
-
-              cmd.id->close_tty ();
-            }
-          else
-            {
-              delete cmd.id;
-              cmd.id = 0;
-              write (sock_fd, &cmd.id, sizeof (cmd.id));
-            }
-        }
-      else if (cmd.type == command::login)
-        {
-#if UTMP_SUPPORT
-          if (find (ptys.begin (), ptys.end (), cmd.id) != ptys.end ())
-            {
-              cmd.hostname[sizeof (cmd.hostname) - 1] = 0;
-              cmd.id->login (cmd.cmd_pid, cmd.login_shell, cmd.hostname);
-            }
-#endif
-        }
-      else if (cmd.type == command::destroy)
-        {
-          vector<ptytty *>::iterator pty = find (ptys.begin (), ptys.end (), cmd.id);
-
-          if (pty != ptys.end ())
-            {
-              delete *pty;
-              ptys.erase (pty);
-            }
-        }
-      else
-        break;
+      break;
     }
+    else if (cmd.type == command::get)
+    {
+      // -> id ptyfd ttyfd
+      cmd.id = new ptytty_unix;
+
+      if (cmd.id->get())
+      {
+        write(sock_fd, &cmd.id, sizeof (cmd.id));
+        ptys.push_back(cmd.id);
+
+        ptytty::send_fd(sock_fd, cmd.id->pty);
+        ptytty::send_fd(sock_fd, cmd.id->tty);
+
+        cmd.id->close_tty();
+      } else {
+        delete cmd.id;
+        cmd.id = nullptr;
+        write(sock_fd, &cmd.id, sizeof (cmd.id));
+      }
+    }
+    else if (cmd.type == command::login)
+    {
+#if UTMP_SUPPORT
+      if (std::find(std::begin(ptys), std::end(ptys), cmd.id) != std::end(ptys))
+      {
+        cmd.hostname[sizeof(cmd.hostname) - 1] = 0;
+        cmd.id->login(cmd.cmd_pid, cmd.login_shell, cmd.hostname);
+      }
+#endif
+    }
+    else if (cmd.type == command::destroy)
+    {
+      const auto it = std::find(std::begin(ptys), std::end(ptys), cmd.id);
+
+      if (it != std::end(ptys))
+      {
+        delete *it;
+        ptys.erase(it);
+      }
+    } else {
+      break;
+    }
+  }
 
   // destroy all ptys
-  for (vector<ptytty *>::iterator i = ptys.end (); i-- > ptys.begin (); )
-    delete *i;
+  for (auto& pty : ptys)
+  {
+    delete pty;
+  }
 }
 
 void

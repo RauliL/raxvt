@@ -40,6 +40,7 @@
 #include "raxvt/display.hpp"
 #include "raxvt/utils.hpp"
 
+#include <algorithm>
 #include <limits>
 #include <csignal>
 #include <termios.h>
@@ -207,7 +208,12 @@ rxvt_term::emergency_cleanup ()
 
 rxvt_term::~rxvt_term()
 {
-  termlist.erase (find (termlist.begin (), termlist.end(), this));
+  const auto it = std::find(std::begin(termlist), std::end(termlist), this);
+
+  if (it != std::end(termlist))
+  {
+    termlist.erase(it);
+  }
 
   emergency_cleanup ();
 
