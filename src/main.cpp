@@ -633,7 +633,7 @@ rxvt_term::window_calc (unsigned int newwidth, unsigned int newheight)
           if (!w)
             rxvt_fatal ("illegal window geometry (width and height must be non-zero), aborting.\n");
 
-          ncol = clamp (w, 1, std::numeric_limits<int16_t>::max ());
+          ncol = raxvt::utils::clamp<int>(w, 1, std::numeric_limits<std::int16_t>::max());
           szHint.flags |= USSize;
         }
 
@@ -642,7 +642,7 @@ rxvt_term::window_calc (unsigned int newwidth, unsigned int newheight)
           if (!h)
             rxvt_fatal ("illegal window geometry (width and height must be non-zero), aborting.\n");
 
-          nrow = clamp (h, 1, std::numeric_limits<int16_t>::max ());
+          nrow = raxvt::utils::clamp<int>(h, 1, std::numeric_limits<std::int16_t>::max());
           szHint.flags |= USSize;
         }
 
@@ -706,7 +706,7 @@ rxvt_term::window_calc (unsigned int newwidth, unsigned int newheight)
     }
   else
     {
-      min_it (width, max_width);
+      width = std::min<int>(width, max_width);
       szHint.width = szHint.base_width + width;
     }
 
@@ -717,7 +717,7 @@ rxvt_term::window_calc (unsigned int newwidth, unsigned int newheight)
     }
   else
     {
-      min_it (height, max_height);
+      height = std::min<int>(height, max_height);
       szHint.height = szHint.base_height + height;
     }
 

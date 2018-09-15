@@ -26,6 +26,7 @@
 #include "rxvt.h"
 
 #include "raxvt/display.hpp"
+#include "raxvt/utils.hpp"
 
 #if HAVE_IMG
 
@@ -671,7 +672,7 @@ rxvt_img::muladd (nv mul, nv add)
 ecb_noinline static void
 extract (int32_t cl0, int32_t cl1, int32_t &c, unsigned short &xc)
 {
-  int32_t x = clamp (c, cl0, cl1);
+  int32_t x = raxvt::utils::clamp(c, cl0, cl1);
   c -= x;
   xc = x;
 }
@@ -841,9 +842,9 @@ rxvt_img::transform (const nv *matrix)
       nv v;
 
       v = m.apply1 (i, 0+x, 0+y);         rmin [i] =            rmax [i] = v;
-      v = m.apply1 (i, w+x, 0+y); min_it (rmin [i], v); max_it (rmax [i],  v);
-      v = m.apply1 (i, 0+x, h+y); min_it (rmin [i], v); max_it (rmax [i],  v);
-      v = m.apply1 (i, w+x, h+y); min_it (rmin [i], v); max_it (rmax [i],  v);
+      v = m.apply1 (i, w+x, 0+y); rmin[i] = std::min(rmin [i], v); rmax[i] = std::max(rmax [i],  v);
+      v = m.apply1 (i, 0+x, h+y); rmin[i] = std::min(rmin [i], v); rmax[i] = std::max(rmax [i],  v);
+      v = m.apply1 (i, w+x, h+y); rmin[i] = std::min(rmin [i], v); rmax[i] = std::max(rmax [i],  v);
     }
 
   float sx = rmin [0] - x;
@@ -937,36 +938,35 @@ rxvt_img::tint (const rgba &c)
   return cc;
 }
 
-rxvt_img *
+rxvt_img*
 rxvt_img::shade (nv factor, rgba c)
 {
-  clamp_it (factor, -1., 1.);
-  factor++;
+  rxvt_img* img;
+
+  factor = raxvt::utils::clamp(factor, -1.0, 1.0) + 1;
 
   if (factor > 1)
-    {
-      c.r = c.r * (2 - factor);
-      c.g = c.g * (2 - factor);
-      c.b = c.b * (2 - factor);
-    }
-  else
-    {
-      c.r = c.r * factor;
-      c.g = c.g * factor;
-      c.b = c.b * factor;
-    }
+  {
+    c.r = c.r * (2 - factor);
+    c.g = c.g * (2 - factor);
+    c.b = c.b * (2 - factor);
+  } else {
+    c.r = c.r * factor;
+    c.g = c.g * factor;
+    c.b = c.b * factor;
+  }
 
-  rxvt_img *img = this->tint (c);
+  img = this->tint(c);
 
   if (factor > 1)
-    {
-      c.a = 0xffff;
-      c.r =
-      c.g =
-      c.b = 0xffff * (factor - 1);
+  {
+    c.a = 0xffff;
+    c.r =
+    c.g =
+    c.b = 0xffff * (factor - 1);
 
-      img->brightness (c.r, c.g, c.b, c.a);
-    }
+    img->brightness(c.r, c.g, c.b, c.a);
+  }
 
   return img;
 }

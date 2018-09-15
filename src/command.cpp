@@ -57,6 +57,7 @@
 #endif
 
 #include "raxvt/display.hpp"
+#include "raxvt/utils.hpp"
 
 #include <signal.h>
 
@@ -207,10 +208,10 @@ rxvt_term::iso14755_51 (unicode_t ch, rend_t r, int x, int y, int y2)
     {
       auto f = (*fs)[fs->find_font_idx (chr[i])];
       fname[i] = rxvt_utf8towcs (f->name);
-      max_it (width, wcswidth (fname[i], wcslen (fname[i])));
+      width = std::max(width, wcswidth(fname[i], std::wcslen(fname[i])));
     }
 
-  max_it(width, std::strlen(attr));
+  width = std::max(width, static_cast<int>(std::strlen(attr)));
 
   if (y >= 0)
     {
@@ -720,7 +721,7 @@ rxvt_term::key_press (XKeyEvent &ev)
 #else
               lnsppg = nrow * 4 / 5;
 #endif
-              max_it (lnsppg, 1);
+              lnsppg = std::max(lnsppg, 1);
 
               if (keysym == XK_Prior)
                 {
@@ -1659,11 +1660,10 @@ rxvt_term::x_cb (XEvent &ev)
                             dist = ev.xbutton.y - (int_bwidth + vt_height);
                           }
 
-                        scroll_selection_lines = Pixel2Height (dist)
-                                                 / SELECTION_SCROLL_LINE_SPEEDUP
-                                                 + 1;
-                        min_it (scroll_selection_lines,
-                                SELECTION_SCROLL_MAX_LINES);
+                        scroll_selection_lines = std::min(
+                          Pixel2Height(dist) / SELECTION_SCROLL_LINE_SPEEDUP + 1,
+                          SELECTION_SCROLL_MAX_LINES
+                        );
                         scroll_selection_lines *= scroll_selection_dir;
                       }
                     else
@@ -2206,7 +2206,7 @@ rxvt_term::button_release (XButtonEvent &ev)
               if (ev.state & ControlMask)
                 {
                   mouse_slip_wheel_speed += dirn;
-                  clamp_it (mouse_slip_wheel_speed, -nrow, nrow);
+                  mouse_slip_wheel_speed = raxvt::utils::clamp(mouse_slip_wheel_speed, -nrow, nrow);
 
                   if (!slip_wheel_ev.is_active ())
                     slip_wheel_ev.start (SCROLLBAR_CONTINUOUS_DELAY, SCROLLBAR_CONTINUOUS_DELAY);
@@ -4102,9 +4102,10 @@ rxvt_term::tt_write_ (const char *data, unsigned int len)
 
   if (v_buflen == 0)
     {
-      auto written = write(pty->pty, data, std::min(len, MAX_PTY_WRITE));
-
-      max_it(written, 0);
+      auto written = std::max<ssize_t>(
+        ::write(pty->pty, data, std::min(len, MAX_PTY_WRITE)),
+        0
+      );
 
       if (written == len)
         return;

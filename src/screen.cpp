@@ -30,6 +30,7 @@
 #include "rxvtperl.h"           /* NECESSARY */
 
 #include "raxvt/display.hpp"
+#include "raxvt/utils.hpp"
 
 static inline void
 fill_text (char32_t* start, char32_t value, int len)
@@ -417,8 +418,8 @@ rxvt_term::scr_reset ()
           term_start = 0;
         }
 
-      clamp_it (screen.cur.row, 0, nrow - 1);
-      clamp_it (screen.cur.col, 0, ncol - 1);
+      screen.cur.row = raxvt::utils::clamp(screen.cur.row, 0, nrow - 1);
+      screen.cur.col = raxvt::utils::clamp(screen.cur.col, 0, ncol - 1);
     }
 
   for (int row = nrow; row--; )
@@ -533,25 +534,29 @@ rxvt_term::scr_cursor (cursor_mode mode)
     }
 
   /* boundary check in case screen size changed between SAVE and RESTORE */
-  min_it (s->cur.row, nrow - 1);
-  min_it (s->cur.col, ncol - 1);
+  s->cur.row = std::min(s->cur.row, nrow - 1);
+  s->cur.col = std::min(s->cur.col, ncol - 1);
   assert (s->cur.row >= 0);
   assert (s->cur.col >= 0);
 }
 
 void
-rxvt_term::scr_swap_screen ()
+rxvt_term::scr_swap_screen()
 {
   if (!get_option(Opt_secondaryScreen))
+  {
     return;
+  }
 
-  for (int i = prev_nrow; i--; )
-    std::swap(ROW(i), swap_buf [i]);
+  for (int i = prev_nrow; i--;)
+  {
+    std::swap(ROW(i), swap_buf[i]);
+  }
 
   std::swap(screen.cur, swap.cur);
 
-  screen.cur.row = clamp (screen.cur.row, 0, prev_nrow - 1);
-  screen.cur.col = clamp (screen.cur.col, 0, prev_ncol - 1);
+  screen.cur.row = raxvt::utils::clamp(screen.cur.row, 0, prev_nrow - 1);
+  screen.cur.col = raxvt::utils::clamp(screen.cur.col, 0, prev_ncol - 1);
 }
 
 /* ------------------------------------------------------------------------- */
@@ -668,7 +673,7 @@ rxvt_term::scr_scroll_text (int row1, int row2, int count)
       && row1 == 0
       && (current_screen == PRIMARY || get_option(Opt_secondaryScroll)))
     {
-      min_it (count, total_rows - (nrow - (row2 + 1)));
+      count = std::min(count, total_rows - (nrow - (row2 + 1)));
 
       top_row = std::max(top_row - count, -saveLines);
 
@@ -771,7 +776,7 @@ rxvt_term::scr_scroll_text (int row1, int row2, int count)
 
       int rows = row2 - row1 + 1;
 
-      min_it (count, rows);
+      count = std::min(count, rows);
 
       line_t *temp_buf = rxvt_temp_buf<line_t> (rows);
 
@@ -818,7 +823,7 @@ rxvt_term::scr_add_lines (const wchar_t *str, int len, int minlines)
   if (minlines > 0)
     {
       minlines += screen.cur.row - screen.bscroll;
-      min_it (minlines, screen.cur.row - top_row);
+      minlines = std::min(minlines, screen.cur.row - top_row);
 
       if (minlines > 0
           && screen.tscroll == 0
@@ -849,7 +854,7 @@ rxvt_term::scr_add_lines (const wchar_t *str, int len, int minlines)
       if (ecb_unlikely (c < 0x20))
         if (c == C0_LF)
           {
-            max_it (line->l, screen.cur.col);
+            line->l = std::max(line->l, screen.cur.col);
 
             screen.flags &= ~Screen_WrapNext;
 
@@ -863,7 +868,7 @@ rxvt_term::scr_add_lines (const wchar_t *str, int len, int minlines)
           }
         else if (c == C0_CR)
           {
-            max_it (line->l, screen.cur.col);
+            line->l = std::max(line->l, screen.cur.col);
 
             screen.flags &= ~Screen_WrapNext;
             screen.cur.col = 0;
@@ -1040,7 +1045,7 @@ end_of_line:
 #endif
     }
 
-  max_it (line->l, screen.cur.col);
+  line->l = std::max(line->l, screen.cur.col);
 
   assert (screen.cur.row >= 0);
 }
@@ -1200,8 +1205,11 @@ rxvt_term::scr_gotorc (int row, int col, int relative)
   want_refresh = 1;
   ZERO_SCROLLBACK ();
 
-  screen.cur.col = relative & C_RELATIVE ? screen.cur.col + col : col;
-  clamp_it (screen.cur.col, 0, ncol - 1);
+  screen.cur.col = raxvt::utils::clamp(
+    relative & C_RELATIVE ? screen.cur.col + col : col,
+    0,
+    ncol - 1
+  );
 
   screen.flags &= ~Screen_WrapNext;
 
@@ -1229,14 +1237,13 @@ rxvt_term::scr_gotorc (int row, int col, int relative)
       if (screen.flags & Screen_Relative)
         {
           /* relative origin mode */
-          screen.cur.row = row + screen.tscroll;
-          min_it (screen.cur.row, screen.bscroll);
+          screen.cur.row = std::min(row + screen.tscroll, screen.bscroll);
         }
       else
         screen.cur.row = row;
     }
 
-  clamp_it (screen.cur.row, 0, nrow - 1);
+  screen.cur.row = raxvt::utils::clamp(screen.cur.row, 0, nrow - 1);
 }
 
 /* ------------------------------------------------------------------------- */
@@ -1257,7 +1264,7 @@ rxvt_term::scr_index (enum page_dirn direction)
   else
     screen.cur.row += direction;
 
-  clamp_it (screen.cur.row, 0, nrow - 1);
+  screen.cur.row = raxvt::utils::clamp(screen.cur.row, 0, nrow - 1);
   selection_check (0);
 }
 
@@ -1295,7 +1302,7 @@ rxvt_term::scr_erase_line (int mode)
       case 0:                     /* erase to end of line */
         col = screen.cur.col;
         num = ncol - col;
-        min_it (line.l, col);
+        line.l = std::min<tlen_t_>(line.l, col);
 
         if (ROWCOL_IN_ROW_AT_OR_AFTER (selection.beginning, screen.cur)
             || ROWCOL_IN_ROW_AT_OR_AFTER (selection.end, screen.cur))
@@ -1374,7 +1381,7 @@ rxvt_term::scr_erase_screen (int mode)
   if (row >= nrow) /* Out Of Bounds */
     return;
 
-  min_it (num, nrow - row);
+  num = std::min(num, nrow - row);
 
   if (rstyle & (RS_Blink | RS_RVid | RS_Uline))
     ren = (rend_t) ~RS_None;
@@ -1508,7 +1515,7 @@ rxvt_term::scr_insdel_chars (int count, int insdel)
   scr_do_wrap ();
 
   selection_check (1);
-  min_it (count, ncol - screen.cur.col);
+  count = std::min(count, ncol - screen.cur.col);
 
   int row = screen.cur.row;
 
@@ -1610,8 +1617,8 @@ rxvt_term::scr_insdel_chars (int count, int insdel)
 void ecb_cold
 rxvt_term::scr_scroll_region (int top, int bot)
 {
-  max_it (top, 0);
-  min_it (bot, nrow - 1);
+  top = std::max(top, 0);
+  bot = std::min(bot, nrow - 1);
 
   if (top > bot)
     return;
@@ -1858,8 +1865,8 @@ rxvt_term::scr_expose (int x, int y, int ewidth, int eheight, bool refresh)
   /* sanity checks */
   for (i = PART_BEG; i < RC_COUNT; i++)
     {
-      min_it (rc[i].col, ncol - 1);
-      min_it (rc[i].row, nrow - 1);
+      rc[i].col = std::min(rc[i].col, ncol - 1);
+      rc[i].row = std::min(rc[i].row, nrow - 1);
     }
 
   for (i = rc[PART_BEG].row; i <= rc[PART_END].row; i++)
@@ -1907,7 +1914,7 @@ rxvt_term::scr_page (int nlines)
 bool
 rxvt_term::scr_changeview (int new_view_start)
 {
-  clamp_it (new_view_start, top_row, 0);
+  new_view_start = raxvt::utils::clamp(new_view_start, top_row, 0);
 
   if (new_view_start == view_start)
     return false;
@@ -2813,7 +2820,9 @@ rxvt_term::selection_make (Time tm)
       col = std::max(col, 0);
 
       if (row == selection.end.row)
-        min_it (end_col, selection.end.col);
+      {
+        end_col = std::min(end_col, selection.end.col);
+      }
 
       t = ROW(row).t + col;
 
@@ -2958,8 +2967,8 @@ rxvt_term::selection_start_colrow (int col, int row)
   mark.row = row + view_start;
   mark.col = col;
 
-  mark.row = clamp(mark.row, top_row, nrow - 1);
-  mark.col = clamp(mark.col, 0, ncol - 1);
+  mark.row = raxvt::utils::clamp(mark.row, top_row, nrow - 1);
+  mark.col = raxvt::utils::clamp(mark.col, 0, ncol - 1);
 
   while (mark.col > 0 && ROW(mark.row).t[mark.col] == NOCHAR)
   {
@@ -3078,8 +3087,8 @@ rxvt_term::selection_delimit_word (enum page_dirn dirn, const raxvt::coordinates
 void ecb_cold
 rxvt_term::selection_extend(int x, int y, int flag)
 {
-  const int col = clamp(Pixel2Col(x), 0, ncol);
-  const int row = clamp(Pixel2Row(y), 0, nrow - 1);
+  const int col = raxvt::utils::clamp(Pixel2Col(x), 0, ncol);
+  const int row = raxvt::utils::clamp(Pixel2Row(y), 0, nrow - 1);
 
   /*
   * If we're selecting characters (single click) then we must check first
@@ -3572,11 +3581,11 @@ rxvt_term::scr_overlay_new (int x, int y, int w, int h)
   if (y < 0) y = nrow - h;
 
   // make space for border
-  w += 2; min_it (w, ncol);
-  h += 2; min_it (h, nrow);
+  w += 2; w = std::min(w, ncol);
+  h += 2; h = std::min(h, nrow);
 
-  x -= 1; clamp_it (x, 0, ncol - w);
-  y -= 1; clamp_it (y, 0, nrow - h);
+  x -= 1; x = raxvt::utils::clamp(x, 0, ncol - w);
+  y -= 1; y = raxvt::utils::clamp(y, 0, nrow - h);
 
   ov.x = x; ov.y = y;
   ov.w = w; ov.h = h;

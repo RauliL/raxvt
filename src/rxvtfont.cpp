@@ -425,7 +425,8 @@ rxvt_font_default::draw (rxvt_drawable &d, int x, int y,
 #if ENABLE_COMBINING
       else if (IS_COMPOSE (t) && (cc = rxvt_composite[t]))
         {
-          min_it (width, 2); // we only support wcwidth up to 2
+          // We only support wcwidth up to 2.
+          width = std::min(width, 2);
 
           char32_t chrs[2];
           chrs [1] = NOCHAR;
@@ -1668,7 +1669,9 @@ rxvt_fontset::find_font_idx (unicode_t unicode)
             goto next_font;
 
           if (prop.ascent != rxvt_fontprop::unset)
-            max_it (f->ascent, prop.ascent);
+          {
+            f->ascent = std::max(f->ascent, prop.ascent);
+          }
         }
 
       if (f->cs == CS_UNKNOWN)

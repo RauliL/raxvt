@@ -8,13 +8,6 @@
 
 #include "emman.h"
 
-// various utility functions
-template<typename T, typename U> static inline void min_it (T &a, U b) { a = a < (T)b ? a : (T)b; }
-template<typename T, typename U> static inline void max_it (T &a, U b) { a = a > (T)b ? a : (T)b; }
-
-template<typename T, typename U, typename V> static inline T    clamp    (T  v, U a, V b) { return v < (T)a ? a : v >(T)b ? b : v; }
-template<typename T, typename U, typename V> static inline void clamp_it (T &v, U a, V b) {    v = v < (T)a ? a : v >(T)b ? b : v; }
-
 // linear interpolation
 template<typename T, typename U, typename P>
 static inline T

@@ -41,6 +41,7 @@
 #include "rxvtperl.h"
 
 #include "raxvt/display.hpp"
+#include "raxvt/utils.hpp"
 
 #include "perlxsi.c"
 
@@ -1102,18 +1103,18 @@ GET_BASEBG (int rend)
         RETVAL
 
 int
-SET_FGCOLOR (int rend, int new_color)
+SET_FGCOLOR(int rend, int new_color)
 	CODE:
-        RETVAL = SET_FGCOLOR (rend, clamp (new_color, 0, TOTAL_COLORS - 1));
+    RETVAL = SET_FGCOLOR(rend, raxvt::utils::clamp(new_color, 0, TOTAL_COLORS - 1));
 	OUTPUT:
-        RETVAL
+    RETVAL
 
 int
 SET_BGCOLOR (int rend, int new_color)
 	CODE:
-        RETVAL = SET_BGCOLOR (rend, clamp (new_color, 0, TOTAL_COLORS - 1));
+    RETVAL = SET_BGCOLOR(rend, raxvt::utils::clamp(new_color, 0, TOTAL_COLORS - 1));
 	OUTPUT:
-        RETVAL
+    RETVAL
 
 int
 GET_CUSTOM (int rend)
@@ -1972,8 +1973,8 @@ rxvt_term::screen_cur (...)
                   }
               }
 
-            clamp_it (rc.col, 0, THIS->ncol);
-            clamp_it (rc.row, THIS->top_row, THIS->nrow - 1);
+            rc.col = raxvt::utils::clamp(rc.col, 0, THIS->ncol);
+            rc.row = raxvt::utils::clamp(rc.row, THIS->top_row, THIS->nrow - 1);
 
             if (ix)
               {

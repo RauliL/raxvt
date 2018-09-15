@@ -706,7 +706,7 @@ struct line_t
 
    void touch (int col)
    {
-     max_it (l, col);
+     l = std::max(l, col);
      touch ();
    }
 };
