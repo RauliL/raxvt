@@ -79,7 +79,7 @@ private:
 
 private:
   uint16_t hash[KEYSYM_HASH_BUCKETS];
-  vector<keysym_t *> keymap;
+  std::vector<keysym_t *> keymap;
 };
 
 #endif /* KEYSYM_RESOURCE */

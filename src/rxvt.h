@@ -746,7 +746,7 @@ struct compose_char
 
 class rxvt_composite_vec
 {
-  vector<compose_char> v;
+  std::vector<compose_char> v;
 public:
   char32_t compose (unicode_t c1, unicode_t c2 = NOCHAR);
   int expand (unicode_t c, wchar_t *r);

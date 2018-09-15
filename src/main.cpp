@@ -99,9 +99,15 @@ char32_t rxvt_composite_vec::compose(unicode_t c1, unicode_t c2)
     }
 
   // check to see whether this combination already exists otherwise
-  for (cc = v.begin (); cc < v.end (); cc++)
-    if (cc->c1 == c1 && cc->c2 == c2)
-      return COMPOSE_LO + (cc - v.begin ());
+  for (std::size_t i = 0; i < v.size(); ++i)
+  {
+    const auto& cc1 = v[i];
+
+    if (cc1.c1 == c1 && cc1.c2 == c2)
+    {
+      return COMPOSE_LO + i;
+    }
+  }
 
   // allocate a new combination
   if (v.size () == COMPOSE_HI - COMPOSE_LO + 1)

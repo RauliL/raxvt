@@ -220,7 +220,7 @@ keyboard_manager::register_done ()
     }
 
   // and allocate just enough space
-  simplevec <keysym_t *> sorted_keymap (index, 0);
+  std::vector<keysym_t*> sorted_keymap(index, 0);
 
   std::memset(hash_bucket_size, 0, sizeof(hash_bucket_size));
 
@@ -243,7 +243,7 @@ keyboard_manager::register_done ()
       ++hash_bucket_size [hashkey];
     }
 
-  keymap.swap (sorted_keymap);
+  std::swap(keymap, sorted_keymap);
 
 #ifndef NDEBUG
   // check for invariants

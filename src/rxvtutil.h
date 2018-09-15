@@ -5,7 +5,6 @@
 #include <cstring>
 
 #include "./ecb.h"
-#include "./estl.h"
 
 #include "emman.h"
 
