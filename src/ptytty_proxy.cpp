@@ -21,7 +21,6 @@
  *---------------------------------------------------------------------*/
 #include "config.h"
 #include "ptytty.h"
-#include "estl.h"
 #include "rxvt.h"
 
 #include <algorithm>

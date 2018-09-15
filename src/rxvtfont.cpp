@@ -1455,12 +1455,15 @@ rxvt_fontset::clear ()
     font.reset();
   }
 
-  for (pagemap **p = fmap.begin (); p != fmap.end (); p++)
-    delete *p;
+  for (auto& p : fmap)
+  {
+    delete p;
+  }
 
-  free (fontdesc); fontdesc = 0;
+  std::free(fontdesc);
+  fontdesc = nullptr;
 
-  fonts.clear ();
+  fonts.clear();
 
   fallback = fallback_fonts;
 }

@@ -110,7 +110,7 @@ private:
     unsigned char cppsucks[256];
     unsigned char &operator [](int i) { return cppsucks [i]; };
   };
-  vector<pagemap *> fmap;
+  std::vector<pagemap *> fmap;
 
   void clear ();
   std::shared_ptr<rxvt_font> new_font(const char *name, codeset cs);
