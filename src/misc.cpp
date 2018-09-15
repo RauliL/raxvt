@@ -202,7 +202,7 @@ rxvt_utf8towcs(const char* str, int len)
  * Print an error message
  */
 void
-rxvt_vlog (const char *fmt, va_list arg_ptr) NOTHROW
+rxvt_vlog (const char *fmt, va_list arg_ptr)
 {
   char msg[1024];
 
@@ -215,7 +215,7 @@ rxvt_vlog (const char *fmt, va_list arg_ptr) NOTHROW
 }
 
 void
-rxvt_log (const char *fmt,...) NOTHROW
+rxvt_log (const char *fmt,...)
 {
   va_list arg_ptr;
 
@@ -228,7 +228,7 @@ rxvt_log (const char *fmt,...) NOTHROW
  * Print an error message
  */
 void
-rxvt_warn (const char *fmt,...) NOTHROW
+rxvt_warn (const char *fmt,...)
 {
   va_list arg_ptr;
 
@@ -240,7 +240,7 @@ rxvt_warn (const char *fmt,...) NOTHROW
 }
 
 void
-rxvt_fatal (const char *fmt,...) THROW ((class rxvt_failure_exception))
+rxvt_fatal (const char *fmt,...)
 {
   va_list arg_ptr;
 
@@ -254,7 +254,7 @@ rxvt_fatal (const char *fmt,...) THROW ((class rxvt_failure_exception))
 }
 
 void
-rxvt_exit_failure () THROW ((class rxvt_failure_exception))
+rxvt_exit_failure ()
 {
   static class rxvt_failure_exception rxvt_failure_exception;
   throw (rxvt_failure_exception);

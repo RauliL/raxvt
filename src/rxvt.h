@@ -122,13 +122,13 @@ wchar_t *        rxvt_mbstowcs                    (const char *str, int len = -1
 char *           rxvt_wcstoutf8                   (const wchar_t *str, int len = -1);
 wchar_t *        rxvt_utf8towcs                   (const char *str, int len = -1);
 
-void             rxvt_vlog                        (const char *fmt, va_list arg_ptr) NOTHROW;
-void             rxvt_log                         (const char *fmt,...) NOTHROW;
-void             rxvt_warn                        (const char *fmt,...) NOTHROW;
+void             rxvt_vlog                        (const char *fmt, va_list arg_ptr);
+void             rxvt_log                         (const char *fmt,...);
+void             rxvt_warn                        (const char *fmt,...);
 ecb_noreturn ecb_cold
-void             rxvt_fatal                       (const char *fmt, ...) THROW ((class rxvt_failure_exception));
+void             rxvt_fatal                       (const char *fmt, ...);
 ecb_noreturn ecb_cold
-void             rxvt_exit_failure                () THROW ((class rxvt_failure_exception));
+void             rxvt_exit_failure                ();
 
 template<typename T>
 static inline T*
@@ -1033,14 +1033,14 @@ struct rxvt_term : rxvt_vars, rxvt_screen
 #if ENABLE_OVERLAY
   overlay_base ov;
 
-  void scr_swap_overlay () NOTHROW;
-  void scr_overlay_new (int x, int y, int w, int h) NOTHROW;
-  void scr_overlay_off () NOTHROW;
+  void scr_swap_overlay ();
+  void scr_overlay_new (int x, int y, int w, int h);
+  void scr_overlay_off ();
   void scr_overlay_set (int x, int y,
                         char32_t text,
-                        rend_t rend = OVERLAY_RSTYLE) NOTHROW;
-  void scr_overlay_set (int x, int y, const char *s) NOTHROW;
-  void scr_overlay_set (int x, int y, const wchar_t *s) NOTHROW;
+                        rend_t rend = OVERLAY_RSTYLE);
+  void scr_overlay_set (int x, int y, const char *s);
+  void scr_overlay_set (int x, int y, const wchar_t *s);
 #endif
 
   std::vector<void*> allocated;           // free these memory blocks with free()
@@ -1092,7 +1092,7 @@ struct rxvt_term : rxvt_vars, rxvt_screen
 
   long vt_emask, vt_emask_perl, vt_emask_xim, vt_emask_mouse;
 
-  void vt_select_input () const NOTHROW
+  void vt_select_input () const
   {
     XSelectInput (dpy, vt, vt_emask | vt_emask_perl | vt_emask_xim | vt_emask_mouse);
   }
@@ -1169,7 +1169,7 @@ struct rxvt_term : rxvt_vars, rxvt_screen
   void im_destroy ();
   void im_cb (); im_watcher im_ev;
   void im_set_size (XRectangle &size);
-  void im_set_position (XPoint &pos) NOTHROW;
+  void im_set_position (XPoint &pos);
   void im_set_color (unsigned long &fg, unsigned long &bg);
   void im_set_preedit_area (XRectangle &preedit_rect, XRectangle &status_rect, const XRectangle &needed_rect);
 
@@ -1183,10 +1183,10 @@ struct rxvt_term : rxvt_vars, rxvt_screen
   void key_press (XKeyEvent &ev);
   void key_release (XKeyEvent &ev);
 
-  wchar_t next_char () NOTHROW;
-  wchar_t cmd_getc () THROW ((class out_of_input));
-  std::uint32_t next_octet () NOTHROW;
-  std::uint32_t cmd_get8 () THROW ((class out_of_input));
+  wchar_t next_char ();
+  wchar_t cmd_getc ();
+  std::uint32_t next_octet ();
+  std::uint32_t cmd_get8 ();
 
   void cmd_parse ();
   void mouse_report (XButtonEvent &ev);
@@ -1271,7 +1271,7 @@ struct rxvt_term : rxvt_vars, rxvt_screen
 
   // screen.C
 
-  int fgcolor_of (rend_t r) const NOTHROW
+  int fgcolor_of (rend_t r) const
   {
     int base = GET_BASEFG (r);
 #ifndef NO_BRIGHTCOLOR
@@ -1285,7 +1285,7 @@ struct rxvt_term : rxvt_vars, rxvt_screen
     return base;
   }
 
-  int bgcolor_of (rend_t r) const NOTHROW
+  int bgcolor_of (rend_t r) const
   {
     int base = GET_BASEBG (r);
 #ifndef NO_BRIGHTCOLOR
@@ -1300,89 +1300,89 @@ struct rxvt_term : rxvt_vars, rxvt_screen
   }
 
   // modifies first argument(!)
-  void tt_paste (char *data, unsigned int len) NOTHROW;
-  void paste (char *data, unsigned int len) NOTHROW;
-  void scr_alloc () NOTHROW;
-  void scr_blank_line (line_t &l, unsigned int col, unsigned int width, rend_t efs) const NOTHROW;
-  void scr_blank_screen_mem (line_t &l, rend_t efs) const NOTHROW;
-  void scr_kill_char (line_t &l, int col) const NOTHROW;
+  void tt_paste (char *data, unsigned int len);
+  void paste (char *data, unsigned int len);
+  void scr_alloc ();
+  void scr_blank_line (line_t &l, unsigned int col, unsigned int width, rend_t efs) const;
+  void scr_blank_screen_mem (line_t &l, rend_t efs) const;
+  void scr_kill_char (line_t &l, int col) const;
   void scr_set_char_rend (line_t &l, int col, rend_t rend);
-  int scr_scroll_text (int row1, int row2, int count) NOTHROW;
+  int scr_scroll_text (int row1, int row2, int count);
   void copy_line (line_t &dst, line_t &src);
   void scr_reset ();
-  void scr_release () NOTHROW;
-  void scr_clear (bool really = false) NOTHROW;
-  void scr_refresh () NOTHROW;
-  bool scr_refresh_rend (rend_t mask, rend_t value) NOTHROW;
-  void scr_erase_screen (int mode) NOTHROW;
+  void scr_release ();
+  void scr_clear (bool really = false);
+  void scr_refresh ();
+  bool scr_refresh_rend (rend_t mask, rend_t value);
+  void scr_erase_screen (int mode);
 #if ENABLE_FRILLS
-  void scr_erase_savelines () NOTHROW;
-  void scr_backindex () NOTHROW;
-  void scr_forwardindex () NOTHROW;
+  void scr_erase_savelines ();
+  void scr_backindex ();
+  void scr_forwardindex ();
 #endif
-  void scr_touch (bool refresh) NOTHROW;
-  void scr_expose (int x, int y, int width, int height, bool refresh) NOTHROW;
-  void scr_recolor (bool refresh = true) NOTHROW;
-  void scr_remap_chars () NOTHROW;
-  void scr_remap_chars (line_t &l) NOTHROW;
+  void scr_touch (bool refresh);
+  void scr_expose (int x, int y, int width, int height, bool refresh);
+  void scr_recolor (bool refresh = true);
+  void scr_remap_chars ();
+  void scr_remap_chars (line_t &l);
 
   enum cursor_mode { SAVE, RESTORE };
 
   void scr_poweron ();
-  void scr_soft_reset () NOTHROW;
-  void scr_cursor (cursor_mode mode) NOTHROW;
-  void scr_do_wrap () NOTHROW;
-  void scr_swap_screen () NOTHROW;
+  void scr_soft_reset ();
+  void scr_cursor (cursor_mode mode);
+  void scr_do_wrap ();
+  void scr_swap_screen ();
   void scr_change_screen (int scrn);
-  void scr_color (unsigned int color, int fgbg) NOTHROW;
-  void scr_rendition (int set, int style) NOTHROW;
-  void scr_add_lines (const wchar_t *str, int len, int minlines = 0) NOTHROW;
-  void scr_backspace () NOTHROW;
-  void scr_tab (int count, bool ht = false) NOTHROW;
-  void scr_gotorc (int row, int col, int relative) NOTHROW;
-  void scr_index (enum page_dirn direction) NOTHROW;
-  void scr_erase_line (int mode) NOTHROW;
-  void scr_E () NOTHROW;
-  void scr_insdel_lines (int count, int insdel) NOTHROW;
-  void scr_insdel_chars (int count, int insdel) NOTHROW;
-  void scr_scroll_region (int top, int bot) NOTHROW;
-  void scr_cursor_visible (int mode) NOTHROW;
-  void scr_autowrap (int mode) NOTHROW;
-  void scr_relative_origin (int mode) NOTHROW;
-  void scr_insert_mode (int mode) NOTHROW;
-  void scr_set_tab (int mode) NOTHROW;
-  void scr_rvideo_mode (bool on) NOTHROW;
-  void scr_report_position () NOTHROW;
-  void scr_charset_choose (int set) NOTHROW;
-  void scr_charset_set (int set, unsigned int ch) NOTHROW;
-  void scr_move_to (int y, int len) NOTHROW;
-  bool scr_page (int nlines) NOTHROW;
-  bool scr_page (enum page_dirn direction, int nlines) NOTHROW
+  void scr_color (unsigned int color, int fgbg);
+  void scr_rendition (int set, int style);
+  void scr_add_lines (const wchar_t *str, int len, int minlines = 0);
+  void scr_backspace ();
+  void scr_tab (int count, bool ht = false);
+  void scr_gotorc (int row, int col, int relative);
+  void scr_index (enum page_dirn direction);
+  void scr_erase_line (int mode);
+  void scr_E ();
+  void scr_insdel_lines (int count, int insdel);
+  void scr_insdel_chars (int count, int insdel);
+  void scr_scroll_region (int top, int bot);
+  void scr_cursor_visible (int mode);
+  void scr_autowrap (int mode);
+  void scr_relative_origin (int mode);
+  void scr_insert_mode (int mode);
+  void scr_set_tab (int mode);
+  void scr_rvideo_mode (bool on);
+  void scr_report_position ();
+  void scr_charset_choose (int set);
+  void scr_charset_set (int set, unsigned int ch);
+  void scr_move_to (int y, int len);
+  bool scr_page (int nlines);
+  bool scr_page (enum page_dirn direction, int nlines)
   {
     return scr_page (direction * nlines);
   }
-  bool scr_changeview (int new_view_start) NOTHROW;
-  void scr_bell () NOTHROW;
-  void scr_printscreen (int fullhist) NOTHROW;
-  void scr_xor_rect (int beg_row, int beg_col, int end_row, int end_col, rend_t rstyle1, rend_t rstyle2) NOTHROW;
-  void scr_xor_span (int beg_row, int beg_col, int end_row, int end_col, rend_t rstyle) NOTHROW;
-  void scr_reverse_selection () NOTHROW;
-  void scr_dump (int fd) NOTHROW;
+  bool scr_changeview (int new_view_start);
+  void scr_bell ();
+  void scr_printscreen (int fullhist);
+  void scr_xor_rect (int beg_row, int beg_col, int end_row, int end_col, rend_t rstyle1, rend_t rstyle2);
+  void scr_xor_span (int beg_row, int beg_col, int end_row, int end_col, rend_t rstyle);
+  void scr_reverse_selection ();
+  void scr_dump (int fd);
 
-  void selection_check (int check_more) NOTHROW;
-  void selection_changed () NOTHROW; /* sets want_refresh, corrects coordinates */
-  void selection_request (Time tm, int selnum = Sel_Primary) NOTHROW;
-  void selection_clear (bool clipboard = false) NOTHROW;
+  void selection_check (int check_more);
+  void selection_changed (); /* sets want_refresh, corrects coordinates */
+  void selection_request (Time tm, int selnum = Sel_Primary);
+  void selection_clear (bool clipboard = false);
   void selection_make (Time tm);
-  bool selection_grab (Time tm, bool clipboard = false) NOTHROW;
-  void selection_start_colrow (int col, int row) NOTHROW;
-  void selection_delimit_word (enum page_dirn dirn, const raxvt::coordinates* mark, raxvt::coordinates* ret) NOTHROW;
-  void selection_extend_colrow (int32_t col, int32_t row, int button3, int buttonpress, int clickchange) NOTHROW;
-  void selection_remove_trailing_spaces () NOTHROW;
-  void selection_send (const XSelectionRequestEvent &rq) NOTHROW;
-  void selection_click (int clicks, int x, int y) NOTHROW;
-  void selection_extend (int x, int y, int flag) NOTHROW;
-  void selection_rotate (int x, int y) NOTHROW;
+  bool selection_grab (Time tm, bool clipboard = false);
+  void selection_start_colrow (int col, int row);
+  void selection_delimit_word (enum page_dirn dirn, const raxvt::coordinates* mark, raxvt::coordinates* ret);
+  void selection_extend_colrow (int32_t col, int32_t row, int button3, int buttonpress, int clickchange);
+  void selection_remove_trailing_spaces ();
+  void selection_send (const XSelectionRequestEvent &rq);
+  void selection_click (int clicks, int x, int y);
+  void selection_extend (int x, int y, int flag);
+  void selection_rotate (int x, int y);
 
   // settings.cpp
   const char* get_setting(int) const;

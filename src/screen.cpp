@@ -103,7 +103,7 @@ static void clear_selection(raxvt::selection& selection, bool all = false)
 
 /* Fill part/all of a line with blanks. */
 void
-rxvt_term::scr_blank_line (line_t &l, unsigned int col, unsigned int width, rend_t efs) const NOTHROW
+rxvt_term::scr_blank_line (line_t &l, unsigned int col, unsigned int width, rend_t efs) const
 {
   if (!l.valid ())
     {
@@ -130,7 +130,7 @@ rxvt_term::scr_blank_line (line_t &l, unsigned int col, unsigned int width, rend
 /* ------------------------------------------------------------------------- */
 /* Fill a full line with blanks - make sure it is allocated first */
 void
-rxvt_term::scr_blank_screen_mem (line_t &l, rend_t efs) const NOTHROW
+rxvt_term::scr_blank_screen_mem (line_t &l, rend_t efs) const
 {
   scr_blank_line (l, 0, ncol, efs);
 
@@ -140,7 +140,7 @@ rxvt_term::scr_blank_screen_mem (line_t &l, rend_t efs) const NOTHROW
 
 // nuke a single wide character at the given column
 void
-rxvt_term::scr_kill_char (line_t &l, int col) const NOTHROW
+rxvt_term::scr_kill_char (line_t &l, int col) const
 {
   // find begin
   while (col > 0 && l.t[col] == NOCHAR)
@@ -174,7 +174,7 @@ rxvt_term::scr_set_char_rend (line_t &l, int col, rend_t rend)
  * ------------------------------------------------------------------------- */
 
 void
-rxvt_term::scr_alloc () NOTHROW
+rxvt_term::scr_alloc ()
 {
   int tsize = sizeof (char32_t) * ncol;
   int rsize = sizeof (rend_t) * ncol;
@@ -447,7 +447,7 @@ rxvt_term::scr_reset ()
 }
 
 void ecb_cold
-rxvt_term::scr_release () NOTHROW
+rxvt_term::scr_release ()
 {
   chunk_free (chunk, chunk_size);
   chunk = 0;
@@ -476,7 +476,7 @@ rxvt_term::scr_poweron ()
 }
 
 void ecb_cold
-rxvt_term::scr_soft_reset () NOTHROW
+rxvt_term::scr_soft_reset ()
 {
   /* only affects modes, nothing drastic such as clearing the screen */
 #if ENABLE_OVERLAY
@@ -500,7 +500,7 @@ rxvt_term::scr_soft_reset () NOTHROW
  * XTERM_SEQ: Restore cursor: ESC 8
  */
 void
-rxvt_term::scr_cursor (cursor_mode mode) NOTHROW
+rxvt_term::scr_cursor (cursor_mode mode)
 {
   screen_t *s;
 
@@ -540,7 +540,7 @@ rxvt_term::scr_cursor (cursor_mode mode) NOTHROW
 }
 
 void
-rxvt_term::scr_swap_screen () NOTHROW
+rxvt_term::scr_swap_screen ()
 {
   if (!get_option(Opt_secondaryScreen))
     return;
@@ -603,7 +603,7 @@ rxvt_term::scr_change_screen (int scrn)
 
 // clear WrapNext indicator, solidifying position on next line
 void
-rxvt_term::scr_do_wrap () NOTHROW
+rxvt_term::scr_do_wrap ()
 {
   if (!(screen.flags & Screen_WrapNext))
     return;
@@ -623,7 +623,7 @@ rxvt_term::scr_do_wrap () NOTHROW
  * Change the colour for following text
  */
 void
-rxvt_term::scr_color (unsigned int color, int fgbg) NOTHROW
+rxvt_term::scr_color (unsigned int color, int fgbg)
 {
   if (!IN_RANGE_INC (color, minCOLOR, maxTermCOLOR24))
     color = fgbg;
@@ -639,7 +639,7 @@ rxvt_term::scr_color (unsigned int color, int fgbg) NOTHROW
  * Change the rendition style for following text
  */
 void
-rxvt_term::scr_rendition (int set, int style) NOTHROW
+rxvt_term::scr_rendition (int set, int style)
 {
   if (set)
     rstyle |= style;
@@ -656,7 +656,7 @@ rxvt_term::scr_rendition (int set, int style) NOTHROW
  * count negative ==> scroll down
  */
 int ecb_hot
-rxvt_term::scr_scroll_text (int row1, int row2, int count) NOTHROW
+rxvt_term::scr_scroll_text (int row1, int row2, int count)
 {
   if (count == 0 || (row1 > row2))
     return 0;
@@ -802,7 +802,7 @@ rxvt_term::scr_scroll_text (int row1, int row2, int count) NOTHROW
  * Add text given in <str> of length <len> to screen struct
  */
 void ecb_hot
-rxvt_term::scr_add_lines (const wchar_t *str, int len, int minlines) NOTHROW
+rxvt_term::scr_add_lines (const wchar_t *str, int len, int minlines)
 {
   if (len <= 0)               /* sanity */
     return;
@@ -1051,7 +1051,7 @@ end_of_line:
  * XTERM_SEQ: CTRL-H
  */
 void
-rxvt_term::scr_backspace () NOTHROW
+rxvt_term::scr_backspace ()
 {
   if (screen.cur.col == 0)
     {
@@ -1078,7 +1078,7 @@ rxvt_term::scr_backspace () NOTHROW
  * XTERM_SEQ: CTRL-I
  */
 void
-rxvt_term::scr_tab (int count, bool ht) NOTHROW
+rxvt_term::scr_tab (int count, bool ht)
 {
   int i, x;
 
@@ -1155,7 +1155,7 @@ rxvt_term::scr_tab (int count, bool ht) NOTHROW
  */
 #if !ENABLE_MINIMAL
 void ecb_cold
-rxvt_term::scr_backindex () NOTHROW
+rxvt_term::scr_backindex ()
 {
   if (screen.cur.col > 0)
     scr_gotorc (0, -1, R_RELATIVE | C_RELATIVE);
@@ -1172,7 +1172,7 @@ rxvt_term::scr_backindex () NOTHROW
  */
 #if !ENABLE_MINIMAL
 void ecb_cold
-rxvt_term::scr_forwardindex () NOTHROW
+rxvt_term::scr_forwardindex ()
 {
   if (screen.cur.col < ncol - 1)
     scr_gotorc (0, 1, R_RELATIVE | C_RELATIVE);
@@ -1195,7 +1195,7 @@ rxvt_term::scr_forwardindex () NOTHROW
  * Goto Row/Column
  */
 void
-rxvt_term::scr_gotorc (int row, int col, int relative) NOTHROW
+rxvt_term::scr_gotorc (int row, int col, int relative)
 {
   want_refresh = 1;
   ZERO_SCROLLBACK ();
@@ -1244,7 +1244,7 @@ rxvt_term::scr_gotorc (int row, int col, int relative) NOTHROW
  * direction should be UP or DN
  */
 void
-rxvt_term::scr_index (enum page_dirn direction) NOTHROW
+rxvt_term::scr_index (enum page_dirn direction)
 {
   want_refresh = 1;
   ZERO_SCROLLBACK ();
@@ -1270,7 +1270,7 @@ rxvt_term::scr_index (enum page_dirn direction) NOTHROW
  * extension: clear to right unless wrapped: ESC [ 3 K
  */
 void
-rxvt_term::scr_erase_line (int mode) NOTHROW
+rxvt_term::scr_erase_line (int mode)
 {
   unsigned int col, num;
 
@@ -1334,7 +1334,7 @@ rxvt_term::scr_erase_line (int mode) NOTHROW
  * XTERM_SEQ: Clear whole screen        : ESC [ 2 J
  */
 void
-rxvt_term::scr_erase_screen (int mode) NOTHROW
+rxvt_term::scr_erase_screen (int mode)
 {
   int num;
   int32_t row;
@@ -1415,7 +1415,7 @@ rxvt_term::scr_erase_screen (int mode) NOTHROW
 
 #if !ENABLE_MINIMAL
 void
-rxvt_term::scr_erase_savelines () NOTHROW
+rxvt_term::scr_erase_savelines ()
 {
   want_refresh = 1;
   ZERO_SCROLLBACK ();
@@ -1430,7 +1430,7 @@ rxvt_term::scr_erase_savelines () NOTHROW
  * XTERM_SEQ: Screen Alignment Test: ESC # 8
  */
 void ecb_cold
-rxvt_term::scr_E () NOTHROW
+rxvt_term::scr_E ()
 {
   rend_t fs;
 
@@ -1467,7 +1467,7 @@ rxvt_term::scr_E () NOTHROW
  * Insert/Delete <count> lines
  */
 void
-rxvt_term::scr_insdel_lines (int count, int insdel) NOTHROW
+rxvt_term::scr_insdel_lines (int count, int insdel)
 {
   int end;
 
@@ -1497,7 +1497,7 @@ rxvt_term::scr_insdel_lines (int count, int insdel) NOTHROW
  * Insert/Delete <count> characters from the current position
  */
 void
-rxvt_term::scr_insdel_chars (int count, int insdel) NOTHROW
+rxvt_term::scr_insdel_chars (int count, int insdel)
 {
   want_refresh = 1;
   ZERO_SCROLLBACK ();
@@ -1608,7 +1608,7 @@ rxvt_term::scr_insdel_chars (int count, int insdel) NOTHROW
  * XTERM_SEQ: Set region <top> - <bot> inclusive: ESC [ <top> ; <bot> r
  */
 void ecb_cold
-rxvt_term::scr_scroll_region (int top, int bot) NOTHROW
+rxvt_term::scr_scroll_region (int top, int bot)
 {
   max_it (top, 0);
   min_it (bot, nrow - 1);
@@ -1628,7 +1628,7 @@ rxvt_term::scr_scroll_region (int top, int bot) NOTHROW
  * XTERM_SEQ: Make cursor invisible: ESC [ ? 25 l
  */
 void ecb_cold
-rxvt_term::scr_cursor_visible (int mode) NOTHROW
+rxvt_term::scr_cursor_visible (int mode)
 {
   want_refresh = 1;
 
@@ -1645,7 +1645,7 @@ rxvt_term::scr_cursor_visible (int mode) NOTHROW
  * XTERM_SEQ: Unset Wraparound: ESC [ ? 7 l
  */
 void ecb_cold
-rxvt_term::scr_autowrap (int mode) NOTHROW
+rxvt_term::scr_autowrap (int mode)
 {
   if (mode)
     screen.flags |= Screen_Autowrap;
@@ -1664,7 +1664,7 @@ rxvt_term::scr_autowrap (int mode) NOTHROW
  * XTERM_SEQ: Set Relative: ESC [ ? 6 l
  */
 void ecb_cold
-rxvt_term::scr_relative_origin (int mode) NOTHROW
+rxvt_term::scr_relative_origin (int mode)
 {
   if (mode)
     screen.flags |= Screen_Relative;
@@ -1681,7 +1681,7 @@ rxvt_term::scr_relative_origin (int mode) NOTHROW
  * XTERM_SEQ: Set Replace mode: ESC [ ? 4 l
  */
 void ecb_cold
-rxvt_term::scr_insert_mode (int mode) NOTHROW
+rxvt_term::scr_insert_mode (int mode)
 {
   if (mode)
     screen.flags |= Screen_Insert;
@@ -1697,7 +1697,7 @@ rxvt_term::scr_insert_mode (int mode) NOTHROW
  * XTERM_SEQ: Clear all tabs             : ESC [ 3 g
  */
 void ecb_cold
-rxvt_term::scr_set_tab(int mode) NOTHROW
+rxvt_term::scr_set_tab(int mode)
 {
   if (mode < 0)
   {
@@ -1716,7 +1716,7 @@ rxvt_term::scr_set_tab(int mode) NOTHROW
  * XTERM_SEQ: Normal video : ESC [ ? 5 l
  */
 void
-rxvt_term::scr_rvideo_mode (bool on) NOTHROW
+rxvt_term::scr_rvideo_mode (bool on)
 {
   rvideo_mode = on;
 
@@ -1758,7 +1758,7 @@ rxvt_term::scr_rvideo_mode (bool on) NOTHROW
  * XTERM_SEQ: Report position: ESC [ 6 n
  */
 void ecb_cold
-rxvt_term::scr_report_position () NOTHROW
+rxvt_term::scr_report_position ()
 {
   tt_printf ("\033[%d;%dR", screen.cur.row + 1, screen.cur.col + 1);
 }
@@ -1775,7 +1775,7 @@ rxvt_term::scr_report_position () NOTHROW
  * XTERM_SEQ: Invoke G3 character set: ESC O
  */
 void ecb_cold
-rxvt_term::scr_charset_choose (int set) NOTHROW
+rxvt_term::scr_charset_choose (int set)
 {
   screen.charset = set;
 }
@@ -1789,7 +1789,7 @@ rxvt_term::scr_charset_choose (int set) NOTHROW
  * XTERM_SEQ: Set G3 character set: ESC + <C>
  */
 void
-rxvt_term::scr_charset_set (int set, unsigned int ch) NOTHROW
+rxvt_term::scr_charset_set (int set, unsigned int ch)
 {
   charsets[set] = (unsigned char)ch;
 }
@@ -1803,7 +1803,7 @@ rxvt_term::scr_charset_set (int set, unsigned int ch) NOTHROW
  * refresh matching text.
  */
 bool ecb_cold
-rxvt_term::scr_refresh_rend (rend_t mask, rend_t value) NOTHROW
+rxvt_term::scr_refresh_rend (rend_t mask, rend_t value)
 {
   bool found = false;
 
@@ -1832,7 +1832,7 @@ enum {
 };
 
 void ecb_hot
-rxvt_term::scr_expose (int x, int y, int ewidth, int eheight, bool refresh) NOTHROW
+rxvt_term::scr_expose (int x, int y, int ewidth, int eheight, bool refresh)
 {
   int i;
   raxvt::coordinates rc[RC_COUNT];
@@ -1876,7 +1876,7 @@ rxvt_term::scr_expose (int x, int y, int ewidth, int eheight, bool refresh) NOTH
  * Refresh the entire screen
  */
 void
-rxvt_term::scr_touch (bool refresh) NOTHROW
+rxvt_term::scr_touch (bool refresh)
 {
   scr_expose (0, 0, vt_width, vt_height, refresh);
 }
@@ -1887,7 +1887,7 @@ rxvt_term::scr_touch (bool refresh) NOTHROW
  * the top of the screen
  */
 void
-rxvt_term::scr_move_to (int y, int len) NOTHROW
+rxvt_term::scr_move_to (int y, int len)
 {
   // lerp (y, 0, len, top_row, nrow - 1)
   scr_changeview (top_row + (nrow - 1 - top_row) * y / len);
@@ -1899,13 +1899,13 @@ rxvt_term::scr_move_to (int y, int len) NOTHROW
  * direction should be UP or DN
  */
 bool
-rxvt_term::scr_page (int nlines) NOTHROW
+rxvt_term::scr_page (int nlines)
 {
   return scr_changeview (view_start - nlines);
 }
 
 bool
-rxvt_term::scr_changeview (int new_view_start) NOTHROW
+rxvt_term::scr_changeview (int new_view_start)
 {
   clamp_it (new_view_start, top_row, 0);
 
@@ -1933,7 +1933,7 @@ rxvt_term::bell_cb (ev::timer &w, int revents)
 
 /* ------------------------------------------------------------------------- */
 void
-rxvt_term::scr_bell () NOTHROW
+rxvt_term::scr_bell ()
 {
 #ifndef NO_BELL
 
@@ -1965,7 +1965,7 @@ rxvt_term::scr_bell () NOTHROW
 
 /* ------------------------------------------------------------------------- */
 void ecb_cold
-rxvt_term::scr_printscreen (int fullhist) NOTHROW
+rxvt_term::scr_printscreen (int fullhist)
 {
 #ifdef PRINTPIPE
   int nrows, row_start;
@@ -2024,7 +2024,7 @@ rxvt_term::scr_printscreen (int fullhist) NOTHROW
  * screen.text/screen.rend contain what the screen will change to.
  */
 void ecb_hot
-rxvt_term::scr_refresh () NOTHROW
+rxvt_term::scr_refresh ()
 {
   int16_t col, row,   /* column/row we're processing               */
           ocrow;      /* old cursor row                            */
@@ -2481,7 +2481,7 @@ rxvt_term::scr_refresh () NOTHROW
 }
 
 void ecb_cold
-rxvt_term::scr_remap_chars (line_t &l) NOTHROW
+rxvt_term::scr_remap_chars (line_t &l)
 {
   if (!l.valid ())
     return;
@@ -2493,7 +2493,7 @@ rxvt_term::scr_remap_chars (line_t &l) NOTHROW
 }
 
 void ecb_cold
-rxvt_term::scr_remap_chars () NOTHROW
+rxvt_term::scr_remap_chars ()
 {
   for (int i = total_rows; i--; )
     scr_remap_chars (row_buf [i]);
@@ -2506,7 +2506,7 @@ rxvt_term::scr_remap_chars () NOTHROW
 }
 
 void ecb_cold
-rxvt_term::scr_recolor (bool refresh) NOTHROW
+rxvt_term::scr_recolor (bool refresh)
 {
   bool transparent = false;
 
@@ -2557,7 +2557,7 @@ rxvt_term::scr_recolor (bool refresh) NOTHROW
 
 /* ------------------------------------------------------------------------- */
 void
-rxvt_term::scr_clear (bool really) NOTHROW
+rxvt_term::scr_clear (bool really)
 {
   if (!mapped)
     return;
@@ -2570,7 +2570,7 @@ rxvt_term::scr_clear (bool really) NOTHROW
 }
 
 void
-rxvt_term::scr_xor_rect (int beg_row, int beg_col, int end_row, int end_col, rend_t rstyle1, rend_t rstyle2) NOTHROW
+rxvt_term::scr_xor_rect (int beg_row, int beg_col, int end_row, int end_col, rend_t rstyle1, rend_t rstyle2)
 {
   int view_end = view_start + nrow;
   int row, col;
@@ -2592,7 +2592,7 @@ rxvt_term::scr_xor_rect (int beg_row, int beg_col, int end_row, int end_col, ren
 }
 
 void
-rxvt_term::scr_xor_span (int beg_row, int beg_col, int end_row, int end_col, rend_t rstyle) NOTHROW
+rxvt_term::scr_xor_span (int beg_row, int beg_col, int end_row, int end_col, rend_t rstyle)
 {
   int view_end = view_start + nrow;
   int row, col;
@@ -2619,7 +2619,7 @@ rxvt_term::scr_xor_span (int beg_row, int beg_col, int end_row, int end_col, ren
 
 /* ------------------------------------------------------------------------- */
 void ecb_hot
-rxvt_term::scr_reverse_selection () NOTHROW
+rxvt_term::scr_reverse_selection ()
 {
   if (selection.op != raxvt::selection::operation::clear
       && current_screen == selection.screen
@@ -2642,7 +2642,7 @@ rxvt_term::scr_reverse_selection () NOTHROW
  *                           CHARACTER SELECTION                             *
  * ------------------------------------------------------------------------- */
 void
-rxvt_term::selection_check(int check_more) NOTHROW
+rxvt_term::selection_check(int check_more)
 {
   if (selection.op == raxvt::selection::operation::clear)
   {
@@ -2662,7 +2662,7 @@ rxvt_term::selection_check(int check_more) NOTHROW
 }
 
 void
-rxvt_term::selection_changed () NOTHROW
+rxvt_term::selection_changed ()
 {
   line_t &r1 = ROW (selection.beginning.row);
   while (selection.beginning.col < r1.l && r1.t [selection.beginning.col] == NOCHAR)
@@ -2680,7 +2680,7 @@ rxvt_term::selection_changed () NOTHROW
  * Paste a selection direct to the command fd
  */
 void
-rxvt_term::tt_paste (char *data, unsigned int len) NOTHROW
+rxvt_term::tt_paste (char *data, unsigned int len)
 {
   /* convert normal newline chars into common keyboard Return key sequence */
   for (unsigned int i = 0; i < len; i++)
@@ -2697,7 +2697,7 @@ rxvt_term::tt_paste (char *data, unsigned int len) NOTHROW
 }
 
 void
-rxvt_term::paste (char *data, unsigned int len) NOTHROW
+rxvt_term::paste (char *data, unsigned int len)
 {
   if (HOOK_INVOKE ((this, HOOK_TT_PASTE, DT_STR_LEN, data, len, DT_END)))
     return;
@@ -2713,7 +2713,7 @@ rxvt_term::paste (char *data, unsigned int len) NOTHROW
  * EXT: button 2 release
  */
 void
-rxvt_term::selection_request (Time tm, int selnum) NOTHROW
+rxvt_term::selection_request (Time tm, int selnum)
 {
   if (!selection_req)
     {
@@ -2728,7 +2728,7 @@ rxvt_term::selection_request (Time tm, int selnum) NOTHROW
  * EXT: SelectionClear
  */
 void
-rxvt_term::selection_clear(bool clipboard) NOTHROW
+rxvt_term::selection_clear(bool clipboard)
 {
   if (!clipboard)
   {
@@ -2877,7 +2877,7 @@ rxvt_term::selection_make (Time tm)
 }
 
 bool
-rxvt_term::selection_grab (Time tm, bool clipboard) NOTHROW
+rxvt_term::selection_grab (Time tm, bool clipboard)
 {
   Atom sel;
 
@@ -2911,7 +2911,7 @@ rxvt_term::selection_grab (Time tm, bool clipboard) NOTHROW
  * EXT: button 1 press
  */
 void ecb_cold
-rxvt_term::selection_click(int clicks, int x, int y) NOTHROW
+rxvt_term::selection_click(int clicks, int x, int y)
 {
   clicks = ((clicks - 1) % 3) + 1;
   // Save clicks so extend will work.
@@ -2949,7 +2949,7 @@ rxvt_term::selection_click(int clicks, int x, int y) NOTHROW
  * Mark a selection at the specified col/row
  */
 void ecb_cold
-rxvt_term::selection_start_colrow (int col, int row) NOTHROW
+rxvt_term::selection_start_colrow (int col, int row)
 {
   auto& mark = selection.mark;
 
@@ -2992,7 +2992,7 @@ rxvt_term::selection_start_colrow (int col, int row) NOTHROW
 #define DELIMIT_REND(x)        1
 
 void ecb_cold
-rxvt_term::selection_delimit_word (enum page_dirn dirn, const raxvt::coordinates *mark, raxvt::coordinates *ret) NOTHROW
+rxvt_term::selection_delimit_word (enum page_dirn dirn, const raxvt::coordinates *mark, raxvt::coordinates *ret)
 {
   int col, row, dirnadd, tcol, trow, w1, w2;
   raxvt::coordinates bound;
@@ -3076,7 +3076,7 @@ rxvt_term::selection_delimit_word (enum page_dirn dirn, const raxvt::coordinates
  * flag == 2 ==> button 3 motion
  */
 void ecb_cold
-rxvt_term::selection_extend(int x, int y, int flag) NOTHROW
+rxvt_term::selection_extend(int x, int y, int flag)
 {
   const int col = clamp(Pixel2Col(x), 0, ncol);
   const int row = clamp(Pixel2Row(y), 0, nrow - 1);
@@ -3113,7 +3113,7 @@ rxvt_term::selection_extend(int x, int y, int flag) NOTHROW
  * Extend the selection to the specified col/row
  */
 void ecb_cold
-rxvt_term::selection_extend_colrow (int32_t col, int32_t row, int button3, int buttonpress, int clickchange) NOTHROW
+rxvt_term::selection_extend_colrow (int32_t col, int32_t row, int button3, int buttonpress, int clickchange)
 {
   auto& beg = selection.beginning;
   auto& end = selection.end;
@@ -3330,7 +3330,7 @@ rxvt_term::selection_extend_colrow (int32_t col, int32_t row, int button3, int b
 
 #if !ENABLE_MINIMAL
 void ecb_cold
-rxvt_term::selection_remove_trailing_spaces () NOTHROW
+rxvt_term::selection_remove_trailing_spaces ()
 {
   auto& beg = selection.beginning;
   auto& end = selection.end;
@@ -3383,7 +3383,7 @@ rxvt_term::selection_remove_trailing_spaces () NOTHROW
  * EXT: button 3 double click
  */
 void ecb_cold
-rxvt_term::selection_rotate(int x, int y) NOTHROW
+rxvt_term::selection_rotate(int x, int y)
 {
   selection.clicks = selection.clicks % 3 + 1;
   selection_extend_colrow(Pixel2Col(x), Pixel2Row(y), 1, 0, 1);
@@ -3395,7 +3395,7 @@ rxvt_term::selection_rotate(int x, int y) NOTHROW
  * EXT: SelectionRequest
  */
 void ecb_cold
-rxvt_term::selection_send (const XSelectionRequestEvent &rq) NOTHROW
+rxvt_term::selection_send (const XSelectionRequestEvent &rq)
 {
   Atom property = rq.property == None ? rq.target : rq.property;
   XSelectionEvent ev;
@@ -3546,7 +3546,7 @@ rxvt_term::selection_send (const XSelectionRequestEvent &rq) NOTHROW
 /* ------------------------------------------------------------------------- */
 #if USE_XIM
 void ecb_cold
-rxvt_term::im_set_position (XPoint &pos) NOTHROW
+rxvt_term::im_set_position (XPoint &pos)
 {
   XWindowAttributes xwa;
 
@@ -3559,7 +3559,7 @@ rxvt_term::im_set_position (XPoint &pos) NOTHROW
 
 #if ENABLE_OVERLAY
 void
-rxvt_term::scr_overlay_new (int x, int y, int w, int h) NOTHROW
+rxvt_term::scr_overlay_new (int x, int y, int w, int h)
 {
   if (nrow < 1 || ncol < 1)
     return;
@@ -3614,7 +3614,7 @@ rxvt_term::scr_overlay_new (int x, int y, int w, int h) NOTHROW
 }
 
 void
-rxvt_term::scr_overlay_off () NOTHROW
+rxvt_term::scr_overlay_off ()
 {
   if (!ov.text)
     return;
@@ -3632,7 +3632,7 @@ rxvt_term::scr_overlay_off () NOTHROW
 }
 
 void
-rxvt_term::scr_overlay_set (int x, int y, char32_t text, rend_t rend) NOTHROW
+rxvt_term::scr_overlay_set (int x, int y, char32_t text, rend_t rend)
 {
   if (!ov.text || x >= ov.w - 2 || y >= ov.h - 2)
     return;
@@ -3644,14 +3644,14 @@ rxvt_term::scr_overlay_set (int x, int y, char32_t text, rend_t rend) NOTHROW
 }
 
 void
-rxvt_term::scr_overlay_set (int x, int y, const char *s) NOTHROW
+rxvt_term::scr_overlay_set (int x, int y, const char *s)
 {
   while (*s)
     scr_overlay_set (x++, y, *s++);
 }
 
 void
-rxvt_term::scr_overlay_set (int x, int y, const wchar_t *s) NOTHROW
+rxvt_term::scr_overlay_set (int x, int y, const wchar_t *s)
 {
   while (*s)
     {
@@ -3667,7 +3667,7 @@ rxvt_term::scr_overlay_set (int x, int y, const wchar_t *s) NOTHROW
 }
 
 void
-rxvt_term::scr_swap_overlay () NOTHROW
+rxvt_term::scr_swap_overlay ()
 {
   if (!ov.text)
     return;
