@@ -27,11 +27,19 @@
 
 #include <cstdlib>
 #include <cstring>
+#include <vector>
 
-static const struct n2cs {
-  const char *name;
-  codeset cs;
-} n2cs[] = {
+namespace
+{
+  struct n2cs_t
+  {
+    const char* name;
+    codeset cs;
+  };
+}
+
+static const std::vector<n2cs_t> n2cs =
+{
   /* first one found is the normalized one */
   { "ISO88591",		CS_ISO8859_1        },
   { "ISO8859PRIMARY",	CS_ISO8859_1        }, // some stupid fonts use this (hi tigert)
@@ -96,9 +104,7 @@ static const struct n2cs {
   { "CNS1164319925",	CS_CNS11643_1992_5  },
   { "CNS1164319926",	CS_CNS11643_1992_6  },
   { "CNS1164319927",	CS_CNS11643_1992_7  },
-  { "CNS116431992F",	CS_CNS11643_1992_F  },
-
-  { 0,       		CS_UNKNOWN      }
+  { "CNS116431992F",	CS_CNS11643_1992_F  }
 };
 
 static const char *
@@ -122,27 +128,21 @@ normalize_name (const char *name)
 codeset
 codeset_from_name(const char *name)
 {
-  const struct n2cs* i = n2cs;
-
   if (!name)
   {
     return CS_UNKNOWN;
   }
 
-  name = normalize_name(name);
-
-  do
+  for (const auto& mapping : n2cs)
   {
-    const std::size_t len = std::strlen(i->name);
+    const auto length = std::strlen(mapping.name);
 
-    if ((i->name[len - 1] == '*'
-         && !std::strncmp(name, i->name, len - 1))
-        || !std::strcmp(name, i->name))
+    if ((mapping.name[length - 1] == '*' && !std::strncmp(name, mapping.name, length - 1))
+        || !std::strcmp(name, mapping.name))
     {
-      return i->cs;
+      return mapping.cs;
     }
   }
-  while ((++i)->name);
 
   return CS_UNKNOWN;
 }
@@ -290,24 +290,28 @@ const rxvt_codeset_conv rxvt_codeset[NUM_CODESETS] = {
 #include "table/compose.h"
 
 unicode_t
-rxvt_compose (unicode_t c1, unicode_t c2)
+rxvt_compose(unicode_t c1, unicode_t c2)
 {
-  int l = 0;
-  int r = ecb_array_length (rxvt_compose_table) - 1;
-  int m;
+  std::size_t l = 0;
+  std::size_t r = rxvt_compose_table.size() - 1;
+  std::size_t m;
 
   while (r >= l)
-    {
-      m = (l + r) / 2;
-      rxvt_compose_entry &c = rxvt_compose_table[m];
+  {
+    const auto m = (l + r) / 2;
+    const auto& c = rxvt_compose_table[m];
 
-      if (c.c1 < c1 || (c.c1 == c1 && c.c2 < c2))
-        l = m + 1;
-      else if (c.c1 > c1 || (c.c1 == c1 && c.c2 > c2))
-        r = m - 1;
-      else
-        return c.r;
+    if (c.c1 < c1 || (c.c1 == c1 && c.c2 < c2))
+    {
+      l = m + 1;
     }
+    else if (c.c1 > c1 || (c.c1 == c1 && c.c2 > c2))
+    {
+      r = m - 1;
+    } else {
+      return c.r;
+    }
+  }
 
   return NOCHAR;
 }

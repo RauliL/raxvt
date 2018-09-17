@@ -75,7 +75,7 @@
 #include <net/if.h>
 #include <net/if_arp.h>
 
-static char * ecb_cold
+static char*
 rxvt_network_display (const char *display)
 {
   char            buffer[1024], *rval = NULL;
@@ -1405,14 +1405,20 @@ rxvt_term::create_windows(const std::vector<std::string>& argv)
                      PropModeReplace, (unsigned char *)&mwmhints, PROP_MWM_HINTS_ELEMENTS);
 #endif
 
-  Atom protocols[] = {
+  std::vector<Atom> protocols =
+  {
     xa[XA_WM_DELETE_WINDOW],
 #if ENABLE_EWMH
     xa[XA_NET_WM_PING],
 #endif
   };
 
-  XSetWMProtocols (dpy, top, protocols, ecb_array_length (protocols));
+  ::XSetWMProtocols(
+    dpy,
+    top,
+    protocols.data(),
+    protocols.size()
+  );
 
 #if ENABLE_FRILLS
   if (get_setting(Rs_transient_for))

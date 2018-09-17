@@ -136,7 +136,7 @@ static unsigned short iso14755_symtab[] = {
   0,
 };
 
-void ecb_cold
+void
 rxvt_term::iso14755_54(int x, int y)
 {
   x = Pixel2Col(x);
@@ -163,7 +163,7 @@ rxvt_term::iso14755_54(int x, int y)
   }
 }
 
-void ecb_cold
+void
 rxvt_term::iso14755_51 (unicode_t ch, rend_t r, int x, int y, int y2)
 {
   rxvt_fontset *fs = FONTSET (r);
@@ -259,7 +259,7 @@ rxvt_term::iso14755_51 (unicode_t ch, rend_t r, int x, int y, int y2)
 }
 #endif
 
-void ecb_cold
+void
 rxvt_term::commit_iso14755 ()
 {
   wchar_t ch = iso14755buf & ISO_14755_MASK;
@@ -287,7 +287,7 @@ rxvt_term::commit_iso14755 ()
   iso14755buf = 0;
 }
 
-static int ecb_cold
+static int
 hex_keyval (XKeyEvent &ev)
 {
   // check whether this event corresponds to a hex digit
@@ -306,7 +306,7 @@ hex_keyval (XKeyEvent &ev)
 }
 #endif
 
-static inline KeySym ecb_cold
+static inline KeySym
 translate_keypad (KeySym keysym, bool kp)
 {
 #ifdef XK_KP_Home
@@ -337,7 +337,7 @@ translate_keypad (KeySym keysym, bool kp)
   return keysym;
 }
 
-static inline int ecb_cold
+static inline int
 map_function_key (KeySym keysym)
 {
   int param = 0;
@@ -405,7 +405,7 @@ rxvt_wcsdup(const wchar_t* str, std::size_t len)
   return r;
 }
 
-void ecb_cold
+void
 rxvt_term::key_press (XKeyEvent &ev)
 {
   int ctrl, meta, shft, len;
@@ -872,7 +872,7 @@ rxvt_term::key_press (XKeyEvent &ev)
   tt_write_user_input (kbuf, (unsigned int)len);
 }
 
-void ecb_cold
+void
 rxvt_term::key_release (XKeyEvent &ev)
 {
 #if (MOUSE_WHEEL && MOUSE_SLIP_WHEELING) || ISO_14755 || ENABLE_PERL
@@ -1239,7 +1239,7 @@ rxvt_term::pty_cb (ev::io &w, int revents)
   refresh_check ();
 }
 
-void ecb_cold
+void
 rxvt_term::pointer_unblank ()
 {
   XDefineCursor (dpy, vt, TermWin_cursor);
@@ -1254,7 +1254,7 @@ rxvt_term::pointer_unblank ()
 }
 
 #if defined(POINTER_BLANK)
-void ecb_cold
+void
 rxvt_term::pointer_blank ()
 {
   if (!get_option(Opt_pointerBlank))
@@ -1266,7 +1266,7 @@ rxvt_term::pointer_blank ()
   hidden_pointer = 1;
 }
 
-void ecb_cold
+void
 rxvt_term::pointer_cb (ev::timer &w, int revents)
 {
   make_current ();
@@ -1368,7 +1368,7 @@ rxvt_term::mouse_report (XButtonEvent &ev)
 }
 
 /*{{{ process an X event */
-void ecb_hot
+void
 rxvt_term::x_cb (XEvent &ev)
 {
   make_current ();
@@ -1719,7 +1719,7 @@ rxvt_term::x_cb (XEvent &ev)
 }
 
 #if ENABLE_FRILLS
-void ecb_cold
+void
 rxvt_term::set_urgency (bool enable)
 {
   if (enable == urgency_hint)
@@ -1735,7 +1735,7 @@ rxvt_term::set_urgency (bool enable)
 }
 #endif
 
-void ecb_cold
+void
 rxvt_term::focus_in ()
 {
   if (!focus)
@@ -1773,7 +1773,7 @@ rxvt_term::focus_in ()
     }
 }
 
-void ecb_cold
+void
 rxvt_term::focus_out ()
 {
   if (focus)
@@ -1819,7 +1819,7 @@ rxvt_term::focus_out ()
     }
 }
 
-void ecb_cold
+void
 rxvt_term::update_fade_color (unsigned int idx, bool first_time)
 {
 #if OFF_FOCUS_FADING
@@ -1836,7 +1836,7 @@ rxvt_term::update_fade_color (unsigned int idx, bool first_time)
 }
 
 #if ENABLE_PERL
-void ecb_hot
+void
 rxvt_term::rootwin_cb (XEvent &ev)
 {
   make_current ();
@@ -2226,7 +2226,7 @@ rxvt_term::button_release (XButtonEvent &ev)
 
 /*}}} */
 
-void ecb_hot
+void
 rxvt_term::cmd_parse ()
 {
   wchar_t ch = NOCHAR;
@@ -2234,18 +2234,18 @@ rxvt_term::cmd_parse ()
 
   for (;;)
     {
-      if (ecb_unlikely (ch == NOCHAR))
-        {
-          seq_begin = cmdbuf_ptr;
-          ch = next_char ();
+      if (ch != NOCHAR)
+      {
+        seq_begin = cmdbuf_ptr;
+        ch = next_char ();
 
-          if (ch == NOCHAR)
-            break;
-        }
+        if (ch == NOCHAR)
+          break;
+      }
 
-      if (ecb_likely (!IS_CONTROL (ch) || ch == C0_LF || ch == C0_CR || ch == C0_HT))
+      if (!IS_CONTROL (ch) || ch == C0_LF || ch == C0_CR || ch == C0_HT)
         {
-          if (ecb_unlikely (!seen_input))
+          if (!!seen_input)
             {
               seen_input = 1;
               // many badly-written programs (e.g. jed) contain a race condition:
@@ -2268,12 +2268,12 @@ rxvt_term::cmd_parse ()
 
           for (;;)
             {
-              if (ecb_unlikely (ch == NOCHAR || (IS_CONTROL (ch) && ch != C0_LF && ch != C0_CR && ch != C0_HT)))
+              if (!(ch == NOCHAR || (IS_CONTROL (ch) && ch != C0_LF && ch != C0_CR && ch != C0_HT)))
                 break;
 
               *str++ = ch;
 
-              if (ecb_unlikely (ch == C0_LF || str >= eol))
+              if (!(ch == C0_LF || str >= eol))
                 {
                   if (ch == C0_LF)
                     nlines++;
@@ -2355,14 +2355,16 @@ rxvt_term::cmd_parse ()
 }
 
 // read the next character
-wchar_t ecb_hot
+wchar_t
 rxvt_term::next_char ()
 {
   while (cmdbuf_ptr < cmdbuf_endp)
     {
       // assume 7-bit to be ascii ALWAYS
-      if (ecb_likely ((unsigned char)*cmdbuf_ptr <= 0x7f && *cmdbuf_ptr != 0x1b))
+      if ((unsigned char)*cmdbuf_ptr <= 0x7f && *cmdbuf_ptr != 0x1b)
+      {
         return *cmdbuf_ptr++;
+      }
 
       wchar_t wc;
       size_t len = mbrtowc (&wc, cmdbuf_ptr, cmdbuf_endp - cmdbuf_ptr, mbstate);
@@ -2391,7 +2393,7 @@ rxvt_term::next_char ()
 }
 
 // read the next octet
-std::uint32_t ecb_hot
+std::uint32_t
 rxvt_term::next_octet ()
 {
   return cmdbuf_ptr < cmdbuf_endp
@@ -2401,7 +2403,7 @@ rxvt_term::next_octet ()
 
 static class out_of_input out_of_input;
 
-wchar_t ecb_hot
+wchar_t
 rxvt_term::cmd_getc ()
 {
   wchar_t c = next_char ();
@@ -2412,7 +2414,7 @@ rxvt_term::cmd_getc ()
   return c;
 }
 
-std::uint32_t ecb_hot
+std::uint32_t
 rxvt_term::cmd_get8 ()
 {
   uint32_t c = next_octet ();
@@ -2426,7 +2428,7 @@ rxvt_term::cmd_get8 ()
 /*{{{ print pipe */
 /*----------------------------------------------------------------------*/
 #ifdef PRINTPIPE
-FILE * ecb_cold
+FILE *
 rxvt_term::popen_printer ()
 {
   FILE *stream = popen (get_setting(Rs_print_pipe) ? get_setting(Rs_print_pipe) : PRINTPIPE, "w");
@@ -2437,7 +2439,7 @@ rxvt_term::popen_printer ()
   return stream;
 }
 
-int ecb_cold
+int
 rxvt_term::pclose_printer (FILE *stream)
 {
   fflush (stream);
@@ -2447,7 +2449,7 @@ rxvt_term::pclose_printer (FILE *stream)
 /*
  * simulate attached vt100 printer
  */
-void ecb_cold
+void
 rxvt_term::process_print_pipe ()
 {
   FILE *fd = popen_printer ();
@@ -2512,7 +2514,7 @@ enum {
 };
 
 /*{{{ process non-printing single characters */
-void ecb_hot
+void
 rxvt_term::process_nonprinting (unicode_t ch)
 {
   switch (ch)
@@ -2570,7 +2572,7 @@ rxvt_term::process_nonprinting (unicode_t ch)
 
 
 /*{{{ process VT52 escape sequences */
-void ecb_cold
+void
 rxvt_term::process_escape_vt52 (unicode_t ch)
 {
   int row, col;
@@ -2630,7 +2632,7 @@ rxvt_term::process_escape_vt52 (unicode_t ch)
 
 
 /*{{{ process escape sequences */
-void ecb_hot
+void
 rxvt_term::process_escape_seq ()
 {
   unicode_t ch = cmd_getc ();
@@ -2693,8 +2695,9 @@ rxvt_term::process_escape_seq ()
         /* 8.3.87: NEXT LINE */
       case C1_NEL:		/* ESC E */
         {
-          wchar_t nlcr[] = { C0_LF, C0_CR };
-          scr_add_lines (nlcr, ecb_array_length (nlcr), 1);
+          static const wchar_t nlcr[] = { C0_LF, C0_CR };
+
+          scr_add_lines(nlcr, 2, 1);
         }
         break;
 
@@ -2792,7 +2795,7 @@ static const unsigned char csi_defaults[] =
     make_byte (0,0,0,0,0,0,0,0),	/* x, y, z, {, |, }, ~,    */
   };
 
-void ecb_hot
+void
 rxvt_term::process_csi_seq ()
 {
   unicode_t ch, priv, prev_ch, i;
@@ -2882,8 +2885,8 @@ rxvt_term::process_csi_seq ()
                 static const int pm_h[] = { 7, 25 };
                 static const int pm_l[] = { 1, 3, 4, 5, 6, 9, 66, 1000, 1001, 1005, 1015, 1049 };
 
-                process_terminal_mode ('h', 0, ecb_array_length (pm_h), pm_h);
-                process_terminal_mode ('l', 0, ecb_array_length (pm_l), pm_l);
+                process_terminal_mode('h', 0, 2, pm_h);
+                process_terminal_mode('l', 0, 12, pm_l);
               }
           break;
         }
@@ -3341,46 +3344,47 @@ rxvt_term::map_rgb24_color (unsigned int r, unsigned int g, unsigned int b, unsi
 
   /* we allow one of the 6 directly neighbouring colours */
   /* to replace the current color, if they not used recently */
-  static const signed char dxyz[][3] = {
-     0,  0,  0,
-     0,  0, +1,
-     0,  0, -1,
-     0, +1,  0,
-     0, -1,  0,
-    +1,  0,  0,
-    -1,  0,  0,
+  static const std::vector<std::array<char, 3>> dxyz =
+  {
+    {0, 0, 0},
+    {0, 0, +1},
+    {0, 0, -1},
+    {0, +1, 0},
+    {0, -1, 0},
+    {+1, 0, 0},
+    {-1, 0, 0},
   };
 
-  for (int n = 0; n < ecb_array_length (dxyz); ++n)
-    {
-      int r = idx_r + dxyz[n][0];
-      int g = idx_g + dxyz[n][1];
-      int b = idx_b + dxyz[n][2];
+  for (std::size_t n = 0; n < dxyz.size(); ++n)
+  {
+    int r = idx_r + dxyz[n][0];
+    int g = idx_g + dxyz[n][1];
+    int b = idx_b + dxyz[n][2];
 
-      if (!IN_RANGE_EXC (r, 0, Red_levels  )) continue;
-      if (!IN_RANGE_EXC (g, 0, Green_levels)) continue;
-      if (!IN_RANGE_EXC (b, 0, Blue_levels )) continue;
+    if (!IN_RANGE_EXC (r, 0, Red_levels  )) continue;
+    if (!IN_RANGE_EXC (g, 0, Green_levels)) continue;
+    if (!IN_RANGE_EXC (b, 0, Blue_levels )) continue;
 
-      unsigned int index = colorcube_index (r, g, b);
+    unsigned int index = colorcube_index (r, g, b);
 
-      if (rgb24_color[index] == color)
-        {
-          rgb24_seqno[index] = ++rgb24_sequence;
-          return index + minTermCOLOR24;
-        }
+    if (rgb24_color[index] == color)
+      {
+        rgb24_seqno[index] = ++rgb24_sequence;
+        return index + minTermCOLOR24;
+      }
 
-      // minor issue: could update index 0 few more times
-      if ((rgb24_seqno[index] | rgb24_color[index]) == 0)
-        {
-          idx = index;
-          goto update;
-        }
-
-      // like (rgb24_seqno[idx] > rgb24_seqno[index])
-      // but also handles wrap around values good enough
-      if ((uint16_t)(rgb24_seqno[idx] - rgb24_seqno[index]) < 0x7fff)
+    // minor issue: could update index 0 few more times
+    if ((rgb24_seqno[index] | rgb24_color[index]) == 0)
+      {
         idx = index;
-    }
+        goto update;
+      }
+
+    // like (rgb24_seqno[idx] > rgb24_seqno[index])
+    // but also handles wrap around values good enough
+    if ((uint16_t)(rgb24_seqno[idx] - rgb24_seqno[index]) < 0x7fff)
+      idx = index;
+  }
 
 update:
   rgb24_color[idx] = color;
@@ -3620,7 +3624,7 @@ rxvt_term::process_xterm_seq (int op, char *str, char resp)
  *      't' = toggle
  * so no need for fancy checking
  */
-int ecb_cold
+int
 rxvt_term::privcases (int mode, unsigned long bit)
 {
   int state;
@@ -3651,64 +3655,67 @@ rxvt_term::privcases (int mode, unsigned long bit)
 
 /* we're not using priv _yet_ */
 void
-rxvt_term::process_terminal_mode (int mode, int priv ecb_unused, unsigned int nargs, const int *arg)
+rxvt_term::process_terminal_mode (int mode, int priv, unsigned int nargs, const int *arg)
 {
   unsigned int i, j;
   int state;
 
-  static const struct
+  struct argtopriv_t
   {
-    const int       argval;
+    const int argval;
     const unsigned long bit;
-  } argtopriv[] = {
-                  { 1, PrivMode_aplCUR },       // DECCKM
-                  { 2, PrivMode_vt52 },         // DECANM
-                  { 3, PrivMode_132 },          // DECCOLM
-                  { 4, PrivMode_smoothScroll }, // DECSCLM
-                  { 5, PrivMode_rVideo },       // DECSCNM
-                  { 6, PrivMode_relOrigin },    // DECOM
-                  { 7, PrivMode_Autowrap },     // DECAWM
-                 // 8, auto-repeat keys         // DECARM
-                  { 9, PrivMode_MouseX10 },
-                  { 12, PrivMode_BlinkingCursor },
-                 // 18 end FF to printer after print screen
-                 // 19 Print screen prints full screen/scroll region
-                  { 25, PrivMode_VisibleCursor }, // DECTCEM cnorm/cvvis/civis
+  };
+
+  static const std::vector<argtopriv_t> argtopriv =
+  {
+    { 1, PrivMode_aplCUR },       // DECCKM
+    { 2, PrivMode_vt52 },         // DECANM
+    { 3, PrivMode_132 },          // DECCOLM
+    { 4, PrivMode_smoothScroll }, // DECSCLM
+    { 5, PrivMode_rVideo },       // DECSCNM
+    { 6, PrivMode_relOrigin },    // DECOM
+    { 7, PrivMode_Autowrap },     // DECAWM
+   // 8, auto-repeat keys         // DECARM
+    { 9, PrivMode_MouseX10 },
+    { 12, PrivMode_BlinkingCursor },
+   // 18 end FF to printer after print screen
+   // 19 Print screen prints full screen/scroll region
+    { 25, PrivMode_VisibleCursor }, // DECTCEM cnorm/cvvis/civis
 #ifdef scrollBar_esc
-                  { scrollBar_esc, PrivMode_scrollBar },
+    { scrollBar_esc, PrivMode_scrollBar },
 #endif
-                  { 35, PrivMode_ShiftKeys },   // rxvt extension
-                 // 38, tektronix mode          // DECTEK
-                  { 40, PrivMode_132OK },
-                 // 41 xterm more fixes NYI
-                 // 45 margin bell NYI
-                 // 46 start logging
-                  { 47, PrivMode_Screen },
-                  { 66, PrivMode_aplKP },       // DECNKM
+    { 35, PrivMode_ShiftKeys },   // rxvt extension
+   // 38, tektronix mode          // DECTEK
+    { 40, PrivMode_132OK },
+   // 41 xterm more fixes NYI
+   // 45 margin bell NYI
+   // 46 start logging
+    { 47, PrivMode_Screen },
+    { 66, PrivMode_aplKP },       // DECNKM
 #ifndef NO_BACKSPACE_KEY
-                  { 67, PrivMode_BackSpace },   // DECBKM
+    { 67, PrivMode_BackSpace },   // DECBKM
 #endif
-                  { 1000, PrivMode_MouseX11 },
-                  { 1002, PrivMode_MouseBtnEvent },
-                  { 1003, PrivMode_MouseAnyEvent },
+    { 1000, PrivMode_MouseX11 },
+    { 1002, PrivMode_MouseBtnEvent },
+    { 1003, PrivMode_MouseAnyEvent },
 #if ENABLE_FRILLS
-                  { 1004, PrivMode_FocusEvent },
-                  { 1005, PrivMode_ExtModeMouse },
+    { 1004, PrivMode_FocusEvent },
+    { 1005, PrivMode_ExtModeMouse },
 #endif
-                  { 1010, PrivMode_TtyOutputInh }, // rxvt extension
-                  { 1011, PrivMode_Keypress }, // rxvt extension
+    { 1010, PrivMode_TtyOutputInh }, // rxvt extension
+    { 1011, PrivMode_Keypress }, // rxvt extension
 #if ENABLE_FRILLS
-                  { 1015, PrivMode_ExtMouseRight }, // urxvt extension of 1005
+    { 1015, PrivMode_ExtMouseRight }, // urxvt extension of 1005
 #endif
-                 // 1035 enable modifiers for alt, numlock NYI
-                 // 1036 send ESC for meta keys NYI
-                 // 1037 send DEL for keypad delete NYI
-                  { 1047, PrivMode_Screen },
-                 // 1048 save and restore cursor, implemented in code
-                  { 1049, PrivMode_Screen }, /* xterm extension, clear screen on ti rather than te */
-                 // 1051, 1052, 1060, 1061 keyboard emulation NYI
-                  { 2004, PrivMode_BracketPaste },
-                };
+   // 1035 enable modifiers for alt, numlock NYI
+   // 1036 send ESC for meta keys NYI
+   // 1037 send DEL for keypad delete NYI
+    { 1047, PrivMode_Screen },
+   // 1048 save and restore cursor, implemented in code
+    { 1049, PrivMode_Screen }, /* xterm extension, clear screen on ti rather than te */
+   // 1051, 1052, 1060, 1061 keyboard emulation NYI
+    { 2004, PrivMode_BracketPaste },
+  };
 
   if (nargs == 0)
     return;
@@ -3724,12 +3731,14 @@ rxvt_term::process_terminal_mode (int mode, int priv ecb_unused, unsigned int na
       state = -1;
 
       /* basic handling */
-      for (j = 0; j < ecb_array_length (argtopriv); j++)
+      for (std::size_t j = 0; j < argtopriv.size(); ++j)
+      {
         if (argtopriv[j].argval == arg[i])
-          {
-            state = privcases (mode, argtopriv[j].bit);
-            break;
-          }
+        {
+          state = privcases(mode, argtopriv[j].bit);
+          break;
+        }
+      }
 
       /* extra handling for values with state unkept  */
       switch (arg[i])
@@ -3857,7 +3866,7 @@ rxvt_term::process_terminal_mode (int mode, int priv ecb_unused, unsigned int na
 /*}}} */
 
 /*{{{ process sgr sequences */
-void ecb_hot
+void
 rxvt_term::process_sgr_mode (unsigned int nargs, const int *arg)
 {
   unsigned int i;

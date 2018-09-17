@@ -159,7 +159,6 @@ namespace
     Picture src, dst, msk;
     Display *dpy;
 
-    ecb_noinline
     composer (rxvt_img *srcimg, rxvt_img *dstimg = 0)
     : srcimg (srcimg), dstimg (dstimg), msk (0)
     {
@@ -173,7 +172,6 @@ namespace
       dst = this->dstimg->picture ();
     }
 
-    ecb_noinline
     void mask (bool rgb = true, int w = 1, int h = 1)
     {
       Pixmap pixmap = XCreatePixmap (dpy, srcimg->pm, w, h, rgb ? 32 : 8);
@@ -220,7 +218,6 @@ namespace
       return dstimg;
     }
 
-    ecb_noinline
     ~composer ()
     {
                XRenderFreePicture (dpy, src);
@@ -662,14 +659,14 @@ rxvt_img::muladd (nv mul, nv add)
 
   XRenderSetPictureFilter (cc.dpy, cc2.src, "nearest", 0, 0);
   XRenderSetPictureTransform (cc.dpy, cc2.src, &h_halve);
-  XRenderSetPictureFilter (cc.dpy, cc2.src, FilterConvolution, kernel, ecb_array_length (kernel));
+  XRenderSetPictureFilter(cc.dpy, cc2.src, FilterConvolution, kernel, 5);
 
   XRenderComposite (cc.dpy, PictOpSrc, cc2.src, None, cc2.dst, 0, 0, 0, 0, 0, 0, w * 2, h);
 
   return cc2;
 }
 
-ecb_noinline static void
+static void
 extract (int32_t cl0, int32_t cl1, int32_t &c, unsigned short &xc)
 {
   int32_t x = raxvt::utils::clamp(c, cl0, cl1);
@@ -677,7 +674,7 @@ extract (int32_t cl0, int32_t cl1, int32_t &c, unsigned short &xc)
   xc = x;
 }
 
-ecb_noinline static bool
+static bool
 extract (int32_t cl0, int32_t cl1, int32_t &r, int32_t &g, int32_t &b, int32_t &a, unsigned short &xr, unsigned short &xg, unsigned short &xb, unsigned short &xa)
 {
   extract (cl0, cl1, r, xr);

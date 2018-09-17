@@ -95,6 +95,12 @@ scrollBar_t::resize ()
     XMapWindow (term->dpy, win);
 }
 
+template<class T>
+static inline T div_ru(const T& val, const T& div)
+{
+  return val < 0 ? - (-val / div) : (val + div - 1) / div;
+}
+
 /*
  * Update current scrollbar view w.r.t. slider heights, etc.
  */
@@ -114,7 +120,7 @@ scrollBar_t::show (int refresh)
       int n = std::min(min_height(), size());
 
       top = beg + (sb_top * (size () - n)) / sb_len;
-      bot = top + ecb_div_ru ((sb_bot - sb_top) * (size () - n), sb_len) + n;
+      bot = top + div_ru((sb_bot - sb_top) * (size () - n), sb_len) + n;
       /* no change */
       if (top == last_top
           && bot == last_bot

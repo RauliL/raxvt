@@ -4,8 +4,6 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "./ecb.h"
-
 #include "emman.h"
 
 // linear interpolation

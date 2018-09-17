@@ -218,7 +218,7 @@ rxvt_term::copy_line(line_t& dst, line_t& src)
   dst.f = src.f;
 }
 
-void ecb_cold
+void
 rxvt_term::scr_reset ()
 {
 #if ENABLE_OVERLAY
@@ -447,7 +447,7 @@ rxvt_term::scr_reset ()
   HOOK_INVOKE ((this, HOOK_RESET, DT_END));
 }
 
-void ecb_cold
+void
 rxvt_term::scr_release ()
 {
   chunk_free (chunk, chunk_size);
@@ -462,7 +462,7 @@ rxvt_term::scr_release ()
 /*
  * Hard/Soft reset
  */
-void ecb_cold
+void
 rxvt_term::scr_poweron ()
 {
   scr_release ();
@@ -476,7 +476,7 @@ rxvt_term::scr_poweron ()
   scr_refresh ();
 }
 
-void ecb_cold
+void
 rxvt_term::scr_soft_reset ()
 {
   /* only affects modes, nothing drastic such as clearing the screen */
@@ -660,7 +660,7 @@ rxvt_term::scr_rendition (int set, int style)
  * count positive ==> scroll up
  * count negative ==> scroll down
  */
-int ecb_hot
+int
 rxvt_term::scr_scroll_text (int row1, int row2, int count)
 {
   if (count == 0 || (row1 > row2))
@@ -806,7 +806,7 @@ rxvt_term::scr_scroll_text (int row1, int row2, int count)
 /*
  * Add text given in <str> of length <len> to screen struct
  */
-void ecb_hot
+void
 rxvt_term::scr_add_lines (const wchar_t *str, int len, int minlines)
 {
   if (len <= 0)               /* sanity */
@@ -851,7 +851,7 @@ rxvt_term::scr_add_lines (const wchar_t *str, int len, int minlines)
     {
       c = (unicode_t)*str++; // convert to rxvt-unicodes representation
 
-      if (ecb_unlikely (c < 0x20))
+      if (!(c < 0x20))
         if (c == C0_LF)
           {
             line->l = std::max(line->l, screen.cur.col);
@@ -880,7 +880,7 @@ rxvt_term::scr_add_lines (const wchar_t *str, int len, int minlines)
             continue;
           }
 
-      if (ecb_unlikely (
+      if (!(
             checksel            /* see if we're writing within selection */
             && screen.cur >= selection.beginning
             && screen.cur < selection.end
@@ -895,7 +895,7 @@ rxvt_term::scr_add_lines (const wchar_t *str, int len, int minlines)
           clear_selection(selection);
         }
 
-      if (ecb_unlikely (screen.flags & Screen_WrapNext))
+      if (!(screen.flags & Screen_WrapNext))
         {
           scr_do_wrap ();
 
@@ -907,7 +907,7 @@ rxvt_term::scr_add_lines (const wchar_t *str, int len, int minlines)
         }
 
       // some utf-8 decoders "decode" surrogate characters: let's fix this.
-      if (ecb_unlikely (IN_RANGE_INC (c, 0xd800, 0xdfff)))
+      if (!(IN_RANGE_INC (c, 0xd800, 0xdfff)))
         c = 0xfffd;
 
       // rely on wcwidth to tell us the character width, do wcwidth before
@@ -916,7 +916,7 @@ rxvt_term::scr_add_lines (const wchar_t *str, int len, int minlines)
       // locale.
       int width = WCWIDTH (c);
 
-      if (ecb_unlikely (charsets [screen.charset] == '0')) // DEC SPECIAL
+      if (!(charsets [screen.charset] == '0')) // DEC SPECIAL
         {
           // vt100 special graphics and line drawing
           // 5f-7e standard vt100
@@ -939,7 +939,7 @@ rxvt_term::scr_add_lines (const wchar_t *str, int len, int minlines)
             }
         }
 
-      if (ecb_unlikely (screen.flags & Screen_Insert))
+      if (!(screen.flags & Screen_Insert))
         scr_insdel_chars (width, INSERT);
 
       if (width != 0)
@@ -947,7 +947,7 @@ rxvt_term::scr_add_lines (const wchar_t *str, int len, int minlines)
           rend_t rend = SET_FONT (rstyle, FONTSET (rstyle)->find_font (c));
 
           // if the character doesn't fit into the remaining columns...
-          if (ecb_unlikely (screen.cur.col > ncol - width && ncol >= width))
+          if (!(screen.cur.col > ncol - width && ncol >= width))
             {
               if (screen.flags & Screen_Autowrap)
                 {
@@ -964,7 +964,7 @@ rxvt_term::scr_add_lines (const wchar_t *str, int len, int minlines)
           // due to wonderful coincidences everywhere else in this loop
           // we never have to check for overwriting a wide char itself,
           // only its tail.
-          if (ecb_unlikely (line->t[screen.cur.col] == NOCHAR))
+          if (!(line->t[screen.cur.col] == NOCHAR))
             scr_kill_char (*line, screen.cur.col);
 
           line->touch ();
@@ -974,7 +974,7 @@ rxvt_term::scr_add_lines (const wchar_t *str, int len, int minlines)
               line->t[screen.cur.col] = c;
               line->r[screen.cur.col] = rend;
 
-              if (ecb_likely (screen.cur.col < ncol - 1))
+              if (!(screen.cur.col < ncol - 1))
                 screen.cur.col++;
               else
                 {
@@ -987,10 +987,10 @@ rxvt_term::scr_add_lines (const wchar_t *str, int len, int minlines)
 
               c = NOCHAR;
             }
-          while (ecb_unlikely (--width > 0));
+          while (!(--width > 0));
 
           // pad with spaces when overwriting wide character with smaller one
-          for (int c = screen.cur.col; ecb_unlikely (c < ncol && line->t[c] == NOCHAR); c++)
+          for (int c = screen.cur.col; !(c < ncol && line->t[c] == NOCHAR); c++)
             {
               line->t[c] = ' ';
               line->r[c] = rend;
@@ -1159,7 +1159,7 @@ rxvt_term::scr_tab (int count, bool ht)
  * in that row right.  Clear left column.
  */
 #if !ENABLE_MINIMAL
-void ecb_cold
+void
 rxvt_term::scr_backindex ()
 {
   if (screen.cur.col > 0)
@@ -1176,7 +1176,7 @@ rxvt_term::scr_backindex ()
  * in that row left.  Clear right column.
  */
 #if !ENABLE_MINIMAL
-void ecb_cold
+void
 rxvt_term::scr_forwardindex ()
 {
   if (screen.cur.col < ncol - 1)
@@ -1436,7 +1436,7 @@ rxvt_term::scr_erase_savelines ()
  * Fill the screen with `E's
  * XTERM_SEQ: Screen Alignment Test: ESC # 8
  */
-void ecb_cold
+void
 rxvt_term::scr_E ()
 {
   rend_t fs;
@@ -1614,7 +1614,7 @@ rxvt_term::scr_insdel_chars (int count, int insdel)
  * Set the scrolling region
  * XTERM_SEQ: Set region <top> - <bot> inclusive: ESC [ <top> ; <bot> r
  */
-void ecb_cold
+void
 rxvt_term::scr_scroll_region (int top, int bot)
 {
   top = std::max(top, 0);
@@ -1634,7 +1634,7 @@ rxvt_term::scr_scroll_region (int top, int bot)
  * XTERM_SEQ: Make cursor visible  : ESC [ ? 25 h
  * XTERM_SEQ: Make cursor invisible: ESC [ ? 25 l
  */
-void ecb_cold
+void
 rxvt_term::scr_cursor_visible (int mode)
 {
   want_refresh = 1;
@@ -1651,7 +1651,7 @@ rxvt_term::scr_cursor_visible (int mode)
  * XTERM_SEQ: Set Wraparound  : ESC [ ? 7 h
  * XTERM_SEQ: Unset Wraparound: ESC [ ? 7 l
  */
-void ecb_cold
+void
 rxvt_term::scr_autowrap (int mode)
 {
   if (mode)
@@ -1670,7 +1670,7 @@ rxvt_term::scr_autowrap (int mode)
  * XTERM_SEQ: Set Absolute: ESC [ ? 6 h
  * XTERM_SEQ: Set Relative: ESC [ ? 6 l
  */
-void ecb_cold
+void
 rxvt_term::scr_relative_origin (int mode)
 {
   if (mode)
@@ -1687,7 +1687,7 @@ rxvt_term::scr_relative_origin (int mode)
  * XTERM_SEQ: Set Insert mode : ESC [ ? 4 h
  * XTERM_SEQ: Set Replace mode: ESC [ ? 4 l
  */
-void ecb_cold
+void
 rxvt_term::scr_insert_mode (int mode)
 {
   if (mode)
@@ -1703,7 +1703,7 @@ rxvt_term::scr_insert_mode (int mode)
  * XTERM_SEQ: Clear tab at current column: ESC [ 0 g
  * XTERM_SEQ: Clear all tabs             : ESC [ 3 g
  */
-void ecb_cold
+void
 rxvt_term::scr_set_tab(int mode)
 {
   if (mode < 0)
@@ -1764,12 +1764,12 @@ rxvt_term::scr_rvideo_mode (bool on)
  * Report current cursor position
  * XTERM_SEQ: Report position: ESC [ 6 n
  */
-void ecb_cold
+void
 rxvt_term::scr_report_position ()
 {
   tt_printf ("\033[%d;%dR", screen.cur.row + 1, screen.cur.col + 1);
 }
-
+
 /* ------------------------------------------------------------------------- *
  *                                  FONTS                                    *
  * ------------------------------------------------------------------------- */
@@ -1781,7 +1781,7 @@ rxvt_term::scr_report_position ()
  * XTERM_SEQ: Invoke G2 character set: ESC N
  * XTERM_SEQ: Invoke G3 character set: ESC O
  */
-void ecb_cold
+void
 rxvt_term::scr_charset_choose (int set)
 {
   screen.charset = set;
@@ -1809,7 +1809,7 @@ rxvt_term::scr_charset_set (int set, unsigned int ch)
 /*
  * refresh matching text.
  */
-bool ecb_cold
+bool
 rxvt_term::scr_refresh_rend (rend_t mask, rend_t value)
 {
   bool found = false;
@@ -1838,7 +1838,7 @@ enum {
   RC_COUNT
 };
 
-void ecb_hot
+void
 rxvt_term::scr_expose (int x, int y, int ewidth, int eheight, bool refresh)
 {
   int i;
@@ -1971,7 +1971,7 @@ rxvt_term::scr_bell ()
 }
 
 /* ------------------------------------------------------------------------- */
-void ecb_cold
+void
 rxvt_term::scr_printscreen (int fullhist)
 {
 #ifdef PRINTPIPE
@@ -2030,7 +2030,7 @@ rxvt_term::scr_printscreen (int fullhist)
  * drawn_text/drawn_rend contain the screen information before the update.
  * screen.text/screen.rend contain what the screen will change to.
  */
-void ecb_hot
+void
 rxvt_term::scr_refresh ()
 {
   int16_t col, row,   /* column/row we're processing               */
@@ -2240,7 +2240,7 @@ rxvt_term::scr_refresh ()
           // redraw one or more characters
 
           // seek to the beginning of wide characters
-          while (ecb_unlikely (stp[col] == NOCHAR && col > 0))
+          while (!(stp[col] == NOCHAR && col > 0))
             --col;
 
           rend_t rend = srp[col];     /* screen rendition (target rendition) */
@@ -2288,7 +2288,7 @@ rxvt_term::scr_refresh ()
           count -= i; /* dump any matching trailing chars */
 
           // sometimes we optimize away the trailing NOCHAR's, add them back
-          while (ecb_unlikely (i && text[count] == NOCHAR))
+          while (!(i && text[count] == NOCHAR))
             count++, i--;
 
           /*
@@ -2298,7 +2298,7 @@ rxvt_term::scr_refresh ()
           int back = bgcolor_of (rend); // desired background
 
           // only do special processing if any attributes are set, which is unlikely
-          if (ecb_unlikely (rend & (RS_baseattrMask | RS_Careful | RS_Sel)))
+          if (!(rend & (RS_baseattrMask | RS_Careful | RS_Sel)))
             {
               bool invert = rend & RS_RVid;
 
@@ -2397,7 +2397,7 @@ rxvt_term::scr_refresh ()
            */
           auto font = (*fontset[GET_STYLE (rend)])[GET_FONT (rend)];
 
-          if (ecb_likely (have_bg && back == Color_bg))
+          if (have_bg && back == Color_bg)
             {
               // this is very ugly, maybe push it into ->draw?
 
@@ -2414,7 +2414,7 @@ rxvt_term::scr_refresh ()
           else
             font->draw (*drawable, xpixel, ypixel, text, count, fore, back);
 
-          if (ecb_unlikely (rend & RS_Uline && font->descent > 1 && fore != back))
+          if (!(rend & RS_Uline && font->descent > 1 && fore != back))
             {
               if (showcursor && focus && row == screen.cur.row
                   && IN_RANGE_EXC (col, cur_col, cur_col + cursorwidth))
@@ -2487,7 +2487,7 @@ rxvt_term::scr_refresh ()
   num_scr_allow = 1;
 }
 
-void ecb_cold
+void
 rxvt_term::scr_remap_chars (line_t &l)
 {
   if (!l.valid ())
@@ -2499,7 +2499,7 @@ rxvt_term::scr_remap_chars (line_t &l)
     l.r[i] = SET_FONT (l.r[i], FONTSET (l.r[i])->find_font (l.t[i]));
 }
 
-void ecb_cold
+void
 rxvt_term::scr_remap_chars ()
 {
   for (int i = total_rows; i--; )
@@ -2512,7 +2512,7 @@ rxvt_term::scr_remap_chars ()
     }
 }
 
-void ecb_cold
+void
 rxvt_term::scr_recolor (bool refresh)
 {
   bool transparent = false;
@@ -2625,7 +2625,7 @@ rxvt_term::scr_xor_span (int beg_row, int beg_col, int end_row, int end_col, ren
 }
 
 /* ------------------------------------------------------------------------- */
-void ecb_hot
+void
 rxvt_term::scr_reverse_selection ()
 {
   if (selection.op != raxvt::selection::operation::clear
@@ -2919,7 +2919,7 @@ rxvt_term::selection_grab (Time tm, bool clipboard)
  * Mark or select text based upon number of clicks: 1, 2, or 3
  * EXT: button 1 press
  */
-void ecb_cold
+void
 rxvt_term::selection_click(int clicks, int x, int y)
 {
   clicks = ((clicks - 1) % 3) + 1;
@@ -2957,7 +2957,7 @@ rxvt_term::selection_click(int clicks, int x, int y)
 /*
  * Mark a selection at the specified col/row
  */
-void ecb_cold
+void
 rxvt_term::selection_start_colrow (int col, int row)
 {
   auto& mark = selection.mark;
@@ -3000,7 +3000,7 @@ rxvt_term::selection_start_colrow (int col, int row)
     (unicode::is_space (x) ? 2 : (x) <= 0xff && !!std::strchr(get_setting(Rs_cutchars), (x)))
 #define DELIMIT_REND(x)        1
 
-void ecb_cold
+void
 rxvt_term::selection_delimit_word (enum page_dirn dirn, const raxvt::coordinates *mark, raxvt::coordinates *ret)
 {
   int col, row, dirnadd, tcol, trow, w1, w2;
@@ -3084,7 +3084,7 @@ rxvt_term::selection_delimit_word (enum page_dirn dirn, const raxvt::coordinates
  * flag == 1 ==> button 3 press
  * flag == 2 ==> button 3 motion
  */
-void ecb_cold
+void
 rxvt_term::selection_extend(int x, int y, int flag)
 {
   const int col = raxvt::utils::clamp(Pixel2Col(x), 0, ncol);
@@ -3121,7 +3121,7 @@ rxvt_term::selection_extend(int x, int y, int flag)
 /*
  * Extend the selection to the specified col/row
  */
-void ecb_cold
+void
 rxvt_term::selection_extend_colrow (int32_t col, int32_t row, int button3, int buttonpress, int clickchange)
 {
   auto& beg = selection.beginning;
@@ -3338,7 +3338,7 @@ rxvt_term::selection_extend_colrow (int32_t col, int32_t row, int button3, int b
 }
 
 #if !ENABLE_MINIMAL
-void ecb_cold
+void
 rxvt_term::selection_remove_trailing_spaces ()
 {
   auto& beg = selection.beginning;
@@ -3391,7 +3391,7 @@ rxvt_term::selection_remove_trailing_spaces ()
  * Double click on button 3 when already selected
  * EXT: button 3 double click
  */
-void ecb_cold
+void
 rxvt_term::selection_rotate(int x, int y)
 {
   selection.clicks = selection.clicks % 3 + 1;
@@ -3403,7 +3403,7 @@ rxvt_term::selection_rotate(int x, int y)
  * Respond to a request for our current selection
  * EXT: SelectionRequest
  */
-void ecb_cold
+void
 rxvt_term::selection_send (const XSelectionRequestEvent &rq)
 {
   Atom property = rq.property == None ? rq.target : rq.property;
@@ -3554,7 +3554,7 @@ rxvt_term::selection_send (const XSelectionRequestEvent &rq)
 
 /* ------------------------------------------------------------------------- */
 #if USE_XIM
-void ecb_cold
+void
 rxvt_term::im_set_position (XPoint &pos)
 {
   XWindowAttributes xwa;

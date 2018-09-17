@@ -29,22 +29,14 @@
 #include <new>
 
 // alas new/delete cannot be specified as inline in C++11 (see 17.6.4.6)
-void *
-operator new (size_t s)
-#if !ECB_CPP11
-  throw (std::bad_alloc)
-#endif
+void*
+operator new(std::size_t s)
 {
   return static_cast<void*>(rxvt_malloc<char>(s));
 }
 
 void
-operator delete (void *p)
-#if ECB_CPP11
-  noexcept
-#else
-  throw ()
-#endif
+operator delete(void *p)
 {
   std::free(p);
 }

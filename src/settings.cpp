@@ -733,10 +733,10 @@ rxvt_define_key (rxvt_term *term, const char *k, const char *v)
  */
 static int
 rxvt_enumerate_helper (
-   XrmDatabase *database ecb_unused,
-   XrmBindingList bindings ecb_unused,
+   XrmDatabase *database,
+   XrmBindingList bindings,
    XrmQuarkList quarks,
-   XrmRepresentation *type ecb_unused,
+   XrmRepresentation *type,
    XrmValue *value,
    XPointer closure
 )
@@ -760,14 +760,17 @@ rxvt_enumerate_helper (
  * look for something like this (XK_Delete)
  * rxvt*keysym.0xFFFF: "\177"
  */
-
-struct keysym_vocabulary_t
+namespace
 {
-  const char    *name;
-  unsigned short len;
-  unsigned short value;
-};
-static const keysym_vocabulary_t keysym_vocabulary[] =
+  struct keysym_vocabulary_t
+  {
+    const char* name;
+    unsigned short len;
+    unsigned short value;
+  };
+}
+
+static const std::vector<keysym_vocabulary_t> keysym_vocabulary =
 {
   { "ISOLevel3", 9, Level3Mask    },
   { "AppKeypad", 9, AppKeypadMask },
@@ -815,25 +818,29 @@ rxvt_term::parse_keysym (const char *str, unsigned int &state)
 
   // parse modifiers
   while (str < key)
+  {
+    std::size_t i;
+
+    for (i = 0; i < keysym_vocabulary.size(); ++i)
     {
-      unsigned int i;
-
-      for (i = 0; i < ecb_array_length (keysym_vocabulary); ++i)
-        {
-          if (strncmp (str, keysym_vocabulary [i].name, keysym_vocabulary [i].len) == 0)
-            {
-              state |= keysym_vocabulary[i].value;
-              str += keysym_vocabulary[i].len;
-              break;
-            }
-        }
-
-      if (i >= ecb_array_length (keysym_vocabulary))
-        return -1;
-
-      if (*str == '-')
-        ++str;
+      if (!std::strncmp(str, keysym_vocabulary[i].name, keysym_vocabulary[i].len))
+      {
+        state |= keysym_vocabulary[i].value;
+        str += keysym_vocabulary[i].len;
+        break;
+      }
     }
+
+    if (i >= keysym_vocabulary.size())
+    {
+      return -1;
+    }
+
+    if (*str == '-')
+    {
+      ++str;
+    }
+  }
 
   // convert keysym name to keysym number
   if ((sym = XStringToKeysym (str)) == None)

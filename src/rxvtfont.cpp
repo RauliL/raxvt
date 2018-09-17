@@ -140,7 +140,8 @@ static const struct rxvt_fallback_font {
 
 // these characters are used to guess the font height and width
 // pango uses a similar algorithm and doesn't trust the font either.
-static uint16_t extent_test_chars[] = {
+static const std::vector<std::uint16_t> extent_test_chars =
+{
   '0', '1', '8', 'a', 'd', 'x', 'm', 'y', 'g', 'W', 'X', '\'', '_',
   0x00cd, 0x00d5, 0x0114, 0x0177, 0x0643,	// ÍÕĔŷﻙ
   0x304c, 0x672c,				// が本
@@ -903,28 +904,38 @@ rxvt_font_x11::load (const rxvt_fontprop &prop, bool force_prop)
 
   width = 1;
 
-  for (uint16_t *t = extent_test_chars; t < extent_test_chars + ecb_array_length (extent_test_chars); t++)
+  for (std::size_t i = 0; i < extent_test_chars.size(); ++i)
+  {
+    const auto t = extent_test_chars[i];
+    bool careful;
+
+    if (FROM_UNICODE(cs, t) == NOCHAR)
     {
-      if (FROM_UNICODE (cs, *t) == NOCHAR)
-        continue;
-
-      // ignore characters we wouldn't use anyways
-      bool careful;
-      if (!has_char (*t, &prop, careful))
-        continue;
-
-      // the casts are needed in C++11 (see 8.5.1)
-      XChar2b ch = { (unsigned char)(*t >> 8), (unsigned char)*t };
-
-      XCharStruct g;
-      int dir_ret, asc_ret, des_ret;
-      XTextExtents16 (f, &ch, 1, &dir_ret, &asc_ret, &des_ret, &g);
-
-      int wcw = WCWIDTH (*t);
-      if (wcw > 0) g.width = (g.width + wcw - 1) / wcw;
-
-      if (width < g.width) width = g.width;
+      continue;
     }
+
+    // ignore characters we wouldn't use anyways
+    if (!has_char(t, &prop, careful))
+    {
+      continue;
+    }
+
+    // the casts are needed in C++11 (see 8.5.1)
+    XChar2b ch =
+    {
+      static_cast<unsigned char>(t >> 8),
+      static_cast<unsigned char>(t)
+    };
+
+    XCharStruct g;
+    int dir_ret, asc_ret, des_ret;
+    XTextExtents16 (f, &ch, 1, &dir_ret, &asc_ret, &des_ret, &g);
+
+    int wcw = WCWIDTH (t);
+    if (wcw > 0) g.width = (g.width + wcw - 1) / wcw;
+
+    if (width < g.width) width = g.width;
+  }
 
   return true;
 }
@@ -1211,32 +1222,35 @@ rxvt_font_xft::load (const rxvt_fontprop &prop, bool force_prop)
 
       int glheight = height;
 
-      for (uint16_t *t = extent_test_chars; t < extent_test_chars + ecb_array_length (extent_test_chars); t++)
+      for (std::size_t i = 0; i < extent_test_chars.size(); ++i)
+      {
+        const auto t = extent_test_chars[i];
+        FcChar16 ch = t;
+        bool careful;
+
+        if (cs != CS_UNICODE
+            && ch > 0x100
+            && FROM_UNICODE (cs, ch) == NOCHAR)
+          continue;
+
+        // ignore characters we wouldn't use anyways
+        if (!has_char(t, &prop, careful))
         {
-          FcChar16 ch = *t;
-
-          if (cs != CS_UNICODE
-              && ch > 0x100
-              && FROM_UNICODE (cs, ch) == NOCHAR)
-            continue;
-
-          // ignore characters we wouldn't use anyways
-          bool careful;
-          if (!has_char (*t, &prop, careful))
-            continue;
-
-          XGlyphInfo g;
-          XftTextExtents16 (disp, f, &ch, 1, &g);
-
-          g.width -= g.x;
-
-          int wcw = WCWIDTH (ch);
-          if (wcw > 0) g.width = (g.width + wcw - 1) / wcw;
-
-          if (width    < g.width       ) width    = g.width;
-          if (height   < g.height      ) height   = g.height;
-          if (glheight < g.height - g.y) glheight = g.height - g.y;
+          continue;
         }
+
+        XGlyphInfo g;
+        XftTextExtents16 (disp, f, &ch, 1, &g);
+
+        g.width -= g.x;
+
+        int wcw = WCWIDTH (ch);
+        if (wcw > 0) g.width = (g.width + wcw - 1) / wcw;
+
+        if (width    < g.width       ) width    = g.width;
+        if (height   < g.height      ) height   = g.height;
+        if (glheight < g.height - g.y) glheight = g.height - g.y;
+      }
 
       if (!width)
         {
