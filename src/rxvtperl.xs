@@ -2328,8 +2328,10 @@ rxvt_term::set_background (rxvt_img *img, bool border = false)
             img->reify ()
                ->replace (img);
 
-            img->convert_format (XRenderFindVisualFormat (THIS->dpy, THIS->visual), THIS->pix_colors [Color_bg])
-               ->replace (img);
+            img->convert_format(
+              XRenderFindVisualFormat(THIS->dpy, THIS->visual),
+              THIS->lookup_color(Color_bg, THIS->pix_colors)
+            )->replace(img);
 
             THIS->bg_img = img;
             THIS->bg_flags |= rxvt_term::BG_NEEDS_REFRESH;

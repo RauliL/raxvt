@@ -66,14 +66,17 @@ scrollBar_t::resize ()
   if (!win)
     {
       /* create the scrollbar window */
-      win = XCreateSimpleWindow (term->dpy,
-                                 term->parent,
-                                 window_sb_x, 0,
-                                 total_width (),
-                                 term->szHint.height,
-                                 0,
-                                 term->pix_colors[Color_fg],
-                                 term->pix_colors[color ()]);
+      win = ::XCreateSimpleWindow(
+        term->dpy,
+        term->parent,
+        window_sb_x,
+        0,
+        total_width(),
+        term->szHint.height,
+        0,
+        term->lookup_color(Color_fg, term->pix_colors),
+        term->lookup_color(color(), term->pix_colors)
+      );
       XDefineCursor (term->dpy, win, leftptr_cursor);
 
       XSelectInput (term->dpy, win,
