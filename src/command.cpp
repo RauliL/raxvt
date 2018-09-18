@@ -1825,15 +1825,24 @@ void ecb_cold
 rxvt_term::update_fade_color (unsigned int idx, bool first_time)
 {
 #if OFF_FOCUS_FADING
-  if (get_setting(Rs_fade))
-    {
-      if (!first_time)
-        pix_colors_focused [idx].free (this);
+  rgba c;
 
-      rgba c;
-      pix_colors [Color_fade].get (c);
-      pix_colors_focused [idx].fade (this, atoi (get_setting(Rs_fade)), pix_colors_unfocused [idx], c);
-    }
+  if (!get_setting(Rs_fade))
+  {
+    return;
+  }
+  if (!first_time)
+  {
+    lookup_color(idx, pix_colors_focused).free(this);
+  }
+
+  lookup_color(Color_fade, pix_colors).get(c);
+  lookup_color(idx, pix_colors_focused).fade(
+    this,
+    std::atoi(get_setting(Rs_fade)),
+    lookup_color(idx, pix_colors_unfocused),
+    c
+  );
 #endif
 }
 
@@ -3323,20 +3332,40 @@ colorcube_index (unsigned int idx_r,
 }
 
 void
-rxvt_term::process_color_seq (int report, int color, const char *str, char resp)
+rxvt_term::process_color_seq(int report,
+                             int color,
+                             const char* str,
+                             char resp)
 {
   if (str[0] == '?' && !str[1])
-    {
-      rgba c;
-      pix_colors_focused[color].get (c);
+  {
+    rgba c;
 
-      if (c.a != rgba::MAX_CC)
-        tt_printf ("\033]%d;rgba:%04x/%04x/%04x/%04x%c", report, c.r, c.g, c.b, c.a, resp);
-      else
-        tt_printf ("\033]%d;rgb:%04x/%04x/%04x%c", report, c.r, c.g, c.b, resp);
+    lookup_color(color, pix_colors_focused).get(c);
+    if (c.a != rgba::MAX_CC)
+    {
+      tt_printf(
+        "\033]%d;rgba:%04x/%04x/%04x/%04x%c",
+        report,
+        c.r,
+        c.g,
+        c.b,
+        c.a,
+        resp
+      );
+    } else {
+      tt_printf(
+        "\033]%d;rgb:%04x/%04x/%04x%c",
+        report,
+        c.r,
+        c.g,
+        c.b,
+        resp
+      );
     }
-  else
-    set_window_color (color, str);
+  } else {
+    set_window_color(color, str);
+  }
 }
 
 /*
@@ -3790,7 +3819,7 @@ rxvt_term::process_sgr_mode (unsigned int nargs, const int *arg)
 {
   unsigned int i;
   short rendset;
-  int rendstyle;
+  rend_t rendstyle;
 
   if (nargs == 0)
     {
@@ -3902,25 +3931,21 @@ rxvt_term::process_sgr_mode (unsigned int nargs, const int *arg)
               unsigned int idx;
 
               if (nargs > i + 2 && arg[i + 1] == 5)
-                {
-                  idx = minCOLOR + arg[i + 2];
-                  i += 2;
+              {
+                idx = minCOLOR + arg[i + 2];
+                i += 2;
 
-                  scr_color (idx, fgbg);
-                }
+                scr_color (idx, fgbg);
+              }
               else if (nargs > i + 4 && arg[i + 1] == 2)
-                {
-                  unsigned int r = arg[i + 2];
-                  unsigned int g = arg[i + 3];
-                  unsigned int b = arg[i + 4];
-                  unsigned int a = 0xff;
+              {
+                unsigned int r = arg[i + 2];
+                unsigned int g = arg[i + 3];
+                unsigned int b = arg[i + 4];
 
-                  idx = map_rgb24_color (r, g, b, a);
-
-                  i += 4;
-
-                  scr_color (idx, fgbg);
-                }
+                scr_color_rgb(r, g, b, fgbg);
+                i += 4;
+              }
             }
             break;
 
