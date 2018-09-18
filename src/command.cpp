@@ -3291,7 +3291,6 @@ rxvt_term::process_dcs_seq ()
   return;
 }
 
-/*----------------------------------------------------------------------*/
 /*
  * process OPERATING SYSTEM COMMAND sequence `ESC ] Ps ; Pt (ST|BEL)'
  */
@@ -3315,20 +3314,6 @@ rxvt_term::process_osc_seq ()
           free (s);
         }
     }
-}
-
-static unsigned int
-colorcube_index (unsigned int idx_r,
-                 unsigned int idx_g,
-                 unsigned int idx_b)
-{
-  assert (idx_r < Red_levels);
-  assert (idx_g < Green_levels);
-  assert (idx_b < Blue_levels);
-
-  return idx_r * Blue_levels * Green_levels +
-         idx_g * Blue_levels +
-         idx_b;
 }
 
 void
