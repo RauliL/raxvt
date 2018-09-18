@@ -318,6 +318,9 @@ static const char optionsstring[] = "options: "
 #if ENABLE_STYLES
                                     "styles,"
 #endif
+#if ENABLE_WIDE_GLYPHS
+                                    "wide-glyphs,"
+#endif
 #if ENABLE_COMBINING
                                     "combining,"
 #endif
