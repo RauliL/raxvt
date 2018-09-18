@@ -29,7 +29,7 @@ extern "C" {
 #include <X11/Xresource.h>
 }
 
-typedef std::uint32_t rend_t;
+typedef std::uint64_t rend_t;
 typedef std::int32_t tlen_t;  // was int16_t, but this results in smaller code and memory use
 typedef std::int32_t tlen_t_; // specifically for use in the line_t structure
 
@@ -307,43 +307,46 @@ enum {
 #define RS_None                 0
 
 // GET_BGATTR depends on RS_fgShift > RS_bgShift
-#define RS_colorMask		((1UL << Color_Bits) - 1UL)
-#define RS_bgShift		0
-#define RS_fgShift		(RS_bgShift + Color_Bits)
-#define RS_bgMask               (RS_colorMask << RS_bgShift)
-#define RS_fgMask               (RS_colorMask << RS_fgShift)
+#define RS_colorMask (static_cast<rend_t>((1UL << Color_Bits) - 1UL))
+#define RS_bgShift 0
+#define RS_fgShift (RS_bgShift + Color_Bits)
+#define RS_bgMask (static_cast<rend_t>(RS_colorMask << RS_bgShift))
+#define RS_fgMask (static_cast<rend_t>(RS_colorMask << RS_fgShift))
 
 // must have space for rxvt_fontset::fontCount * 2 + 2 values
 #define RS_fontShift            (RS_fgShift + Color_Bits)
-#define RS_Careful		(1UL << RS_fontShift)	/* be careful when drawing these */
-#define RS_fontCount		rxvt_fontset::fontCount
-#define RS_fontMask             ((RS_fontCount << (RS_fontShift + 1)) | RS_Careful)   // includes RS_Careful
+/** Be careful when drawing these. */
+#define RS_Careful (static_cast<rend_t>(1UL << RS_fontShift))
+#define RS_fontCount (static_cast<rend_t>(rxvt_fontset::fontCount))
+/** Includes RS_Careful. */
+#define RS_fontMask (static_cast<rend_t>((RS_fontCount << (RS_fontShift + 1)) | RS_Careful))
 
 // toggle this to force redraw, must be != RS_Careful and otherwise "pretty neutral"
-#define RS_redraw		(2UL << RS_fontShift)
+#define RS_redraw (static_cast<rend_t>(2UL << RS_fontShift))
 
-#define RS_Sel                  (1UL << 22)
+#define RS_selShift (RS_fontShift + 4)
+#define RS_Sel (static_cast<rend_t>(1UL << 22))
 
 // 4 custom bits for extensions
 #define RS_customCount          16UL
-#define RS_customShift          23
-#define RS_customMask           ((RS_customCount - 1UL) << RS_customShift)
+#define RS_customShift (RS_selShift + 1)
+#define RS_customMask (static_cast<rend_t>((RS_customCount - 1UL) << RS_customShift))
 
 // font styles
-#define RS_Bold                 (1UL << RS_styleShift)
-#define RS_Italic		(2UL << RS_styleShift)
+#define RS_Bold (static_cast<rend_t>(1UL << RS_styleShift))
+#define RS_Italic	(static_cast<rend_t>(2UL << RS_styleShift))
 
-#define RS_styleCount		4
-#define RS_styleShift		27
-#define RS_styleMask		(RS_Bold | RS_Italic)
+#define RS_styleCount 4
+#define RS_styleShift (RS_customShift + RS_styleCount)
+#define RS_styleMask (static_cast<rend_t>(RS_Bold | RS_Italic))
 
 // fake styles
-#define RS_Blink                (1UL << 29)
-#define RS_RVid                 (1UL << 30)    // reverse video
-#define RS_Uline                (1UL << 31)    // underline
+#define RS_Blink (static_cast<rend_t>(1UL << (RS_styleShift + 2)))
+#define RS_RVid (static_cast<rend_t>(1UL << (RS_styleShift + 3)))    // reverse video
+#define RS_Uline (static_cast<rend_t>(1UL << (RS_styleShift + 4)))    // underline
 
-#define RS_baseattrMask         (RS_Italic | RS_Bold | RS_Blink | RS_RVid | RS_Uline)
-#define RS_attrMask             (RS_baseattrMask | RS_fontMask)
+#define RS_baseattrMask (static_cast<rend_t>(RS_Italic | RS_Bold | RS_Blink | RS_RVid | RS_Uline))
+#define RS_attrMask (static_cast<rend_t>(RS_baseattrMask | RS_fontMask))
 
 #define DEFAULT_RSTYLE  (RS_None | (Color_fg    << RS_fgShift) | (Color_bg     << RS_bgShift))
 #define OVERLAY_RSTYLE  (RS_None | (Color_Black << RS_fgShift) | (Color_Yellow << RS_bgShift))
@@ -489,7 +492,7 @@ enum colour_list {
 #endif
 };
 
-#define Color_Bits      9 // 0 .. maxTermCOLOR24
+#define Color_Bits 25
 
 #if maxTermCOLOR24 >= (1 << Color_Bits)
 # error color index overflow
@@ -620,21 +623,21 @@ typedef struct _mwmhints
 #define ROW(n) ROW_of (this, n)
 
 /* how to build & extract colors and attributes */
-#define GET_BASEFG(x)           (((x) & RS_fgMask) >> RS_fgShift)
-#define GET_BASEBG(x)           (((x) & RS_bgMask) >> RS_bgShift)
+#define GET_BASEFG(x) ((((rend_t) (x)) & RS_fgMask) >> RS_fgShift)
+#define GET_BASEBG(x) ((((rend_t) (x)) & RS_bgMask) >> RS_bgShift)
 
-#define GET_FONT(x)             (((x) & RS_fontMask) >> RS_fontShift)
-#define SET_FONT(x,fid)         (((x) & ~RS_fontMask) | ((fid) << RS_fontShift))
+#define GET_FONT(x) ((((rend_t) (x)) & RS_fontMask) >> RS_fontShift)
+#define SET_FONT(x,fid) ((((rend_t) (x)) & ~((rend_t) RS_fontMask)) | (((rend_t) (fid)) << RS_fontShift))
 
-#define GET_STYLE(x)		(((x) & RS_styleMask) >> RS_styleShift)
-#define SET_STYLE(x,style)	(((x) & ~RS_styleMask) | ((style) << RS_styleShift))
+#define GET_STYLE(x) ((((rend_t) (x)) & RS_styleMask) >> RS_styleShift)
+#define SET_STYLE(x,style) ((((rend_t) (x)) & ~((rend_t) RS_styleMask)) | (((rend_t) (style)) << RS_styleShift))
 
-#define GET_ATTR(x)             (((x) & RS_attrMask))
-#define SET_FGCOLOR(x,fg)       (((x) & ~RS_fgMask)   | ((fg) << RS_fgShift))
-#define SET_BGCOLOR(x,bg)       (((x) & ~RS_bgMask)   | ((bg) << RS_bgShift))
-#define SET_ATTR(x,a)           (((x) & ~RS_attrMask) | (a))
+#define GET_ATTR(x) ((((rend_t) (x)) & RS_attrMask))
+#define SET_FGCOLOR(x,fg) ((((rend_t) (x)) & ~((rend_t) RS_fgMask))   | (((rend_t) (fg)) << RS_fgShift))
+#define SET_BGCOLOR(x,bg) ((((rend_t) (x)) & ~((rend_t) RS_bgMask))   | (((rend_t) (bg)) << RS_bgShift))
+#define SET_ATTR(x,a) ((((rend_t) (x)) & ~((rend_t) RS_attrMask)) | ((rend_t) (a)))
 
-#define RS_SAME(a,b)		(!(((a) ^ (b)) & ~RS_Careful))
+#define RS_SAME(a,b) (!((((rend_t) (a)) ^ ((rend_t) (b))) & ~((rend_t) RS_Careful)))
 
 #define PIXCOLOR_NAME(idx)      get_setting(Rs_color + (idx))
 #define ISSET_PIXCOLOR(idx)     (!!get_setting(Rs_color + (idx)))
@@ -1335,7 +1338,10 @@ struct rxvt_term : rxvt_vars, rxvt_screen
   void scr_swap_screen ();
   void scr_change_screen (int scrn);
   void scr_color (unsigned int color, int fgbg);
-  void scr_rendition (int set, int style);
+  void scr_color_24(unsigned int color, int fgbg);
+  void scr_color_rgb(unsigned int r, unsigned int g, unsigned int b, int fgbg);
+  rxvt_color& lookup_color(unsigned int color, rxvt_color* table);
+  void scr_rendition (int set, rend_t style);
   void scr_add_lines (const wchar_t *str, int len, int minlines = 0);
   void scr_backspace ();
   void scr_tab (int count, bool ht = false);

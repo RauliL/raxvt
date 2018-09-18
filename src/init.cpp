@@ -1067,11 +1067,9 @@ rxvt_term::get_colors ()
 
   for (i = 0; i < NRS_COLORS; i++)
   {
-    const char* name = get_setting(Rs_color + i);
-
-    if (name)
+    if (const char* name = get_setting(Rs_color + i))
     {
-      set_color(pix_colors[i], name);
+      set_color(lookup_color(i, pix_colors), name);
     }
   }
 
@@ -1082,20 +1080,38 @@ rxvt_term::get_colors ()
    * from the fvwm window manager.
    */
 #ifdef RXVT_SCROLLBAR
-  pix_colors [Color_scroll].fade (this, 50, pix_colors [Color_bottomShadow]);
+  lookup_color(Color_scroll, pix_colors).fade(
+    this,
+    50,
+    lookup_color(Color_bottomShadow, pix_colors)
+  );
 
   rgba cscroll;
-  pix_colors [Color_scroll].get (cscroll);
+  lookup_color(Color_scroll, pix_colors).get(cscroll);
 
   /* topShadowColor */
-  if (!pix_colors[Color_topShadow].set (this,
-                   rgba (
-                     std::min((int)rgba::MAX_CC, std::max<int>(cscroll.r / 5, cscroll.r) * 7 / 5),
-                     std::min((int)rgba::MAX_CC, std::max<int>(cscroll.g / 5, cscroll.g) * 7 / 5),
-                     std::min((int)rgba::MAX_CC, std::max<int>(cscroll.b / 5, cscroll.b) * 7 / 5),
-                     cscroll.a)
-                   ))
-    alias_color (Color_topShadow, Color_White);
+  if (!lookup_color(Color_topShadow, pix_colors).set(
+        this,
+        rgba(
+          std::min<int>(
+            rgba::MAX_CC,
+            std::max<int>(cscroll.r / 5, cscroll.r) * 7 / 5
+          ),
+          std::min<int>(
+            rgba::MAX_CC,
+            std::max<int>(cscroll.g / 5, cscroll.g) * 7 / 5
+          ),
+          std::min<int>(
+            rgba::MAX_CC,
+            std::max<int>(cscroll.b / 5, cscroll.b) * 7 / 5
+          ),
+          cscroll.a
+        )
+      )
+  )
+  {
+    alias_color(Color_topShadow, Color_White);
+  }
 #endif
 
 #ifdef OFF_FOCUS_FADING
@@ -1336,9 +1352,9 @@ rxvt_term::create_windows(const std::vector<std::string>& argv)
   window_calc (0, 0);
 
   /* sub-window placement & size in rxvt_term::resize_all_windows () */
-  attributes.background_pixel = pix_colors_focused [Color_border];
-  attributes.border_pixel     = pix_colors_focused [Color_border];
-  attributes.colormap         = cmap;
+  attributes.background_pixel = lookup_color(Color_border, pix_colors_focused);
+  attributes.border_pixel = lookup_color(Color_border, pix_colors_focused);
+  attributes.colormap = cmap;
 
   top = XCreateWindow (dpy, parent,
                        szHint.x, szHint.y,
@@ -1454,12 +1470,17 @@ rxvt_term::create_windows(const std::vector<std::string>& argv)
   TermWin_cursor = XCreateFontCursor (dpy, shape);
 
   /* the vt window */
-  vt = XCreateSimpleWindow (dpy, top,
-                            window_vt_x, window_vt_y,
-                            vt_width, vt_height,
-                            0,
-                            pix_colors_focused[Color_fg],
-                            pix_colors_focused[Color_bg]);
+  vt = ::XCreateSimpleWindow(
+    dpy,
+    top,
+    window_vt_x,
+    window_vt_y,
+    vt_width,
+    vt_height,
+    0,
+    lookup_color(Color_fg, pix_colors_focused),
+    lookup_color(Color_bg, pix_colors_focused)
+  );
 
   attributes.bit_gravity = NorthWestGravity;
   XChangeWindowAttributes (dpy, vt, CWBitGravity, &attributes);
@@ -1476,8 +1497,8 @@ rxvt_term::create_windows(const std::vector<std::string>& argv)
   vt_ev.start (display, vt);
 
   /* graphics context for the vt window */
-  gcvalue.foreground         = pix_colors[Color_fg];
-  gcvalue.background         = pix_colors[Color_bg];
+  gcvalue.foreground = lookup_color(Color_fg, pix_colors);
+  gcvalue.background = lookup_color(Color_bg, pix_colors);
   gcvalue.graphics_exposures = 0;
 
   gc = XCreateGC (dpy, vt,
