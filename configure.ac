@@ -76,6 +76,7 @@ support_combining=yes
 support_8bitctrls=no
 support_iso14755=yes
 support_styles=yes
+support_wide_glyphs=yes
 support_perl=yes
 codesets=all
 
@@ -111,6 +112,7 @@ AC_ARG_ENABLE(everything,
        support_8bitctrls=no
        support_iso14755=no
        support_styles=no
+       support_wide_glyphs=yes
        support_perl=no
        codesets=
     fi
@@ -185,6 +187,12 @@ AC_ARG_ENABLE(font-styles,
   [  --enable-font-styles    enable bold and italic support],
   [if test x$enableval = xyes -o x$enableval = xno; then
     support_styles=$enableval
+  fi])
+
+AC_ARG_ENABLE(wide-glyphs,
+  [ --enable-wide-glyphs     enable displaying of wide glyphs],
+  [if test x$enableval = xyes -o x$enableval = xno; then
+    support_wide_glyphs=$enableval
   fi])
 
 AC_ARG_ENABLE(pixbuf,
@@ -601,6 +609,9 @@ fi
 
 if test x$support_styles = xyes; then
   AC_DEFINE(ENABLE_STYLES, 1, Define if you want bold and italic support)
+fi
+if test x$support_wide_glyphs = xyes; then
+  AC_DEFINE(ENABLE_WIDE_GLYPHS, 1, Define if you want to display wide glyphs)
 fi
 if test x$support_iso14755 = xyes; then
   AC_DEFINE(ISO_14755, 1, Define if you want ISO 14755 extended support)

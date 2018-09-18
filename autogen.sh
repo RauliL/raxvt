@@ -1,7 +1,6 @@
 #! /bin/sh
 
 for filename in deps/libev/ev++.h \
-                deps/libptytty/src/libptytty.h \
                 deps/tinytoml/include/toml/toml.h
 do
   if test ! -e "$filename"

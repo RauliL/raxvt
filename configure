@@ -716,6 +716,7 @@ enable_warnings
 enable_unicode3
 enable_combining
 enable_font_styles
+enable_wide_glyphs
 enable_pixbuf
 enable_startup_notification
 enable_transparency
@@ -1398,6 +1399,7 @@ Optional Features:
   --enable-unicode3       use 21 instead of 16 bits to represent unicode characters
   --enable-combining      enable composition of base and combining characters
   --enable-font-styles    enable bold and italic support
+ --enable-wide-glyphs     enable displaying of wide glyphs
   --enable-pixbuf         enable integration with gdk-pixbuf for background images
   --enable-startup-notification  enable freedesktop startup notification support
   --enable-transparency   enable transparent backgrounds
@@ -4721,6 +4723,7 @@ support_combining=yes
 support_8bitctrls=no
 support_iso14755=yes
 support_styles=yes
+support_wide_glyphs=yes
 support_perl=yes
 codesets=all
 
@@ -4752,6 +4755,7 @@ if test "${enable_everything+set}" = set; then :
        support_8bitctrls=no
        support_iso14755=no
        support_styles=no
+       support_wide_glyphs=yes
        support_perl=no
        codesets=
     fi
@@ -4854,6 +4858,14 @@ fi
 if test "${enable_font_styles+set}" = set; then :
   enableval=$enable_font_styles; if test x$enableval = xyes -o x$enableval = xno; then
     support_styles=$enableval
+  fi
+fi
+
+
+# Check whether --enable-wide-glyphs was given.
+if test "${enable_wide_glyphs+set}" = set; then :
+  enableval=$enable_wide_glyphs; if test x$enableval = xyes -o x$enableval = xno; then
+    support_wide_glyphs=$enableval
   fi
 fi
 
@@ -7671,6 +7683,11 @@ fi
 if test x$support_styles = xyes; then
 
 $as_echo "#define ENABLE_STYLES 1" >>confdefs.h
+
+fi
+if test x$support_wide_glyphs = xyes; then
+
+$as_echo "#define ENABLE_WIDE_GLYPHS 1" >>confdefs.h
 
 fi
 if test x$support_iso14755 = xyes; then
