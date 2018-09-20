@@ -242,7 +242,7 @@ rxvt_term::~rxvt_term()
 #if USE_XIM
       im_destroy ();
 #endif
-      scrollBar.destroy ();
+      scrollbar.reset();
 
       if (gc)
         XFreeGC (dpy, gc);
@@ -689,14 +689,16 @@ rxvt_term::window_calc (unsigned int newwidth, unsigned int newheight)
 
   window_vt_x = window_vt_y = int_bwidth;
 
-  if (scrollBar.state)
-    {
-      int sb_w = scrollBar.total_width ();
-      szHint.base_width += sb_w;
+  if (scrollbar->state() != raxvt::scrollbar::state::off)
+  {
+    const auto width = scrollbar->total_width();
 
-      if (!get_option(Opt_scrollBar_right))
-        window_vt_x += sb_w;
+    szHint.base_width += width;
+    if (!get_option(Opt_scrollBar_right))
+    {
+      window_vt_x += width;
     }
+  }
 
   szHint.width_inc  = fwidth;
   szHint.height_inc = fheight;
@@ -1137,16 +1139,18 @@ rxvt_term::resize_all_windows (unsigned int newwidth, unsigned int newheight, in
   fix_screen = ncol != prev_ncol || nrow != prev_nrow;
 
   if (fix_screen || newwidth != old_width || newheight != old_height)
+  {
+    if (scrollbar->state() != raxvt::scrollbar::state::off)
     {
-      if (scrollBar.state)
-        scrollBar.resize ();
-
-      XMoveResizeWindow (dpy, vt,
-                         window_vt_x, window_vt_y,
-                         vt_width, vt_height);
-
-      HOOK_INVOKE ((this, HOOK_SIZE_CHANGE, DT_INT, newwidth, DT_INT, newheight, DT_END));
+      scrollbar->resize();
     }
+
+    XMoveResizeWindow (dpy, vt,
+                       window_vt_x, window_vt_y,
+                       vt_width, vt_height);
+
+    HOOK_INVOKE ((this, HOOK_SIZE_CHANGE, DT_INT, newwidth, DT_INT, newheight, DT_END));
+  }
 
   if (fix_screen || old_height == 0)
     scr_reset ();

@@ -668,7 +668,7 @@ rxvt_term::init_resources(const std::vector<std::string>& argv)
   }
 #endif
 
-    scrollBar.setup (this);
+  scrollbar = raxvt::scrollbar::make(this);
 
 #ifdef XTERM_REVERSE_VIDEO
   /* this is how xterm implements reverseVideo */
@@ -795,8 +795,11 @@ rxvt_term::init2(const std::vector<std::string>& argv)
           rxvt_fatal ("unable to change into specified shell working directory, aborting.\n");
       }
 
+  // Set existence for size calculations.
   if (get_option(Opt_scrollBar))
-    scrollBar.state = SB_STATE_IDLE;    /* set existence for size calculations */
+  {
+    scrollbar->state(raxvt::scrollbar::state::idle);
+  }
 
   pty = ptytty::create ();
 
@@ -806,8 +809,11 @@ rxvt_term::init2(const std::vector<std::string>& argv)
 
   scr_poweron (); // initialize screen
 
+  // Create and map scrollbar.
   if (get_option(Opt_scrollBar))
-    scrollBar.resize ();      /* create and map scrollbar */
+  {
+    scrollbar->resize();
+  }
 
 #if ENABLE_PERL
   rootwin_ev.start(display, display->root());
@@ -1046,11 +1052,11 @@ rxvt_term::init_command(const std::vector<std::string>& argv)
 #endif
 
   /* add value for scrollBar */
-  if (scrollBar.state)
-    {
-      priv_modes |= PrivMode_scrollBar;
-      SavedModes |= PrivMode_scrollBar;
-    }
+  if (scrollbar->state() != raxvt::scrollbar::state::off)
+  {
+    priv_modes |= PrivMode_scrollBar;
+    SavedModes |= PrivMode_scrollBar;
+  }
 
   run_command (argv);
 }

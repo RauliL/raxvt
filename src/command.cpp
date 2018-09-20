@@ -1005,7 +1005,7 @@ rxvt_term::flush ()
         }
 
       scr_refresh ();
-      scrollBar.show (1);
+      scrollbar->show(true);
 #if USE_XIM
       im_send_spot ();
 #endif
@@ -1078,16 +1078,18 @@ rxvt_term::text_blink_cb (ev::timer &w, int revents)
 
 #ifndef NO_SCROLLBAR_BUTTON_CONTINUAL_SCROLLING
 void
-rxvt_term::cont_scroll_cb (ev::timer &w, int revents)
+rxvt_term::cont_scroll_cb(ev::timer& timer, int revents)
 {
-  if ((scrollBar.state == SB_STATE_UP || scrollBar.state == SB_STATE_DOWN)
-      && scr_page (scrollBar.state == SB_STATE_UP ? UP : DN, 1))
-    {
-      want_refresh = 1;
-      refresh_check ();
-    }
-  else
-    w.stop ();
+  const auto state = scrollbar->state();
+
+  if ((state == raxvt::scrollbar::state::up || state == raxvt::scrollbar::state::down)
+      && scr_page(state == raxvt::scrollbar::state::up ? UP : DN, 1))
+  {
+    want_refresh = 1;
+    refresh_check();
+  } else {
+    timer.stop();
+  }
 }
 #endif
 
@@ -1579,11 +1581,12 @@ rxvt_term::x_cb (XEvent &ev)
             while (XCheckTypedWindowEvent (dpy, ev.xany.window, GraphicsExpose, &unused_event))
               ;
 
-            if (scrollBar.state && ev.xany.window == scrollBar.win)
-              {
-                scrollBar.state = SB_STATE_IDLE;
-                scrollBar.show (0);
-              }
+            if (scrollbar->state() != raxvt::scrollbar::state::off
+                && ev.xany.window == scrollbar->window())
+            {
+              scrollbar->state(raxvt::scrollbar::state::idle);
+              scrollbar->show(false);
+            }
           }
         break;
 
@@ -1679,22 +1682,33 @@ rxvt_term::x_cb (XEvent &ev)
                   }
               }
           }
-        else if (scrollBar.state == SB_STATE_MOTION && ev.xany.window == scrollBar.win)
-          {
-            while (XCheckTypedWindowEvent (dpy, scrollBar.win,
-                                           MotionNotify, &ev))
-              ;
-
-            XQueryPointer (dpy, scrollBar.win,
-                          &unused_root, &unused_child,
-                          &unused_root_x, &unused_root_y,
-                          &ev.xbutton.x, &ev.xbutton.y,
-                          &unused_mask);
-            scr_move_to (scrollBar.position (ev.xbutton.y) - csrO,
-                         scrollBar.size ());
-            want_refresh = 1;
-            scrollBar.show (1);
-          }
+        else if (scrollbar->state() == raxvt::scrollbar::state::motion
+            && ev.xany.window == scrollbar->window())
+        {
+          while (::XCheckTypedWindowEvent(
+            dpy,
+            scrollbar->window(),
+            MotionNotify,
+            &ev
+          ));
+          ::XQueryPointer(
+            dpy,
+            scrollbar->window(),
+            &unused_root,
+            &unused_child,
+            &unused_root_x,
+            &unused_root_y,
+            &ev.xbutton.x,
+            &ev.xbutton.y,
+            &unused_mask
+          );
+          scr_move_to(
+            scrollbar->position(ev.xbutton.y) - csrO,
+            scrollbar->size()
+          );
+          want_refresh = 1;
+          scrollbar->show(true);
+        }
         break;
     }
 
@@ -1995,16 +2009,21 @@ rxvt_term::button_press (XButtonEvent &ev)
   /*
    * Scrollbar window processing of button press
    */
-  if (scrollBar.state && ev.window == scrollBar.win)
+  if (scrollbar->state() != raxvt::scrollbar::state::off
+      && ev.window == scrollbar->window())
     {
       page_dirn direction = NO_DIR;
 
-      if (scrollBar.upButton (ev.y))
-        direction = UP; /* up */
-      else if (scrollBar.dnButton (ev.y))
-        direction = DN;  /* down */
+      if (scrollbar->is_up_button_available(ev.y))
+      {
+        direction = UP;
+      }
+      else if (scrollbar->is_down_button_available(ev.y))
+      {
+        direction = DN;
+      }
 
-      scrollBar.state = SB_STATE_IDLE;
+      scrollbar->state(raxvt::scrollbar::state::idle);
       /*
        * Rxvt-style scrollbar:
        * move up if mouse is above slider
@@ -2051,68 +2070,73 @@ rxvt_term::button_press (XButtonEvent &ev)
                 cont_scroll_ev.start (SCROLLBAR_INITIAL_DELAY, SCROLLBAR_CONTINUOUS_DELAY);
 #endif
               if (scr_page (direction, 1))
-                {
-                  if (direction == UP)
-                    scrollBar.state = SB_STATE_UP;
-                  else
-                    scrollBar.state = SB_STATE_DOWN;
-                }
+              {
+                scrollbar->state(
+                  direction == UP
+                    ? raxvt::scrollbar::state::up
+                    : raxvt::scrollbar::state::down
+                );
+              }
             }
           else
             switch (ev.button)
               {
                 case Button2:
-                  switch (scrollBar.align)
-                    {
-                      case SB_ALIGN_TOP:
-                        csrO = 0;
-                        break;
-                      case SB_ALIGN_CENTRE:
-                        csrO = (scrollBar.bot - scrollBar.top) / 2;
-                        break;
-                      case SB_ALIGN_BOTTOM:
-                        csrO = scrollBar.bot - scrollBar.top;
-                        break;
-                    }
+                  switch (scrollbar->alignment())
+                  {
+                    case raxvt::scrollbar::alignment::top:
+                      csrO = 0;
+                      break;
 
-                  if (scrollBar.style == SB_STYLE_XTERM
-                      || scrollBar.above_slider (ev.y)
-                      || scrollBar.below_slider (ev.y))
-                    scr_move_to (scrollBar.position (ev.y) - csrO, scrollBar.size ());
+                    case raxvt::scrollbar::alignment::centre:
+                      csrO = (scrollbar->bottom() - scrollbar->top()) / 2;
+                      break;
 
-                  scrollBar.state = SB_STATE_MOTION;
+                    case raxvt::scrollbar::alignment::bottom:
+                      csrO = scrollbar->bottom() - scrollbar->top();
+                      break;
+                  }
+
+                  if (scrollbar->style() == raxvt::scrollbar::style::xterm
+                      || scrollbar->is_above_slider_available(ev.y)
+                      || scrollbar->is_below_slider_available(ev.y))
+                  {
+                    scr_move_to(scrollbar->position(ev.y) - csrO, scrollbar->size());
+                  }
+
+                  scrollbar->state(raxvt::scrollbar::state::motion);
                   break;
 
                 case Button1:
-                  if (scrollBar.align == SB_ALIGN_CENTRE)
-                    csrO = ev.y - scrollBar.top;
-                  /* FALLTHROUGH */
+                  if (scrollbar->alignment() == raxvt::scrollbar::alignment::centre)
+                  {
+                    csrO = ev.y - scrollbar->top();
+                  }
+                  // FALLTHROUGH
 
                 case Button3:
-                  if (scrollBar.style != SB_STYLE_XTERM)
-                    {
-                      if (scrollBar.above_slider (ev.y))
+                  if (scrollbar->style() != raxvt::scrollbar::style::xterm)
+                  {
+                    if (scrollbar->is_above_slider_available(ev.y))
 # ifdef RXVT_SCROLL_FULL
-                        scr_page (UP, nrow - 1);
+                      scr_page (UP, nrow - 1);
 # else
-                        scr_page (UP, nrow / 4);
+                      scr_page (UP, nrow / 4);
 # endif
-                      else if (scrollBar.below_slider (ev.y))
+                    else if (scrollbar->is_below_slider_available(ev.y))
 # ifdef RXVT_SCROLL_FULL
-                        scr_page (DN, nrow - 1);
+                      scr_page (DN, nrow - 1);
 # else
-                        scr_page (DN, nrow / 4);
+                      scr_page (DN, nrow / 4);
 # endif
-                      else
-                        scrollBar.state = SB_STATE_MOTION;
-                    }
-                  else
-                    {
-                      scr_page ((ev.button == Button1 ? DN : UP),
-                                (nrow
-                                 * scrollBar.position (ev.y)
-                                 / scrollBar.size ()));
-                    }
+                    else
+                      scrollbar->state(raxvt::scrollbar::state::motion);
+                  } else {
+                    scr_page ((ev.button == Button1 ? DN : UP),
+                              (nrow
+                               * scrollbar->position(ev.y)
+                               / scrollbar->size()));
+                  }
 
                   break;
               }
@@ -2131,11 +2155,12 @@ rxvt_term::button_release (XButtonEvent &ev)
   if (!bypass_keystate)
     reportmode = !! (priv_modes & PrivMode_mouse_report);
 
-  if (scrollBar.state == SB_STATE_UP || scrollBar.state == SB_STATE_DOWN)
-    {
-      scrollBar.state = SB_STATE_IDLE;
-      scrollBar.show (0);
-    }
+  if (scrollbar->state() == raxvt::scrollbar::state::up
+      || scrollbar->state() == raxvt::scrollbar::state::down)
+  {
+    scrollbar->state(raxvt::scrollbar::state::idle);
+    scrollbar->show(false);
+  }
 
 #ifdef SELECTION_SCROLLING
   sel_scroll_ev.stop();
@@ -2226,7 +2251,7 @@ rxvt_term::button_release (XButtonEvent &ev)
 # endif
                 {
                   scr_page (dirn, lines);
-                  scrollBar.show (1);
+                  scrollbar->show(true);
                 }
             }
             break;
@@ -2756,7 +2781,7 @@ rxvt_term::process_escape_seq ()
       case 'c':
         mbstate.reset ();
         scr_poweron ();
-        scrollBar.show (1);
+        scrollbar->show(true);
         break;
 
         /* 8.3.79: LOCKING-SHIFT TWO (see ISO2022) */
@@ -3727,7 +3752,7 @@ rxvt_term::process_terminal_mode (int mode, int priv ecb_unused, unsigned int na
               break;
 #ifdef scrollBar_esc
             case scrollBar_esc:
-              scrollBar.map (state);
+              scrollbar->map(state);
               resize_all_windows (0, 0, 0);
               scr_touch (true);
               break;

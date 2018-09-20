@@ -45,7 +45,7 @@
 
 #include "perlxsi.c"
 
-#define GRAB_CURSOR THIS->scrollBar.leftptr_cursor
+#define GRAB_CURSOR THIS->scrollbar->leftptr_cursor()
 
 #undef LINENO
 #define LINENO(n) MOD (THIS->term_start + int(n), THIS->total_rows)
@@ -1250,9 +1250,22 @@ rxvt_term::_keysym_resources ()
 int
 rxvt_term::grab_button (int button, U32 modifiers, Window window = THIS->vt)
 	CODE:
-        RETVAL = XGrabButton (THIS->dpy, button, modifiers, window, 1,
-                              ButtonPressMask | ButtonReleaseMask | EnterWindowMask | LeaveWindowMask | PointerMotionMask,
-                              GrabModeSync, GrabModeSync, None, GRAB_CURSOR);
+    RETVAL = ::XGrabButton(
+      THIS->dpy,
+      button,
+      modifiers,
+      window,
+      1,
+      ButtonPressMask
+      | ButtonReleaseMask
+      | EnterWindowMask
+      | LeaveWindowMask
+      | PointerMotionMask,
+      GrabModeSync,
+      GrabModeSync,
+      None,
+      GRAB_CURSOR
+    );
 	OUTPUT: RETVAL
 
 int
