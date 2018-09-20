@@ -2674,15 +2674,22 @@ rxvt_term::scr_recolor (bool refresh)
 
   XClearWindow (dpy, parent);
 
-  if (scrollBar.state && scrollBar.win)
+  if (scrollbar->state() != raxvt::scrollbar::state::off
+      && scrollbar->window())
+  {
+    if (transparent)
     {
-      if (transparent)
-        XSetWindowBackgroundPixmap (dpy, scrollBar.win, ParentRelative);
-      else
-        XSetWindowBackground (dpy, scrollBar.win, lookup_color(scrollBar.color(), pix_colors));
-      scrollBar.state = SB_STATE_IDLE;
-      scrollBar.show (0);
+      ::XSetWindowBackgroundPixmap(dpy, scrollbar->window(), ParentRelative);
+    } else {
+      ::XSetWindowBackground(
+        dpy,
+        scrollbar->window(),
+        lookup_color(scrollbar->color(), pix_colors)
+      );
     }
+    scrollbar->state(raxvt::scrollbar::state::idle);
+    scrollbar->show(false);
+  }
 
   if (refresh)
     {

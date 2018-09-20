@@ -78,9 +78,9 @@ typedef std::int32_t tlen_t_; // specifically for use in the line_t structure
 #include "rxvtfont.h"
 #include "rxvttoolkit.h"
 #include "rxvtimg.h"
-#include "scrollbar.h"
 #include "ev_cpp.h"
 #include "rxvtperl.h"
+#include "raxvt/scrollbar.hpp"
 #include "raxvt/selection.hpp"
 
 /*
@@ -910,7 +910,7 @@ enum {
 
 struct rxvt_vars : TermWin_t
 {
-  scrollBar_t     scrollBar;
+  std::shared_ptr<raxvt::scrollbar> scrollbar;
   XSizeHints      szHint;
   rxvt_color     *pix_colors;
   Cursor          TermWin_cursor;       /* cursor for vt window */
