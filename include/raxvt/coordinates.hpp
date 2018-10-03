@@ -8,6 +8,22 @@ namespace raxvt
     int row;
     int col;
 
+    coordinates()
+      : row(0)
+      , col(0) {}
+
+    coordinates(const coordinates& that)
+      : row(that.row)
+      , col(that.col) {}
+
+    coordinates& operator=(const coordinates& that)
+    {
+      row = that.row;
+      col = that.col;
+
+      return *this;
+    }
+
     int compare(const coordinates& that) const
     {
       const int a = row;
