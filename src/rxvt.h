@@ -125,9 +125,9 @@ wchar_t *        rxvt_utf8towcs                   (const char *str, int len = -1
 void             rxvt_vlog                        (const char *fmt, va_list arg_ptr);
 void             rxvt_log                         (const char *fmt,...);
 void             rxvt_warn                        (const char *fmt,...);
-ecb_noreturn ecb_cold
+ecb_noreturn
 void             rxvt_fatal                       (const char *fmt, ...);
-ecb_noreturn ecb_cold
+ecb_noreturn
 void             rxvt_exit_failure                ();
 
 template<typename T>

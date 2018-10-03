@@ -218,7 +218,7 @@ rxvt_term::copy_line(line_t& dst, line_t& src)
   dst.f = src.f;
 }
 
-void ecb_cold
+void
 rxvt_term::scr_reset ()
 {
 #if ENABLE_OVERLAY
@@ -447,7 +447,7 @@ rxvt_term::scr_reset ()
   HOOK_INVOKE ((this, HOOK_RESET, DT_END));
 }
 
-void ecb_cold
+void
 rxvt_term::scr_release ()
 {
   chunk_free (chunk, chunk_size);
@@ -462,7 +462,7 @@ rxvt_term::scr_release ()
 /*
  * Hard/Soft reset
  */
-void ecb_cold
+void
 rxvt_term::scr_poweron ()
 {
   scr_release ();
@@ -476,7 +476,7 @@ rxvt_term::scr_poweron ()
   scr_refresh ();
 }
 
-void ecb_cold
+void
 rxvt_term::scr_soft_reset ()
 {
   /* only affects modes, nothing drastic such as clearing the screen */
@@ -717,7 +717,7 @@ rxvt_term::scr_rendition(int set, rend_t style)
  * count positive ==> scroll up
  * count negative ==> scroll down
  */
-int ecb_hot
+int
 rxvt_term::scr_scroll_text (int row1, int row2, int count)
 {
   if (count == 0 || (row1 > row2))
@@ -863,7 +863,7 @@ rxvt_term::scr_scroll_text (int row1, int row2, int count)
 /*
  * Add text given in <str> of length <len> to screen struct
  */
-void ecb_hot
+void
 rxvt_term::scr_add_lines (const wchar_t *str, int len, int minlines)
 {
   if (len <= 0)               /* sanity */
@@ -1271,7 +1271,7 @@ rxvt_term::scr_tab (int count, bool ht)
  * in that row right.  Clear left column.
  */
 #if !ENABLE_MINIMAL
-void ecb_cold
+void
 rxvt_term::scr_backindex ()
 {
   if (screen.cur.col > 0)
@@ -1288,7 +1288,7 @@ rxvt_term::scr_backindex ()
  * in that row left.  Clear right column.
  */
 #if !ENABLE_MINIMAL
-void ecb_cold
+void
 rxvt_term::scr_forwardindex ()
 {
   if (screen.cur.col < ncol - 1)
@@ -1548,7 +1548,7 @@ rxvt_term::scr_erase_savelines ()
  * Fill the screen with `E's
  * XTERM_SEQ: Screen Alignment Test: ESC # 8
  */
-void ecb_cold
+void
 rxvt_term::scr_E ()
 {
   rend_t fs;
@@ -1726,7 +1726,7 @@ rxvt_term::scr_insdel_chars (int count, int insdel)
  * Set the scrolling region
  * XTERM_SEQ: Set region <top> - <bot> inclusive: ESC [ <top> ; <bot> r
  */
-void ecb_cold
+void
 rxvt_term::scr_scroll_region (int top, int bot)
 {
   top = std::max(top, 0);
@@ -1746,7 +1746,7 @@ rxvt_term::scr_scroll_region (int top, int bot)
  * XTERM_SEQ: Make cursor visible  : ESC [ ? 25 h
  * XTERM_SEQ: Make cursor invisible: ESC [ ? 25 l
  */
-void ecb_cold
+void
 rxvt_term::scr_cursor_visible (int mode)
 {
   want_refresh = 1;
@@ -1763,7 +1763,7 @@ rxvt_term::scr_cursor_visible (int mode)
  * XTERM_SEQ: Set Wraparound  : ESC [ ? 7 h
  * XTERM_SEQ: Unset Wraparound: ESC [ ? 7 l
  */
-void ecb_cold
+void
 rxvt_term::scr_autowrap (int mode)
 {
   if (mode)
@@ -1782,7 +1782,7 @@ rxvt_term::scr_autowrap (int mode)
  * XTERM_SEQ: Set Absolute: ESC [ ? 6 h
  * XTERM_SEQ: Set Relative: ESC [ ? 6 l
  */
-void ecb_cold
+void
 rxvt_term::scr_relative_origin (int mode)
 {
   if (mode)
@@ -1799,7 +1799,7 @@ rxvt_term::scr_relative_origin (int mode)
  * XTERM_SEQ: Set Insert mode : ESC [ ? 4 h
  * XTERM_SEQ: Set Replace mode: ESC [ ? 4 l
  */
-void ecb_cold
+void
 rxvt_term::scr_insert_mode (int mode)
 {
   if (mode)
@@ -1815,7 +1815,7 @@ rxvt_term::scr_insert_mode (int mode)
  * XTERM_SEQ: Clear tab at current column: ESC [ 0 g
  * XTERM_SEQ: Clear all tabs             : ESC [ 3 g
  */
-void ecb_cold
+void
 rxvt_term::scr_set_tab(int mode)
 {
   if (mode < 0)
@@ -1889,7 +1889,7 @@ rxvt_term::scr_rvideo_mode (bool on)
  * Report current cursor position
  * XTERM_SEQ: Report position: ESC [ 6 n
  */
-void ecb_cold
+void
 rxvt_term::scr_report_position ()
 {
   tt_printf ("\033[%d;%dR", screen.cur.row + 1, screen.cur.col + 1);
@@ -1906,7 +1906,7 @@ rxvt_term::scr_report_position ()
  * XTERM_SEQ: Invoke G2 character set: ESC N
  * XTERM_SEQ: Invoke G3 character set: ESC O
  */
-void ecb_cold
+void
 rxvt_term::scr_charset_choose (int set)
 {
   screen.charset = set;
@@ -1934,7 +1934,7 @@ rxvt_term::scr_charset_set (int set, unsigned int ch)
 /*
  * refresh matching text.
  */
-bool ecb_cold
+bool
 rxvt_term::scr_refresh_rend (rend_t mask, rend_t value)
 {
   bool found = false;
@@ -1963,7 +1963,7 @@ enum {
   RC_COUNT
 };
 
-void ecb_hot
+void
 rxvt_term::scr_expose (int x, int y, int ewidth, int eheight, bool refresh)
 {
   int i;
@@ -2096,7 +2096,7 @@ rxvt_term::scr_bell ()
 }
 
 /* ------------------------------------------------------------------------- */
-void ecb_cold
+void
 rxvt_term::scr_printscreen (int fullhist)
 {
 #ifdef PRINTPIPE
@@ -2155,7 +2155,7 @@ rxvt_term::scr_printscreen (int fullhist)
  * drawn_text/drawn_rend contain the screen information before the update.
  * screen.text/screen.rend contain what the screen will change to.
  */
-void ecb_hot
+void
 rxvt_term::scr_refresh ()
 {
   int16_t col, row,   /* column/row we're processing               */
@@ -2617,7 +2617,7 @@ rxvt_term::scr_refresh ()
   num_scr_allow = 1;
 }
 
-void ecb_cold
+void
 rxvt_term::scr_remap_chars (line_t &l)
 {
   if (!l.valid ())
@@ -2629,7 +2629,7 @@ rxvt_term::scr_remap_chars (line_t &l)
     l.r[i] = SET_FONT (l.r[i], FONTSET (l.r[i])->find_font (l.t[i]));
 }
 
-void ecb_cold
+void
 rxvt_term::scr_remap_chars ()
 {
   for (int i = total_rows; i--; )
@@ -2642,7 +2642,7 @@ rxvt_term::scr_remap_chars ()
     }
 }
 
-void ecb_cold
+void
 rxvt_term::scr_recolor (bool refresh)
 {
   bool transparent = false;
@@ -2762,7 +2762,7 @@ rxvt_term::scr_xor_span (int beg_row, int beg_col, int end_row, int end_col, ren
 }
 
 /* ------------------------------------------------------------------------- */
-void ecb_hot
+void
 rxvt_term::scr_reverse_selection ()
 {
   if (selection.op != raxvt::selection::operation::clear
@@ -3056,7 +3056,7 @@ rxvt_term::selection_grab (Time tm, bool clipboard)
  * Mark or select text based upon number of clicks: 1, 2, or 3
  * EXT: button 1 press
  */
-void ecb_cold
+void
 rxvt_term::selection_click(int clicks, int x, int y)
 {
   clicks = ((clicks - 1) % 3) + 1;
@@ -3094,7 +3094,7 @@ rxvt_term::selection_click(int clicks, int x, int y)
 /*
  * Mark a selection at the specified col/row
  */
-void ecb_cold
+void
 rxvt_term::selection_start_colrow (int col, int row)
 {
   auto& mark = selection.mark;
@@ -3137,7 +3137,7 @@ rxvt_term::selection_start_colrow (int col, int row)
     (unicode::is_space (x) ? 2 : (x) <= 0xff && !!std::strchr(get_setting(Rs_cutchars), (x)))
 #define DELIMIT_REND(x)        1
 
-void ecb_cold
+void
 rxvt_term::selection_delimit_word (enum page_dirn dirn, const raxvt::coordinates *mark, raxvt::coordinates *ret)
 {
   int col, row, dirnadd, tcol, trow, w1, w2;
@@ -3221,7 +3221,7 @@ rxvt_term::selection_delimit_word (enum page_dirn dirn, const raxvt::coordinates
  * flag == 1 ==> button 3 press
  * flag == 2 ==> button 3 motion
  */
-void ecb_cold
+void
 rxvt_term::selection_extend(int x, int y, int flag)
 {
   const int col = raxvt::utils::clamp(Pixel2Col(x), 0, ncol);
@@ -3258,7 +3258,7 @@ rxvt_term::selection_extend(int x, int y, int flag)
 /*
  * Extend the selection to the specified col/row
  */
-void ecb_cold
+void
 rxvt_term::selection_extend_colrow (int32_t col, int32_t row, int button3, int buttonpress, int clickchange)
 {
   auto& beg = selection.beginning;
@@ -3475,7 +3475,7 @@ rxvt_term::selection_extend_colrow (int32_t col, int32_t row, int button3, int b
 }
 
 #if !ENABLE_MINIMAL
-void ecb_cold
+void
 rxvt_term::selection_remove_trailing_spaces ()
 {
   auto& beg = selection.beginning;
@@ -3528,7 +3528,7 @@ rxvt_term::selection_remove_trailing_spaces ()
  * Double click on button 3 when already selected
  * EXT: button 3 double click
  */
-void ecb_cold
+void
 rxvt_term::selection_rotate(int x, int y)
 {
   selection.clicks = selection.clicks % 3 + 1;
@@ -3540,7 +3540,7 @@ rxvt_term::selection_rotate(int x, int y)
  * Respond to a request for our current selection
  * EXT: SelectionRequest
  */
-void ecb_cold
+void
 rxvt_term::selection_send (const XSelectionRequestEvent &rq)
 {
   Atom property = rq.property == None ? rq.target : rq.property;
@@ -3691,7 +3691,7 @@ rxvt_term::selection_send (const XSelectionRequestEvent &rq)
 
 /* ------------------------------------------------------------------------- */
 #if USE_XIM
-void ecb_cold
+void
 rxvt_term::im_set_position (XPoint &pos)
 {
   XWindowAttributes xwa;
