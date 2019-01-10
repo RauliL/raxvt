@@ -13,7 +13,7 @@ namespace raxvt
     std::vector<std::string> split(const std::string&, char);
 
     template<class T>
-    constexpr const T& clamp(const T& v, const T& lo, const T& hi)
+    constexpr T clamp(const T& v, const T& lo, const T& hi)
     {
       T result = v;
 

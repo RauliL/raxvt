@@ -1317,7 +1317,7 @@ rxvt_term::scr_gotorc (int row, int col, int relative)
   want_refresh = 1;
   ZERO_SCROLLBACK ();
 
-  screen.cur.col = raxvt::utils::clamp(
+  screen.cur.col = raxvt::utils::clamp<int>(
     relative & C_RELATIVE ? screen.cur.col + col : col,
     0,
     ncol - 1

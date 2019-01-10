@@ -33,25 +33,26 @@ enum hook_type {
   HOOK_NUM,
 };
 
-struct rxvt_perl_term
+class rxvt_perl_term
 {
+public:
+  rxvt_perl_term();
+
   void *self;
   unsigned long grabtime;
-  uint8_t should_invoke[HOOK_NUM];
+  std::array<std::uint8_t, HOOK_NUM> should_invoke;
 
-  // this object must be zero-initialised
-  rxvt_perl_term ()
-  {
-    should_invoke [HOOK_INIT]     =
-    should_invoke [HOOK_DESTROY]  = 1;
-  }
+  rxvt_perl_term(const rxvt_perl_term&) = delete;
+  void operator=(const rxvt_perl_term&) = delete;
 };
 
-struct rxvt_perl_interp
+class rxvt_perl_interp
 {
-  char **perl_environ;
+public:
+  rxvt_perl_interp();
+  ~rxvt_perl_interp();
 
-  ~rxvt_perl_interp ();
+  char **perl_environ;
 
   void init ();
   void init (rxvt_term *term);
@@ -67,6 +68,9 @@ struct rxvt_perl_interp
     RESOURCE_ARG       = 2  // whether the option eats the next arg
   };
   uint8_t parse_resource (rxvt_term *term, const char *name, bool arg, bool longopt, bool flag, const char *value);
+
+  rxvt_perl_interp(const rxvt_perl_interp&) = delete;
+  void operator=(const rxvt_perl_interp&) = delete;
 };
 
 extern struct rxvt_perl_interp rxvt_perl;

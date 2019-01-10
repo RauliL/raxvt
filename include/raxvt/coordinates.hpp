@@ -3,8 +3,9 @@
 
 namespace raxvt
 {
-  struct coordinates
+  class coordinates
   {
+  public:
     int row;
     int col;
 

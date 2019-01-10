@@ -150,11 +150,176 @@ int rxvt_composite_vec::expand (unicode_t c, wchar_t *r)
 }
 #endif
 
+screen_t::screen_t()
+  : tscroll(0)
+  , bscroll(0)
+  , charset(0)
+  , flags(0)
+  , s_charset(0)
+  , s_charset_char(0)
+  , s_rstyle(0) {}
+
 rxvt_term::rxvt_term()
-  : env(nullptr)
+  : rxvt_screen()
+
+  // Variables from `TermWin_t`:
+  , vt_width(0)
+  , vt_height(0)
+  , width(0)
+  , height(0)
+  , fwidth(0)
+  , fheight(0)
+  , fbase(0)
+  , ncol(0)
+  , nrow(0)
+  , focus(0)
+  , mapped(0)
+  , int_bwidth(0)
+  , ext_bwidth(0)
+  , lineSpace(0)
+  , letterSpace(0)
+  , saveLines(0)
+  , total_rows(0)
+  , term_start(0)
+  , view_start(0)
+  , top_row(0)
+  , parent(0)
+  , vt(0)
+  , gc(nullptr)
+  , drawable(nullptr)
+
+  // Variables from `rxvt_vars`:
+  , pix_colors(nullptr)
+  , TermWin_cursor(0)
+  , row_buf(nullptr)
+  , drawn_buf(nullptr)
+  , swap_buf(nullptr)
+  , tabs(nullptr)
+
+  , log_hook(nullptr)
+  , getfd_hook(nullptr)
+
+  , want_refresh(0)
+  , current_screen(0)
+  , num_scr_allow(0)
+  , bypass_keystate(0)
+#if ENABLE_FRILLS
+  , urgency_hint(0)
+#endif
+#if CURSOR_BLINK
+  , hidden_cursor(0)
+#endif
+#if TEXT_BLINK
+  , hidden_text(0)
+#endif
+#if POINTER_BLANK
+  , hidden_pointer(0)
+#endif
+  , enc_utf8(0)
+  , seen_input(0)
+  , seen_resize(0)
+  , init_done(0)
+  , parsed_geometry(0)
+
+  , refresh_type(0)
+#if defined(META8_OPTION)
+  , meta_char(0)
+#endif
+  , rvideo_state(false)
+  , rvideo_mode(false)
+#if !defined(NO_BELL)
+  , rvideo_bell(false)
+#endif
+  , num_scr(0)
+  , prev_ncol(0)
+  , prev_nrow(0)
+  , rstyle(0)
+#if defined(SELECTION_SCROLLING)
+  , scroll_selection_lines(0)
+  , selection_save_x(0)
+  , selection_save_y(0)
+  , selection_save_state(0)
+#endif
+  , csrO(0)
+#if defined(MOUSE_WHEEL) && defined(MOUSE_SLIP_WHEELING)
+  , mouse_slip_wheel_speed(0)
+#endif
+  , refresh_count(0)
+  , window_vt_x(0)
+  , window_vt_y(0)
+  , mouse_row(0)
+  , mouse_col(0)
+#if defined(POINTER_BLANK)
+  , pointerBlankDelay(0)
+#endif
+  , multiClickTime(0)
+  , cursor_type(0)
+  , allowedxerror(0)
+
+  , ModLevel3Mask(0)
+  , ModMetaMask(0)
+  , ModNumLockMask(0)
+  , priv_modes(0)
+  , SavedModes(0)
+
+  , xa(nullptr)
+
+  , selection_time(0)
+  , clipboard_time(0)
+  , selection_req(nullptr)
+  , cmd_pid(0)
+
+#if defined(HAVE_IMG)
+  , bg_flags(0)
+  , bg_img(nullptr)
+#endif
+
+  , parent_x(0)
+  , parent_y(0)
+
+  , v_buffer(nullptr)
+  , v_buflen(0)
+  , env(nullptr)
   , env_size(0)
+
+#if defined(KEYSYM_RESOURCE)
+  , keyboard(nullptr)
+#endif
+#if !defined(NO_RESOURCES)
+  , option_db(nullptr)
+#endif
+
+  , cmdbuf_ptr(nullptr)
+  , cmdbuf_endp(nullptr)
+
+  , pty(nullptr)
+
+  , chunk(nullptr)
+  , chunk_size(0)
+
+  , rgb24_sequence(0)
+
+#if ENABLE_FRILLS || ISO_14755
+  , iso14755buf(0)
+#endif
+
+  , vt_emask(0)
+  , vt_emask_perl(0)
+  , vt_emask_xim(0)
+  , vt_emask_mouse(0)
+
+#if USE_XIM
+  , Input_Context(nullptr)
+  , input_style(0)
+#endif
 {
   using namespace std::placeholders;
+
+  std::memset(fontset, 0, sizeof(rxvt_fontset*) * 4);
+  std::memset(charsets, 0, sizeof(char) * 4);
+  std::memset(cmdbuf_base, 0, sizeof(char) * CBUFSIZ);
+  std::memset(rgb24_color, 0, sizeof(std::uint32_t) * RGB24_CUBE_SIZE);
+  std::memset(rgb24_seqno, 0, sizeof(std::uint16_t) * RGB24_CUBE_SIZE);
 
 #ifdef CURSOR_BLINK
   cursor_blink_ev.set     <rxvt_term, &rxvt_term::cursor_blink_cb> (this); cursor_blink_ev.set (0., CURSOR_BLINK_INTERVAL);

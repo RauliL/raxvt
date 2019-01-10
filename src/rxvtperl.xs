@@ -373,7 +373,18 @@ void overlay::set (int x, int y, SV *text, SV *rend)
 
 struct rxvt_perl_interp rxvt_perl;
 
-static PerlInterpreter *perl;
+static PerlInterpreter* perl = nullptr;
+
+rxvt_perl_term::rxvt_perl_term()
+  : self(nullptr)
+  , grabtime(0)
+{
+  should_invoke[HOOK_INIT] = 1;
+  should_invoke[HOOK_DESTROY] = 1;
+}
+
+rxvt_perl_interp::rxvt_perl_interp()
+  : perl_environ(nullptr) {}
 
 rxvt_perl_interp::~rxvt_perl_interp ()
 {
@@ -1412,7 +1423,7 @@ rxvt_term::locale_decode(SV* octets)
 	OUTPUT:
     RETVAL
 
-#define TERM_OFFSET(sym) offsetof (TermWin_t, sym)
+#define TERM_OFFSET(sym) offsetof (rxvt_term, sym)
 
 #define TERM_OFFSET_width       TERM_OFFSET(width)
 #define TERM_OFFSET_height      TERM_OFFSET(height)

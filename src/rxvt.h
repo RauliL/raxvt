@@ -778,54 +778,84 @@ extern rxvt_t rxvt_current_term;
 #define GET_R rxvt_current_term
 
 /* ------------------------------------------------------------------------- */
-struct overlay_base
+class overlay_base
 {
+public:
   int x, y, w, h; // overlay dimensions
   char32_t** text;
   rend_t **rend;
 
-  // while tempting to add swap() etc. here, it effectively only increases code size
+  overlay_base()
+    : x(0)
+    , y(0)
+    , w(0)
+    , h(0)
+    , text(nullptr)
+    , rend(nullptr) {}
+
+  overlay_base(const overlay_base&) = delete;
+  void operator=(const overlay_base&) = delete;
+};
+
+/*
+ * screen accounting:
+ * screen_t elements
+ *   row:       Cursor row position                   : 0 <= row < nrow
+ *   col:       Cursor column position                : 0 <= col < ncol
+ *   tscroll:   Scrolling region top row inclusive    : 0 <= row < nrow
+ *   bscroll:   Scrolling region bottom row inclusive : 0 <= row < nrow
+ *
+ * selection_t elements
+ *   clicks:    1, 2 or 3 clicks - 4 indicates a special condition of 1 where
+ *              nothing is selected
+ *   beg:       row/column of beginning of selection  : never past mark
+ *   mark:      row/column of initial click           : never past end
+ *   end:       row/column of one character past end of selection
+ * * Note: top_row <= beg.row <= mark.row <= end.row < nrow
+ * * Note: col == -1 ==> we're left of screen
+ *
+ */
+class screen_t
+{
+public:
+  raxvt::coordinates cur;          /* cursor position on the screen             */
+  int             tscroll;      /* top of settable scroll region             */
+  int             bscroll;      /* bottom of settable scroll region          */
+  unsigned int    charset;      /* character set number [0..3]               */
+  unsigned int    flags;        /* see below                                 */
+  raxvt::coordinates s_cur;        /* saved cursor position                     */
+  unsigned int    s_charset;    /* saved character set number [0..3]         */
+  char            s_charset_char;
+  rend_t          s_rstyle;     /* saved rendition style                     */
+
+  screen_t();
+
+  screen_t(const screen_t&) = delete;
+  void operator=(const screen_t&) = delete;
 };
 
 /* ------------------------------------------------------------------------- */
 
-/*
- * terminal limits:
- *
- *  width      : 1 <= width
- *  height     : 1 <= height
- *  ncol       : 1 <= ncol       <= MAX(tlen_t)
- *  nrow       : 1 <= nrow       <= MAX(int)
- *  saveLines  : 0 <= saveLines  <= MAX(int)
- *  term_start : 0 <= term_start < saveLines
- *  total_rows : nrow + saveLines
- *
- *  top_row    : -saveLines <= top_row    <= 0
- *  view_start : top_row    <= view_start <= 0
- *
- *          | most coordinates are stored relative to term_start,
- *  ROW_BUF | which is the first line of the terminal screen
- *  |························= row_buf[0]
- *  |························= row_buf[1]
- *  |························= row_buf[2] etc.
- *  |
- *  +------------+···········= term_start + top_row
- *  | scrollback |
- *  | scrollback +---------+·= term_start + view_start
- *  | scrollback | display |
- *  | scrollback | display |
- *  +------------+·display·+·= term_start
- *  |  terminal  | display |
- *  |  terminal  +---------+
- *  |  terminal  |
- *  |  terminal  |
- *  +------------+···········= term_start + nrow - 1
- *  |
- *  |
- *  END······················= total_rows
- */
+/* screen_t flags */
+#define Screen_Relative          (1<<0)  /* relative origin mode flag         */
+#define Screen_VisibleCursor     (1<<1)  /* cursor visible?                   */
+#define Screen_Autowrap          (1<<2)  /* auto-wrap flag                    */
+#define Screen_Insert            (1<<3)  /* insert mode (vs. overstrike)      */
+#define Screen_WrapNext          (1<<4)  /* need to wrap for next char?       */
+#define Screen_DefaultFlags      (Screen_VisibleCursor | Screen_Autowrap)
 
-struct TermWin_t
+/* rxvt_vars.options */
+enum {
+# define def(name)   Opt_ ## name,
+# define nodef(name) Opt_prev_ ## name, Opt_ ## name = 0, Opt_next_ ## name = Opt_prev_ ## name - 1,
+  Opt_0,
+# include "optinc.h"
+# undef nodef
+# undef def
+  Opt_count
+};
+
+struct rxvt_term : rxvt_screen
 {
   int            vt_width;      /* actual window width             [pixels] */
   int            vt_height;     /* actual window height            [pixels] */
@@ -852,64 +882,7 @@ struct TermWin_t
   GC             gc;            /* GC for drawing                           */
   rxvt_drawable *drawable;
   rxvt_fontset  *fontset[4];
-};
 
-/*
- * screen accounting:
- * screen_t elements
- *   row:       Cursor row position                   : 0 <= row < nrow
- *   col:       Cursor column position                : 0 <= col < ncol
- *   tscroll:   Scrolling region top row inclusive    : 0 <= row < nrow
- *   bscroll:   Scrolling region bottom row inclusive : 0 <= row < nrow
- *
- * selection_t elements
- *   clicks:    1, 2 or 3 clicks - 4 indicates a special condition of 1 where
- *              nothing is selected
- *   beg:       row/column of beginning of selection  : never past mark
- *   mark:      row/column of initial click           : never past end
- *   end:       row/column of one character past end of selection
- * * Note: top_row <= beg.row <= mark.row <= end.row < nrow
- * * Note: col == -1 ==> we're left of screen
- *
- */
-struct screen_t
-{
-  raxvt::coordinates cur;          /* cursor position on the screen             */
-  int             tscroll;      /* top of settable scroll region             */
-  int             bscroll;      /* bottom of settable scroll region          */
-  unsigned int    charset;      /* character set number [0..3]               */
-  unsigned int    flags;        /* see below                                 */
-  raxvt::coordinates s_cur;        /* saved cursor position                     */
-  unsigned int    s_charset;    /* saved character set number [0..3]         */
-  char            s_charset_char;
-  rend_t          s_rstyle;     /* saved rendition style                     */
-};
-
-/* ------------------------------------------------------------------------- */
-
-/* screen_t flags */
-#define Screen_Relative          (1<<0)  /* relative origin mode flag         */
-#define Screen_VisibleCursor     (1<<1)  /* cursor visible?                   */
-#define Screen_Autowrap          (1<<2)  /* auto-wrap flag                    */
-#define Screen_Insert            (1<<3)  /* insert mode (vs. overstrike)      */
-#define Screen_WrapNext          (1<<4)  /* need to wrap for next char?       */
-#define Screen_DefaultFlags      (Screen_VisibleCursor | Screen_Autowrap)
-
-/* rxvt_vars.options */
-enum {
-# define def(name)   Opt_ ## name,
-# define nodef(name) Opt_prev_ ## name, Opt_ ## name = 0, Opt_next_ ## name = Opt_prev_ ## name - 1,
-  Opt_0,
-# include "optinc.h"
-# undef nodef
-# undef def
-  Opt_count
-};
-
-/* ------------------------------------------------------------------------- */
-
-struct rxvt_vars : TermWin_t
-{
   std::shared_ptr<raxvt::scrollbar> scrollbar;
   XSizeHints      szHint;
   rxvt_color     *pix_colors;
@@ -926,10 +899,6 @@ struct rxvt_vars : TermWin_t
 #ifdef OFF_FOCUS_FADING
   rxvt_color      pix_colors_unfocused[TOTAL_COLORS];
 #endif
-};
-
-struct rxvt_term : rxvt_vars, rxvt_screen
-{
 
   // special markers with magic addresses
   static const char resval_undef [];    // options specifically unset
