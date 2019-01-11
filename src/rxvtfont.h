@@ -61,8 +61,9 @@ struct rxvt_font
 
 struct rxvt_fallback_font;
 
-struct rxvt_fontset
+class rxvt_fontset
 {
+public:
   char *fontdesc;
 
   // must be power-of-two - 1, also has to match RS_fontMask in rxvt.h
@@ -71,8 +72,8 @@ struct rxvt_fontset
   // index of first font in set
   enum { firstFont = 2 };
 
-  rxvt_fontset (rxvt_term *term);
-  ~rxvt_fontset ();
+  rxvt_fontset(rxvt_term *term);
+  ~rxvt_fontset();
 
   bool populate (const char *desc);
   void set_prop (const rxvt_fontprop &prop, bool force_prop) { this->prop = prop; this->force_prop = force_prop; }
@@ -90,6 +91,9 @@ struct rxvt_fontset
   {
     return std::min<int>((fontCount << 1) | 1, find_font_idx(unicode));
   }
+
+  rxvt_fontset(const rxvt_fontset&) = delete;
+  void operator=(const rxvt_fontset&) = delete;
 
 private:
   rxvt_term *term;

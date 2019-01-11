@@ -255,7 +255,7 @@ rxvt_font::clear_rect (rxvt_drawable &d, int x, int y, int w, int h, int color) 
 /////////////////////////////////////////////////////////////////////////////
 
 struct rxvt_font_default : rxvt_font {
-  struct rxvt_fontset *fs;
+  rxvt_fontset *fs;
 
   rxvt_font_default (rxvt_fontset *fs)
   : rxvt_font ()
@@ -482,7 +482,7 @@ rxvt_font_default::draw (rxvt_drawable &d, int x, int y,
 }
 
 struct rxvt_font_overflow : rxvt_font {
-  struct rxvt_fontset *fs;
+  rxvt_fontset *fs;
 
   rxvt_font_overflow (rxvt_fontset *fs)
   : rxvt_font ()
@@ -1478,15 +1478,18 @@ rxvt_font_xft::draw (rxvt_drawable &d, int x, int y,
 
 /////////////////////////////////////////////////////////////////////////////
 
-rxvt_fontset::rxvt_fontset (rxvt_term *term)
-: fontdesc (0), term (term)
+rxvt_fontset::rxvt_fontset(rxvt_term *term)
+  : fontdesc(nullptr)
+  , term(term)
+  , force_prop(false)
+  , fallback(nullptr)
 {
-  clear ();
+  clear();
 }
 
-rxvt_fontset::~rxvt_fontset ()
+rxvt_fontset::~rxvt_fontset()
 {
-  clear ();
+  clear();
 }
 
 void

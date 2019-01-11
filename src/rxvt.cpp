@@ -26,14 +26,14 @@
 int
 main(int argc, char** argv)
 {
-  std::shared_ptr<rxvt_term> term;
+  rxvt_term* term;
 
   try
   {
     ptytty::init();
     rxvt_init();
 
-    term = std::make_shared<rxvt_term>();
+    term = new rxvt_term();
     term->init(argc, argv, environ);
     ev_run();
 
