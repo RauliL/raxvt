@@ -65,13 +65,15 @@ rxvt_drawable::operator XftDraw *()
   return xftdrawable;
 }
 
-/////////////////////////////////////////////////////////////////////////////
-
-// not strictly necessary as it is only used with superclass of zero_initialised
-rxvt_screen::rxvt_screen ()
-: scratch_area (0)
-{
-}
+rxvt_screen::rxvt_screen()
+  : display(nullptr)
+  , dpy(nullptr)
+  , depth(0)
+  , visual(nullptr)
+  , cmap(0)
+  , scratch_area(nullptr)
+  , scratch_w(0)
+  , scratch_h(0) {}
 
 rxvt_drawable& rxvt_screen::scratch_drawable(int w, int h)
 {

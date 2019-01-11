@@ -855,8 +855,9 @@ enum {
   Opt_count
 };
 
-struct rxvt_term : rxvt_screen
+class rxvt_term : public rxvt_screen
 {
+public:
   int            vt_width;      /* actual window width             [pixels] */
   int            vt_height;     /* actual window height            [pixels] */
   int            width;         /* window width                    [pixels] */

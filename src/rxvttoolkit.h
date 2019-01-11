@@ -113,7 +113,7 @@ struct rxvt_watcher
 
 /////////////////////////////////////////////////////////////////////////////
 
-struct rxvt_screen;
+class rxvt_screen;
 
 struct rxvt_drawable
 {
@@ -167,8 +167,9 @@ private:
 };
 #endif
 
-struct rxvt_screen
+class rxvt_screen
 {
+public:
   raxvt::display* display;
   Display *dpy;
   int depth;
@@ -181,12 +182,15 @@ struct rxvt_screen
 
   rxvt_drawable &scratch_drawable (int w, int h);
 
-  rxvt_screen ();
+  rxvt_screen();
 
   void set(raxvt::display* disp);
   void select_visual (int id);
   void select_depth (int bitdepth); // select visual by depth
   void clear ();
+
+  rxvt_screen(const rxvt_screen&) = delete;
+  void operator=(const rxvt_screen&) = delete;
 };
 
 #if USE_XIM
