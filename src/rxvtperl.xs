@@ -379,8 +379,9 @@ rxvt_perl_term::rxvt_perl_term()
   : self(nullptr)
   , grabtime(0)
 {
-  should_invoke[HOOK_INIT] = 1;
-  should_invoke[HOOK_DESTROY] = 1;
+  should_invoke.fill(false);
+  should_invoke[HOOK_INIT] = true;
+  should_invoke[HOOK_DESTROY] = true;
 }
 
 rxvt_perl_interp::rxvt_perl_interp()
