@@ -1,0 +1,14 @@
+*.o
+Makefile
+/config.h
+/config.log
+/config.status
+/doc/rxvt.1.man
+/doc/rxvt.7.man
+/doc/rxvtc.1.man
+/doc/rxvtd.1.man
+/src/perlxsi.c
+/src/rxvt
+/src/rxvtc
+/src/rxvtd
+/src/rxvtperl.C
