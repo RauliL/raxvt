@@ -1,0 +1,6 @@
+[submodule "deps/libev"]
+	path = deps/libev
+	url = https://github.com/yusiwen/libev.git
+[submodule "deps/libptytty"]
+	path = deps/libptytty
+	url = https://github.com/yusiwen/libptytty.git
